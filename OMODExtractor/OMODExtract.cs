@@ -39,6 +39,7 @@ namespace OMODExtractor
                 {
                     Console.WriteLine(ex.Message);
                 }
+                p.WaitForExit();
                 Console.Write($"Archive extracted\n");
 
                 string outputDir = Path.Combine(Directory.GetCurrentDirectory(), dest);
