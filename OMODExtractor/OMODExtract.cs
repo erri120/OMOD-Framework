@@ -73,12 +73,24 @@ namespace OMODExtractor
                 SaveFile("script");
 
                 ExtractData();
+                ExtractPlugins();
             }
 
             internal void ExtractData()
             {
                 string DataPath = GetDataFiles();
                 Console.WriteLine(DataPath);
+            }
+
+            internal void ExtractPlugins()
+            {
+                string PluginPath = GetPlugins();
+                Console.WriteLine(PluginPath);
+            }
+
+            internal string GetPlugins()
+            {
+                return ParseCompressedStream("plugins.crc", "plugin");
             }
 
             internal string GetDataFiles()
