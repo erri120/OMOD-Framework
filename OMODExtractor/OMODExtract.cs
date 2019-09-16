@@ -8,6 +8,7 @@ namespace OMODExtractor
 {
     public class OMODExtract
     {
+        // currently a cli application
         static void Main(String[] args)
         {
             if(args.Length == 2)
@@ -69,6 +70,7 @@ namespace OMODExtractor
                 tempdir = basedir + "temp\\";
                 Directory.CreateDirectory(tempdir);
 
+                // test commands---------------------
                 SaveConfig();
                 SaveFile("readme");
                 SaveFile("script");
@@ -85,6 +87,7 @@ namespace OMODExtractor
                 {
                     Console.WriteLine(item);
                 }
+                //-----------------------------------
             }
 
             internal void ExtractData()
@@ -99,6 +102,11 @@ namespace OMODExtractor
                 Console.WriteLine(PluginPath);
             }
 
+            /// <summary>
+            ///     Reads the plugins.crc file and returns the a list of all plugins or
+            ///     an empty string if no plugins are found
+            /// </summary>
+            /// <returns></returns>
             private string[] GetPluginList()
             {
                 Stream TempStream = ExtractWholeFile("plugins.crc");
@@ -115,6 +123,11 @@ namespace OMODExtractor
                 return ar.ToArray();
             }
 
+            /// <summary>
+            ///     Reads the data.crc file and returns the a list of all files or
+            ///     an empty string if no files are found
+            /// </summary>
+            /// <returns></returns>
             private string[] GetDataList()
             {
                 Stream TempStream = ExtractWholeFile("data.crc");
@@ -132,16 +145,30 @@ namespace OMODExtractor
                 return ar.ToArray();
             }
 
+            /// <summary>
+            ///     Returns the path to the directory containing the extracted plugins from plugins.crc
+            /// </summary>
+            /// <returns></returns>
             internal string GetPlugins()
             {
                 return ParseCompressedStream("plugins.crc", "plugin");
             }
 
+            /// <summary>
+            ///     Returns the path to the directory containing the extracted files from data.crc
+            /// </summary>
+            /// <returns></returns>
             internal string GetDataFiles()
             {
                 return ParseCompressedStream("data.crc", "data");
             }
 
+            /// <summary>
+            ///     Extracts the provided .crc file and returns the path to the output
+            /// </summary>
+            /// <param name="fileList">The crc file, either data.crc or plugins.crc</param>
+            /// <param name="compressedStream">Name of the Stream, just use data for data.crc and plugins for plugins.crc</param>
+            /// <returns></returns>
             private string ParseCompressedStream(string fileList, string compressedStream)
             {
                 string path;
@@ -154,6 +181,10 @@ namespace OMODExtractor
                 return path;
             }
 
+            /// <summary>
+            ///     Writes a file somewhere
+            /// </summary>
+            /// <param name="entry">Path to the output file</param>
             internal void SaveFile(string entry)
             {
                 string result = null;
@@ -173,6 +204,9 @@ namespace OMODExtractor
                 }
             }
 
+            /// <summary>
+            ///     Writes the entire config file to config.txt in the output folder
+            /// </summary>
             internal void SaveConfig()
             {
                 string result = null;
@@ -245,6 +279,13 @@ namespace OMODExtractor
                 return ExtractWholeFile(ze, ref path);
             }
 
+            /// <summary>
+            ///     Extracts a file from the omod archive and returns a readable Stream,
+            ///     also creates a temp folder to store the data in
+            /// </summary>
+            /// <param name="ze">The name of the file inside the omod archive (config,readme,...)</param>
+            /// <param name="path"></param>
+            /// <returns></returns>
             private Stream ExtractWholeFile(ZipEntry ze, ref string path)
             {
                 Stream file = ModFile.GetInputStream(ze);
