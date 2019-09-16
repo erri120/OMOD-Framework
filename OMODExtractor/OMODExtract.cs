@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip;
@@ -74,6 +75,16 @@ namespace OMODExtractor
 
                 ExtractData();
                 ExtractPlugins();
+                Console.WriteLine(GetDataList().Length);
+                foreach (var item in GetDataList())
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine(GetPluginList().Length);
+                foreach (var item in GetPluginList())
+                {
+                    Console.WriteLine(item);
+                }
             }
 
             internal void ExtractData()
@@ -86,6 +97,39 @@ namespace OMODExtractor
             {
                 string PluginPath = GetPlugins();
                 Console.WriteLine(PluginPath);
+            }
+
+            private string[] GetPluginList()
+            {
+                Stream TempStream = ExtractWholeFile("plugins.crc");
+                if (TempStream == null) return new string[0];
+                BinaryReader br = new BinaryReader(TempStream);
+                List<string> ar = new List<string>();
+                while (br.PeekChar() != -1)
+                {
+                    ar.Add(br.ReadString());
+                    br.ReadInt32();
+                    br.ReadInt64();
+                }
+                br.Close();
+                return ar.ToArray();
+            }
+
+            private string[] GetDataList()
+            {
+                Stream TempStream = ExtractWholeFile("data.crc");
+                if (TempStream == null) return new string[0];
+                BinaryReader br = new BinaryReader(TempStream);
+                List<string> ar = new List<string>();
+                while (br.PeekChar() != -1)
+                {
+                    string s = br.ReadString();
+                    ar.Add(s);
+                    br.ReadUInt32();
+                    br.ReadInt64();
+                }
+                br.Close();
+                return ar.ToArray();
             }
 
             internal string GetPlugins()
