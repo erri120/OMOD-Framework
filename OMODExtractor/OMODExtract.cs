@@ -44,6 +44,7 @@ namespace OMODExtractor
             {
                 string source = o.InputFile;
                 string dest = o.OutputDir;
+                utils.DeleteDir(dest);
                 if (o.UseSevenZip)
                 {
                     if (File.Exists("7z.exe"))
