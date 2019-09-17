@@ -83,6 +83,11 @@ namespace OMODExtractor
                 else
                 {
                     Console.WriteLine("The usage of 7zip was set to false, expecting extracted files in "+dest);
+                    if (!Directory.Exists(dest))
+                    {
+                        Console.WriteLine($"The output directory {dest} does not exist!");
+                        System.Environment.Exit(2);
+                    }
                 }
 
                 string outputDir = Path.Combine(Directory.GetCurrentDirectory(), dest);
