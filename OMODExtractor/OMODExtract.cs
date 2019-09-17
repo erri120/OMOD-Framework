@@ -155,14 +155,25 @@ namespace OMODExtractor
 
             internal void ExtractData()
             {
+                Console.WriteLine("Extracting data from data.crc...");
                 string DataPath = GetDataFiles();
                 Directory.Move(DataPath, basedir+"data");
+                Console.WriteLine("Data extracted to "+basedir+"data");
             }
 
             internal void ExtractPlugins()
             {
+                Console.WriteLine("Extracting plugins from plugins.crc...");
                 string PluginsPath = GetPlugins();
-                if(PluginsPath != null) Directory.Move(PluginsPath, basedir + "plugins");
+                if (PluginsPath != null)
+                {
+                    Directory.Move(PluginsPath, basedir + "plugins");
+                    Console.WriteLine("Plugins extracted to " + basedir + "plugins");
+                }
+                else
+                {
+                    if (PluginsPath == null) Console.WriteLine("No plugins found.");
+                }
             }
 
             /// <summary>
@@ -250,6 +261,7 @@ namespace OMODExtractor
             /// <param name="entry">Path to the output file</param>
             internal void SaveFile(string entry)
             {
+                Console.WriteLine("Saving " + entry + " to " + entry + ".txt...");
                 string result = null;
                 string s = "";
                 Stream st = ExtractWholeFile(entry, ref s);
@@ -264,6 +276,7 @@ namespace OMODExtractor
                 {
                     if (br != null) br.Close();
                     utils.SaveToFile(result, basedir + entry + ".txt");
+                    Console.WriteLine(entry + " was saved");
                 }
             }
 
@@ -272,6 +285,7 @@ namespace OMODExtractor
             /// </summary>
             internal void SaveConfig()
             {
+                Console.WriteLine("Saving config to config.txt");
                 string result = null;
                 string s = "";
                 Stream st = ExtractWholeFile("config", ref s);
@@ -326,6 +340,7 @@ namespace OMODExtractor
                 {
                     if (br != null) br.Close();
                     utils.SaveToFile(result, basedir + "config.txt");
+                    Console.WriteLine("Config was saved.");
                 }
             }
 
