@@ -162,7 +162,7 @@ namespace OMODExtractor
             internal void ExtractPlugins()
             {
                 string PluginsPath = GetPlugins();
-                Directory.Move(PluginsPath, basedir + "plugins");
+                if(PluginsPath != null) Directory.Move(PluginsPath, basedir + "plugins");
             }
 
             /// <summary>
