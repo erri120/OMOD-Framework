@@ -18,3 +18,7 @@ Example command:
 `OMODExtractor.exe -i DarNified UI 1.3.2.omod -o output -r true -s true`
 
 This will extract all files from the `.omod` file.
+
+## Licence and 3rd Parties
+
+The Licence for this project can be found [here](https://github.com/erri120/OMOD-Extractor/blob/master/LICENSE). This project uses code from the OMM, made by Timeslip under the same licence. The licence for 7zip, made by Igor Pavlov, can be found [here](https://www.7-zip.org/license.txt).
