@@ -97,6 +97,14 @@ namespace OMODExtractor
                 if (allOMODFiles.Length == 1)
                 {
                     OMOD omod = new OMOD(allOMODFiles[0], outputDir);
+                }else if (allOMODFiles.Length == 0)
+                {
+                    Console.WriteLine("No .omod files found in " + outputDir);
+                    System.Environment.Exit(3);
+                }else if (allOMODFiles.Length > 1)
+                {
+                    Console.WriteLine("Multiple .omod files found in " + outputDir);
+                    System.Environment.Exit(4);
                 }
 
                 //on exit:
