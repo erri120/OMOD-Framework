@@ -12,13 +12,13 @@ namespace OMODExtractor
         public static Utils utils = new Utils();
         internal class Options
         {
-            [Option('i', "input", Required = true, HelpText = "The OMOD file")]
+            [Option('i', "input", Required = true, HelpText = "The OMOD file, can also be an archive containing the omod file")]
             public string InputFile { get; set; }
 
             [Option('o', "output", Required = true, HelpText = "The Output folder")]
             public string OutputDir { get; set; }
 
-            [Option('z', "sevenzip", Required = false, Default = true, HelpText = "Sets the usage of 7zip")]
+            [Option('z', "sevenzip", Required = false, Default = false, HelpText = "Sets the usage of 7zip, only needed if the input is an archive")]
             public bool UseSevenZip { get; set; }
 
             [Option('c', "config", Required = false, Default = true, HelpText = "Extract the config to config.txt")]
@@ -45,36 +45,44 @@ namespace OMODExtractor
                 string source = o.InputFile;
                 string dest = o.OutputDir;
                 utils.DeleteDir(dest);
+                Directory.CreateDirectory(dest);
                 if (o.UseSevenZip)
                 {
                     if (File.Exists("7z.exe"))
                     {
-                        Console.Write($"Extracting {source} using 7zip\n");
-                        var info = new ProcessStartInfo
+                        if (source.Contains(".omod"))
                         {
-                            FileName = "7z.exe",
-                            Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
-                            RedirectStandardError = true,
-                            RedirectStandardInput = true,
-                            RedirectStandardOutput = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        };
-                        var p = new Process
-                        {
-                            StartInfo = info
-                        };
-                        p.Start();
-                        try
-                        {
-                            p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                            File.Copy(source, dest+ "\\" + source);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            Console.WriteLine(ex.Message);
+                            Console.Write($"Extracting {source} using 7zip\n");
+                            var info = new ProcessStartInfo
+                            {
+                                FileName = "7z.exe",
+                                Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
+                                RedirectStandardError = true,
+                                RedirectStandardInput = true,
+                                RedirectStandardOutput = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            };
+                            var p = new Process
+                            {
+                                StartInfo = info
+                            };
+                            p.Start();
+                            try
+                            {
+                                p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                            p.WaitForExit();
+                            Console.Write($"Archive extracted\n");
                         }
-                        p.WaitForExit();
-                        Console.Write($"Archive extracted\n");
                     }
                     else
                     {
