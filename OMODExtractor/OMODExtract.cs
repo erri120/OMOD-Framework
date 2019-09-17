@@ -9,6 +9,7 @@ namespace OMODExtractor
 {
     public class OMODExtract
     {
+        public static Utils utils = new Utils();
         internal class Options
         {
             [Option('i', "input", Required = true, HelpText = "The OMOD file")]
@@ -77,7 +78,7 @@ namespace OMODExtractor
                     else
                     {
                         Console.WriteLine("7z.exe not found!");
-                        System.Environment.Exit(1);
+                        utils.Exit(1);
                     }
                 }
                 else
@@ -86,7 +87,7 @@ namespace OMODExtractor
                     if (!Directory.Exists(dest))
                     {
                         Console.WriteLine($"The output directory {dest} does not exist!");
-                        System.Environment.Exit(2);
+                        utils.Exit(2);
                     }
                 }
 
@@ -100,15 +101,12 @@ namespace OMODExtractor
                 }else if (allOMODFiles.Length == 0)
                 {
                     Console.WriteLine("No .omod files found in " + outputDir);
-                    System.Environment.Exit(3);
+                    utils.Exit(3);
                 }else if (allOMODFiles.Length > 1)
                 {
                     Console.WriteLine("Multiple .omod files found in " + outputDir);
-                    System.Environment.Exit(4);
+                    utils.Exit(4);
                 }
-
-                //on exit:
-                cleanup(outputDir + "temp\\");
             });
         }
 
@@ -126,6 +124,7 @@ namespace OMODExtractor
                 basedir = basedir_;
                 tempdir = basedir + "temp\\";
                 Directory.CreateDirectory(tempdir);
+                utils.AddTempDir(tempdir);
 
                 // test commands---------------------
                 SaveConfig();
@@ -257,7 +256,7 @@ namespace OMODExtractor
                 finally
                 {
                     if (br != null) br.Close();
-                    SaveToFile(result,basedir+entry+".txt");
+                    utils.SaveToFile(result, basedir + entry + ".txt");
                 }
             }
 
@@ -319,7 +318,7 @@ namespace OMODExtractor
                 finally
                 {
                     if (br != null) br.Close();
-                    SaveToFile(result, basedir + "config.txt");
+                    utils.SaveToFile(result, basedir + "config.txt");
                 }
             }
 
@@ -388,6 +387,7 @@ namespace OMODExtractor
         public static string CreateTempDirectory()
         {
             string tempdir = Directory.GetCurrentDirectory()+"\\temp\\";
+            utils.AddTempDir(tempdir);
             for (int i = 0; i < 32000; i++)
             {
                 if (!Directory.Exists(tempdir + i.ToString()))
@@ -397,27 +397,6 @@ namespace OMODExtractor
                 }
             }
             throw new Exception("Could not create temp folder because directory is full");
-        }
-
-        public static void cleanup(string tempdir)
-        {
-            DirectoryInfo di = new DirectoryInfo(tempdir);
-            foreach (FileInfo file in di.GetFiles())
-            {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.GetDirectories())
-            {
-                dir.Delete(true);
-            }
-            Directory.Delete(tempdir);
-        }
-
-        //for testing
-        public static void SaveToFile(string contents, string dest)
-        {
-            if (File.Exists(dest)) File.Delete(dest);
-            File.WriteAllText(dest, contents);
         }
     }
 }

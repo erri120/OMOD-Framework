@@ -8,6 +8,8 @@ namespace OMODExtractor
     {
         private List<string> tempDirs = new List<string>();
 
+        public Utils() { }
+
         public void AddTempDir(string dir)
         {
             tempDirs.Add(dir);
@@ -23,19 +25,22 @@ namespace OMODExtractor
         {
             foreach (var item in tempDirs)
             {
-                DirectoryInfo di = new DirectoryInfo(item);
-                foreach (FileInfo file in di.GetFiles())
+                if (Directory.Exists(item))
                 {
-                    file.Delete();
+                    DirectoryInfo di = new DirectoryInfo(item);
+                    foreach (FileInfo file in di.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                    foreach (DirectoryInfo dir in di.GetDirectories())
+                    {
+                        dir.Delete(true);
+                    }
+                    Directory.Delete(item);
                 }
-                foreach (DirectoryInfo dir in di.GetDirectories())
-                {
-                    dir.Delete(true);
-                }
-                Directory.Delete(item);
             }
         }
-        public static void SaveToFile(string contents, string dest)
+        public void SaveToFile(string contents, string dest)
         {
             if (File.Exists(dest)) File.Delete(dest);
             File.WriteAllText(dest, contents);
