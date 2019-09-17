@@ -19,6 +19,18 @@ Example command:
 
 This will extract all files from the `.omod` file.
 
+## Exitcodes
+
+If you decide to use this program inside your application than checking for the exitcodes during execution should be important for you.
+
+| Code        | Comment           |
+| ----------- |-----------------|
+| 0 | Everything went successful |
+| 1 | When `-z` is set to `true` and no `7z.exe` was found |
+| 2 | When the output directory doesn't exist after extraction (you will get this when the directory is deleted during execution) |
+| 3 | When no `.omod` file was found in the output directory (probably because the archive didnt contain an omod file) |
+| 4 | When multiple `.omod` files are in the output directory (possible that the archive contains multiple omod files) |
+
 ## Licence and 3rd Parties
 
 The Licence for this project can be found [here](https://github.com/erri120/OMOD-Extractor/blob/master/LICENSE). This project uses code from the OMM, made by Timeslip under the same licence. The licence for 7zip, made by Igor Pavlov, can be found [here](https://www.7-zip.org/license.txt).
