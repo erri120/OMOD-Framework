@@ -98,6 +98,10 @@ namespace OMODExtractor
                         Console.WriteLine($"The output directory {dest} does not exist!");
                         utils.Exit(2);
                     }
+                    if (source.Contains(".omod"))
+                    {
+                        File.Copy(source, dest + "\\" + source);
+                    }
                 }
 
                 string outputDir = Path.Combine(Directory.GetCurrentDirectory(), dest);
