@@ -95,9 +95,11 @@ namespace OMODExtractor
                 outputDir += "\\";
                 string[] allOMODFiles = Directory.GetFiles(outputDir, "*.omod", SearchOption.TopDirectoryOnly);
 
+                OMOD omod = null;
+
                 if (allOMODFiles.Length == 1)
                 {
-                    OMOD omod = new OMOD(allOMODFiles[0], outputDir);
+                    omod = new OMOD(allOMODFiles[0], outputDir);
                 }else if (allOMODFiles.Length == 0)
                 {
                     Console.WriteLine("No .omod files found in " + outputDir);
@@ -106,6 +108,27 @@ namespace OMODExtractor
                 {
                     Console.WriteLine("Multiple .omod files found in " + outputDir);
                     utils.Exit(4);
+                }
+
+                if (o.ExtractConfig)
+                {
+                    omod.SaveConfig();
+                }
+                if (o.ExtractReadme)
+                {
+                    omod.SaveFile("readme");
+                }
+                if (o.ExtractScript)
+                {
+                    omod.SaveFile("script");
+                }
+                if (o.ExtractData)
+                {
+                    omod.ExtractData();
+                }
+                if (o.ExtractPlugins)
+                {
+                    omod.ExtractPlugins();
                 }
             });
         }
@@ -125,25 +148,6 @@ namespace OMODExtractor
                 tempdir = basedir + "temp\\";
                 Directory.CreateDirectory(tempdir);
                 utils.AddTempDir(tempdir);
-
-                // test commands---------------------
-                SaveConfig();
-                SaveFile("readme");
-                SaveFile("script");
-
-                ExtractData();
-                ExtractPlugins();
-                Console.WriteLine(GetDataList().Length);
-                foreach (var item in GetDataList())
-                {
-                    Console.WriteLine(item);
-                }
-                Console.WriteLine(GetPluginList().Length);
-                foreach (var item in GetPluginList())
-                {
-                    Console.WriteLine(item);
-                }
-                //-----------------------------------
             }
 
             internal void ExtractData()
