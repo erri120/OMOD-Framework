@@ -130,6 +130,8 @@ namespace OMODExtractor
                 {
                     omod.ExtractPlugins();
                 }
+
+                utils.Exit(0);
             });
         }
 
