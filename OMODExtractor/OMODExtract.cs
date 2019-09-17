@@ -3,57 +3,77 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip;
+using CommandLine;
 
 namespace OMODExtractor
 {
     public class OMODExtract
     {
+        internal class Options
+        {
+            [Option('i', "input", Required = true, HelpText = "The OMOD file.")]
+            public string InputFile { get; set; }
+
+            [Option('o', "output", Required = true, HelpText = "The Output folder.")]
+            public string OutputDir { get; set; }
+
+            [Option('s', "sevenzip", Required = false, Default = true, HelpText = "Sets the usage of 7zip.")]
+            public bool UseSevenZip { get; set; }
+        }
+
         // currently a cli application
         static void Main(String[] args)
         {
-            if(args.Length == 2)
+            Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o =>
             {
-                string source = args[0];
-                string dest = args[1];
-                Console.Write($"Extracting {source} using 7zip\n");
-                var info = new ProcessStartInfo
+                string source = o.InputFile;
+                string dest = o.OutputDir;
+                if (o.UseSevenZip)
                 {
-                    FileName = "7z.exe",
-                    Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                var p = new Process
-                {
-                    StartInfo = info
-                };
-                p.Start();
-                try
-                {
-                    p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    Console.Write($"Extracting {source} using 7zip\n");
+                    var info = new ProcessStartInfo
+                    {
+                        FileName = "7z.exe",
+                        Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
+                        RedirectStandardError = true,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    var p = new Process
+                    {
+                        StartInfo = info
+                    };
+                    p.Start();
+                    try
+                    {
+                        p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    p.WaitForExit();
+                    Console.Write($"Archive extracted\n");
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("The usage of 7zip was set to false, expecting extracted files in "+dest);
                 }
-                p.WaitForExit();
-                Console.Write($"Archive extracted\n");
 
                 string outputDir = Path.Combine(Directory.GetCurrentDirectory(), dest);
                 outputDir += "\\";
-                string[] allOMODFiles = Directory.GetFiles(outputDir, "*.omod",SearchOption.TopDirectoryOnly);
+                string[] allOMODFiles = Directory.GetFiles(outputDir, "*.omod", SearchOption.TopDirectoryOnly);
 
-                if(allOMODFiles.Length == 1)
+                if (allOMODFiles.Length == 1)
                 {
                     OMOD omod = new OMOD(allOMODFiles[0], outputDir);
                 }
 
                 //on exit:
                 cleanup(outputDir + "temp\\");
-            }
+            });
         }
 
         internal class OMOD
