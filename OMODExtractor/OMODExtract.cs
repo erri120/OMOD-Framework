@@ -30,32 +30,40 @@ namespace OMODExtractor
                 string dest = o.OutputDir;
                 if (o.UseSevenZip)
                 {
-                    Console.Write($"Extracting {source} using 7zip\n");
-                    var info = new ProcessStartInfo
+                    if (File.Exists("7z.exe"))
                     {
-                        FileName = "7z.exe",
-                        Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
-                        RedirectStandardError = true,
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    var p = new Process
-                    {
-                        StartInfo = info
-                    };
-                    p.Start();
-                    try
-                    {
-                        p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                        Console.Write($"Extracting {source} using 7zip\n");
+                        var info = new ProcessStartInfo
+                        {
+                            FileName = "7z.exe",
+                            Arguments = $"x -bsp1 -y -o\"{dest}\" \"{source}\"",
+                            RedirectStandardError = true,
+                            RedirectStandardInput = true,
+                            RedirectStandardOutput = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        var p = new Process
+                        {
+                            StartInfo = info
+                        };
+                        p.Start();
+                        try
+                        {
+                            p.PriorityClass = ProcessPriorityClass.BelowNormal;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                        p.WaitForExit();
+                        Console.Write($"Archive extracted\n");
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Console.WriteLine(ex.Message);
+                        Console.WriteLine("7z.exe not found!");
+                        System.Environment.Exit(1);
                     }
-                    p.WaitForExit();
-                    Console.Write($"Archive extracted\n");
                 }
                 else
                 {
