@@ -155,13 +155,13 @@ namespace OMODExtractor
             internal void ExtractData()
             {
                 string DataPath = GetDataFiles();
-                Console.WriteLine(DataPath);
+                Directory.Move(DataPath, basedir+"data");
             }
 
             internal void ExtractPlugins()
             {
-                string PluginPath = GetPlugins();
-                Console.WriteLine(PluginPath);
+                string PluginsPath = GetPlugins();
+                Directory.Move(PluginsPath, basedir + "plugins");
             }
 
             /// <summary>
