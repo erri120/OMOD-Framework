@@ -30,5 +30,8 @@ namespace OMODExtractor
 
         [Option('q', "quiet", Required = false, Default = false, HelpText = "Sets the program to silent mode, no console outputs")]
         public bool IsQuiet { get; set; }
+
+        [Option('t',"temp", Required = false, Default = "temp", HelpText = "The temp folder")]
+        public string TempDir { get; set; }
     }
 }

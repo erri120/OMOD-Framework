@@ -2,9 +2,9 @@
 using System.IO;
 using SevenZip.Compression.LZMA;
 
-namespace OMODExtractor
+namespace OMODExtractorDLL
 {
-    internal class SparseFileWriterStream : Stream
+    public class SparseFileWriterStream : Stream
     {
         private long position = 0;
         private long length;
@@ -23,10 +23,10 @@ namespace OMODExtractor
             return BaseDirectory;
         }
 
-        internal SparseFileWriterStream(Stream fileList)
+        internal SparseFileWriterStream(Stream fileList, string tempDir)
         {
             FileList = new BinaryReader(fileList);
-            BaseDirectory = OMODExtract.CreateTempDirectory();
+            BaseDirectory = Utils.CreateTempDirectory(tempDir);
             CreateDirectoryStructure();
             NextFile();
         }
@@ -127,31 +127,31 @@ namespace OMODExtractor
         }
     }
 
-    internal abstract class CompressionHandler
+    public abstract class CompressionHandler
     {
         public enum CompressionType : byte { SevenZip, Zip }
 
         private static SevenZipHandler SevenZip = new SevenZipHandler();
         private static ZipHandler Zip = new ZipHandler();
 
-        internal static string DecompressFiles(Stream FileList, Stream CompressedStream, CompressionType type)
+        public static string DecompressFiles(Stream FileList, Stream CompressedStream, CompressionType type, string tempDir)
         {
             switch (type)
             {
-                case CompressionType.SevenZip: return SevenZip.DecompressAll(FileList, CompressedStream);
-                case CompressionType.Zip: return Zip.DecompressAll(FileList, CompressedStream); ;
+                case CompressionType.SevenZip: return SevenZip.DecompressAll(FileList, CompressedStream, tempDir);
+                case CompressionType.Zip: return Zip.DecompressAll(FileList, CompressedStream, tempDir); ;
                 default: throw new Exception("Unknown compression type");
             }
         }
 
-        protected abstract string DecompressAll(Stream FileList, Stream CompressedStream);
+        protected abstract string DecompressAll(Stream FileList, Stream CompressedStream, string tempDir);
     }
 
     internal class SevenZipHandler : CompressionHandler
     {
-        protected override string DecompressAll(Stream FileList, Stream CompressedStream)
+        protected override string DecompressAll(Stream FileList, Stream CompressedStream, string tempDir)
         {
-            SparseFileWriterStream sfs = new SparseFileWriterStream(FileList);
+            SparseFileWriterStream sfs = new SparseFileWriterStream(FileList, tempDir);
             byte[] buffer = new byte[5];
             Decoder decoder = new Decoder();
             CompressedStream.Read(buffer, 0, 5);
@@ -170,7 +170,7 @@ namespace OMODExtractor
     }
     internal class ZipHandler : CompressionHandler
     {
-        protected override string DecompressAll(Stream FileList, Stream CompressedStream)
+        protected override string DecompressAll(Stream FileList, Stream CompressedStream, string tempDir)
         {
             throw new NotImplementedException();
         }
