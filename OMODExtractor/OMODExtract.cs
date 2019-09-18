@@ -120,6 +120,8 @@ namespace OMODExtractor
                     omod.ExtractPlugins();
                 }
 
+                utils.DeleteDir(Path.Combine(o.OutputDir, o.TempDir));
+
                 System.Environment.Exit(0);
             });
         }
