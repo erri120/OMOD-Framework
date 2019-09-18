@@ -16,6 +16,10 @@ namespace OMODExtractor
         {
             Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o =>
             {
+                if (o.IsQuiet)
+                {
+                    Console.SetOut(TextWriter.Null);
+                }
                 string source = o.InputFile;
                 string dest = o.OutputDir;
                 utils.DeleteDir(dest);

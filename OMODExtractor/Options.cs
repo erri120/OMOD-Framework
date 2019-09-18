@@ -27,5 +27,8 @@ namespace OMODExtractor
 
         [Option('r', "readme", Required = false, Default = false, HelpText = "Extract the readme to readme.txt")]
         public bool ExtractReadme { get; set; }
+
+        [Option('q', "quiet", Required = false, Default = false, HelpText = "Sets the program to silent mode, no console outputs")]
+        public bool IsQuiet { get; set; }
     }
 }
