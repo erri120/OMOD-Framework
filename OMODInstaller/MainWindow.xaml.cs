@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.IO;
+using System.Windows;
+using CommandLine;
+using OMODExtractorDLL;
 
 namespace OMODInstaller
 {
@@ -9,7 +13,12 @@ namespace OMODInstaller
     {
         public MainWindow()
         {
-            InitializeComponent();
+            Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs()).WithParsed<Options>(o =>
+            {
+                OMOD omod = new OMOD(o.InputFile, o.OutputDir+"//", Path.Combine(o.OutputDir,o.TempDir));
+                omod.SaveFile("script");
+                InitializeComponent();
+            });
         }
     }
 }
