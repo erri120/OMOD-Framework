@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommandLine;
 
 namespace OMODInstaller
 {
@@ -10,7 +7,10 @@ namespace OMODInstaller
     {
         static void Main(String[] args)
         {
+            Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o =>
+            {
 
+            });
         }
     }
 }
