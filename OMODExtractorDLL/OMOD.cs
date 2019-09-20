@@ -130,7 +130,7 @@ namespace OMODExtractorDLL
         /// <param name="entry">Path to the output file</param>
         public void SaveFile(string entry)
         {
-            Console.WriteLine("Saving " + entry + " to " + entry + ".txt...");
+            Console.WriteLine("Saving " + entry + " to file...");
             string result = null;
             string s = "";
             Stream st = ExtractWholeFile(entry, ref s);
@@ -144,7 +144,14 @@ namespace OMODExtractorDLL
             finally
             {
                 if (br != null) br.Close();
-                Utils.SaveToFile(result, basedir + entry + ".txt");
+                if (entry == "script")
+                {
+                    Utils.SaveToFile(result, basedir + entry + ".cs");
+                }
+                else
+                {
+                    Utils.SaveToFile(result, basedir + entry + ".txt");
+                }
                 Console.WriteLine(entry + " was saved");
             }
         }
