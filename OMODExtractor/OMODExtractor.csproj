@@ -98,7 +98,6 @@
     <None Include="7z.dll.gz" />
     <None Include="7z.exe.gz" />
     <None Include="App.config" />
-    <None Include="OMODExtractor_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>
