@@ -424,14 +424,14 @@ namespace OblivionModManager.Scripting
                 : StripPathList(GetDirectoryPaths(DataFiles + path, pattern, recurse), DataFiles.Length);
         }
 
-        public bool GetDisplayWarnings()
-        {
-            throw new NotImplementedException();
-        }
+        public bool GetDisplayWarnings() { return false; }
 
         public string[] GetExistingEspNames()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            string[] names = new string[Program.Data.Esps.Count];
+            for (int i = 0; i < names.Length; i++) names[i] = Program.Data.Esps[i].FileName;
+            return names;
         }
 
         // TODO: OBMM had to be placed inside the oblivion folder, need to change that
