@@ -316,15 +316,9 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public void DontInstallAnyDataFiles()
-        {
-            throw new NotImplementedException();
-        }
+        public void DontInstallAnyDataFiles() { srd.InstallAllData = false; }
 
-        public void DontInstallAnyPlugins()
-        {
-            throw new NotImplementedException();
-        }
+        public void DontInstallAnyPlugins() { srd.InstallAllPlugins = false; }
 
         public void DontInstallDataFile(string name)
         {
@@ -489,15 +483,9 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public void InstallAllDataFiles()
-        {
-            throw new NotImplementedException();
-        }
+        public void InstallAllDataFiles() { srd.InstallAllData = true; }
 
-        public void InstallAllPlugins()
-        {
-            throw new NotImplementedException();
-        }
+        public void InstallAllPlugins() { srd.InstallAllPlugins = true; }
 
         public void InstallDataFile(string name)
         {
