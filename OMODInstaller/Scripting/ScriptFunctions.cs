@@ -384,7 +384,11 @@ namespace OblivionModManager.Scripting
 
         public string[] GetActiveEspNames()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            List<string> names = new List<string>();
+            List<EspInfo> Esps = Program.Data.Esps;
+            for (int i = 0; i < Esps.Count; i++) if (Esps[i].Active) names.Add(Program.Data.Esps[i].FileName);
+            return names.ToArray();
         }
 
         public string[] GetActiveOmodNames()
@@ -394,22 +398,30 @@ namespace OblivionModManager.Scripting
 
         public byte[] GetDataFileFromBSA(string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            permissions.Assert();
+            return Classes.BSAArchive.GetFileFromBSA(file);
         }
 
         public byte[] GetDataFileFromBSA(string bsa, string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            permissions.Assert();
+            return Classes.BSAArchive.GetFileFromBSA(bsa, file);
         }
 
         public string[] GetDataFiles(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(path);
+            return testMode ? SimulateFSOutput(dataFileList, path, pattern, recurse)
+                : StripPathList(GetFilePaths(DataFiles + path, pattern, recurse), DataFiles.Length);
         }
 
         public string[] GetDataFolders(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(path);
+            return testMode ? SimulateFSOutput(dataFolderList, path, pattern, recurse)
+                : StripPathList(GetDirectoryPaths(DataFiles + path, pattern, recurse), DataFiles.Length);
         }
 
         public bool GetDisplayWarnings()
@@ -459,12 +471,16 @@ namespace OblivionModManager.Scripting
 
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckPluginFolderSafety(path);
+            return testMode ? SimulateFSOutput(pluginFolderList, path, pattern, recurse)
+                : StripPathList(GetDirectoryPaths(Plugins + path, pattern, recurse), Plugins.Length);
         }
 
         public string[] GetPlugins(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckPluginFolderSafety(path);
+            return testMode ? SimulateFSOutput(pluginList, path, pattern, recurse)
+                : StripPathList(GetFilePaths(Plugins + path, pattern, recurse), Plugins.Length);
         }
 
         public string InputString()

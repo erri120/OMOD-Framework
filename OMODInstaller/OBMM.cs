@@ -21,6 +21,8 @@ namespace OblivionModManager
         internal static readonly string OblivionINIDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\oblivion\\");
         internal static readonly string OblivionESPDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "oblivion\\");
 
+        internal static sData Data;
+
         internal static bool IsSafeFileName(string s)
         {
             s = s.Replace('/', '\\');

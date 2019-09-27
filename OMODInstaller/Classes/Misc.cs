@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using omod = OMODExtractorDLL.OMOD;
 
 namespace OblivionModManager
 {
@@ -38,5 +39,41 @@ namespace OblivionModManager
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         //internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+    }
+
+    [Serializable]
+    internal class EspInfo
+    {
+        internal const string UnknownOwner = "Unknown";
+        internal const string BaseOwner = "Base";
+        internal static string[] BaseFiles = { "oblivion.esm" };
+
+        internal readonly string FileName;
+        internal readonly string LowerFileName;
+        internal string BelongsTo;
+        internal bool Active;
+        internal omod Parent;
+
+        internal EspInfo(string fileName, omod parent)
+        {
+            FileName = fileName;
+            LowerFileName = FileName.ToLower();
+            Parent = parent;
+        }
+
+        internal EspInfo(string fileName)
+        {
+            FileName = fileName;
+            LowerFileName = FileName.ToLower();
+            if (System.Array.IndexOf<string>(BaseFiles, LowerFileName) != -1)
+            {
+                BelongsTo = BaseOwner;
+            }
+            else
+            {
+                BelongsTo = UnknownOwner;
+            }
+            Parent = null;
+        }
     }
 }
