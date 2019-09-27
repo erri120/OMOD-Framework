@@ -612,12 +612,16 @@ namespace OblivionModManager.Scripting
 
         public byte[] ReadDataFile(string file)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(file);
+            permissions.Assert();
+            return File.ReadAllBytes(Path.Combine(DataFiles, file));
         }
 
         public byte[] ReadExistingDataFile(string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            permissions.Assert();
+            return File.ReadAllBytes("data\\" + file);
         }
 
         public string ReadINI(string section, string value)
