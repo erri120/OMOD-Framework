@@ -322,17 +322,44 @@ namespace OblivionModManager.Scripting
 
         public void DontInstallDataFile(string name)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(name);
+            Program.strArrayRemove(srd.InstallData, name);
+            if (!Program.strArrayContains(srd.IgnoreData, name)) srd.IgnoreData.Add(name);
         }
 
         public void DontInstallDataFolder(string folder, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(folder);
+            if (testMode)
+            {
+                folder = folder.ToLower();
+                if (folder.EndsWith("\\") || folder.EndsWith("/")) folder = folder.Remove(folder.Length - 1);
+                foreach (string s in dataFileList)
+                {
+                    if (s.StartsWith(folder) && (recurse || s.IndexOf('\\', folder.Length + 1) == -1))
+                    {
+                        Program.strArrayRemove(srd.InstallData, s);
+                        if (!Program.strArrayContains(srd.IgnoreData, s)) srd.IgnoreData.Add(s);
+                    }
+                }
+            }
+            else
+            {
+                permissions.Assert();
+                foreach (string path in Directory.GetFiles(DataFiles + folder, "*", recurse ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly))
+                {
+                    string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                    Program.strArrayRemove(srd.InstallData, file);
+                    if (!Program.strArrayContains(srd.IgnoreData, file)) srd.IgnoreData.Add(file);
+                }
+            }
         }
 
         public void DontInstallPlugin(string name)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(name);
+            Program.strArrayRemove(srd.InstallPlugins, name);
+            if (!Program.strArrayContains(srd.IgnorePlugins, name)) srd.IgnorePlugins.Add(name);
         }
 
         public void EditINI(string section, string key, string value)
