@@ -1,14 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security;
+using System.Security.Permissions;
 using System.Windows.Forms;
+using System.IO;
+using System.Collections.Generic;
 
 namespace OblivionModManager.Scripting
 {
     internal class ScriptFunctions : IScriptFunctions
     {
+        private readonly System.Security.PermissionSet permissions;
+        private readonly ScriptReturnData srd;
+        private readonly string DataFiles;
+        private readonly string Plugins;
+        private readonly string[] dataFileList;
+        private readonly string[] pluginList;
+        private readonly string[] dataFolderList;
+        private readonly string[] pluginFolderList;
+        private readonly bool testMode; //ignore
+
+        internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath)
+        {
+            this.srd = srd;
+            DataFiles = dataFilesPath;
+            Plugins = pluginsPath;
+
+            permissions = new PermissionSet(PermissionState.None);
+            List<string> paths = new List<string>(4);
+
+            paths.Add(Program.CurrentDir);
+            paths.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\Oblivion"));
+            if (dataFilesPath != null) paths.Add(dataFilesPath);
+            if (pluginsPath != null) paths.Add(pluginsPath);
+
+            permissions.AddPermission(new FileIOPermission(FileIOPermissionAccess.AllAccess, paths.ToArray()));
+            permissions.AddPermission(new UIPermission(UIPermissionWindow.AllWindows));
+
+            testMode = false;
+        }
+
         public void CancelDataFileCopy(string file)
         {
             throw new NotImplementedException();
