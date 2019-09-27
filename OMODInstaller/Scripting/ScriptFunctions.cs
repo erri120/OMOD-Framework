@@ -292,20 +292,14 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public bool DialogYesNo(string msg)
-        {
-            throw new NotImplementedException();
-        }
+        public bool DialogYesNo(string msg) { return DialogYesNo(msg, "Question"); }
 
         public bool DialogYesNo(string msg, string title)
         {
-            throw new NotImplementedException();
+            return MessageBox.Show(msg, title, System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes;
         }
 
-        public void DisplayImage(string path)
-        {
-            throw new NotImplementedException();
-        }
+        public void DisplayImage(string path) { DisplayImage(path, null); }
 
         public void DisplayImage(string path, string title)
         {
