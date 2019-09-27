@@ -99,31 +99,31 @@ namespace OblivionModManager.Scripting
             return Array.Exists<string>(files, new Predicate<string>(path.ToLower().Equals));
         }
 
-        private void CheckPathSafty(string path)
+        private void CheckPathSafety(string path)
         {
             if(!Program.IsSafeFileName(path)) throw new Exception("Illegal file name: "+path);
         }
 
-        private void CheckPluginSafty(string path)
+        private void CheckPluginSafety(string path)
         {
             permissions.Assert();
             if (!Program.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path);
             if (!(testMode ? ExistsIn(path, pluginList) : File.Exists(Plugins + path))) throw new Exception("File " + path + " not found");
         }
 
-        private void CheckDataSafty(string path)
+        private void CheckDataSafety(string path)
         {
             permissions.Assert();
             if (!Program.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path);
             if (!(testMode ? ExistsIn(path, dataFileList) : File.Exists(DataFiles + path))) throw new Exception("File " + path + " not found");
         }
 
-        private void CheckFolderSafty(string path)
+        private void CheckFolderSafety(string path)
         {
             if (!Program.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
         }
 
-        private void CheckPluginFolderSafty(string path)
+        private void CheckPluginFolderSafety(string path)
         {
             permissions.Assert();
             if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
@@ -131,7 +131,7 @@ namespace OblivionModManager.Scripting
             if (!(testMode ? ExistsIn(path, pluginFolderList) : Directory.Exists(Plugins + path))) throw new ScriptingException("Folder " + path + " not found");
         }
 
-        private void CheckDataFolderSafty(string path)
+        private void CheckDataFolderSafety(string path)
         {
             permissions.Assert();
             if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
