@@ -159,6 +159,24 @@ namespace OblivionModManager.Scripting
             });
         }
 
+        private string[] GetFilePaths(string path, string pattern, bool recurse)
+        {
+            permissions.Assert();
+            return Directory.GetFiles(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        }
+
+        private string[] GetDirectoryPaths(string path, string pattern, bool recurse)
+        {
+            permissions.Assert();
+            return Directory.GetDirectories(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        }
+
+        private string[] StripPathList(string[] paths, int baseLength)
+        {
+            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
+            return paths;
+        }
+
         public void CancelDataFileCopy(string file)
         {
             throw new NotImplementedException();
