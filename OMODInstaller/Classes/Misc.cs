@@ -4,8 +4,11 @@ using omod = OMODExtractorDLL.OMOD;
 
 namespace OblivionModManager
 {
+    internal enum CompressionType : byte { SevenZip, Zip }
+    internal enum CompressionLevel : byte { VeryHigh, High, Medium, Low, VeryLow, None }
     public enum ConflictLevel { Active, NoConflict, MinorConflict, MajorConflict, Unusable }
     public enum DeactiveStatus { Allow, WarnAgainst, Disallow }
+    internal enum ScriptType { obmmScript, Python, cSharp, vb, Count }
 
     internal struct ScriptEspWarnAgainst { }
 
@@ -39,6 +42,59 @@ namespace OblivionModManager
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         //internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+    }
+
+    [Serializable]
+    internal class DataFileInfo
+    {
+        internal readonly string FileName;
+        internal readonly string LowerFileName;
+        internal uint CRC;
+        private readonly List<string> UsedBy = new List<string>();
+
+        public static bool operator ==(DataFileInfo a, DataFileInfo b)
+        {
+            if (null == (object)a || null == (object)b)
+            {
+                if (null != (object)a || null != (object)b) return false; else return true;
+            }
+            return (a.LowerFileName == b.LowerFileName);
+        }
+        public static bool operator !=(DataFileInfo a, DataFileInfo b)
+        {
+            return !(a == b);
+        }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is DataFileInfo)) return false;
+            return this == (DataFileInfo)obj;
+        }
+        public override int GetHashCode() { return LowerFileName.GetHashCode(); }
+
+        //I dont really want this to be here, but .NET does some stupid implicit convertion by calling ToString() it isn't
+        /*internal static implicit operator string(DataFileInfo dfi) {
+            return dfi.FileName;
+        }*/
+
+        public override string ToString()
+        {
+            return FileName;
+        }
+
+        internal DataFileInfo(string s, uint crc)
+        {
+            FileName = s;
+            LowerFileName = FileName.ToLower();
+            CRC = crc;
+        }
+        internal DataFileInfo(DataFileInfo orig)
+        {
+            FileName = orig.FileName;
+            LowerFileName = orig.LowerFileName;
+            CRC = orig.CRC;
+        }
+
+        internal string Owners { get { return string.Join(", ", UsedBy.ToArray()); } }
     }
 
     [Serializable]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
@@ -44,6 +45,60 @@ namespace OblivionModManager
             if (s.Contains("\\..\\")) return false;
             if (s.EndsWith(".")) return false;
             return true;
+        }
+
+        internal static bool strArrayContains(List<string> a, string s)
+        {
+            s = s.ToLower();
+            foreach (string s2 in a)
+            {
+                if (s2.ToLower() == s) return true;
+            }
+            return false;
+        }
+        internal static bool strArrayContains(List<DataFileInfo> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].LowerFileName == s) return true;
+            }
+            return false;
+        }
+
+        internal static DataFileInfo strArrayGet(DataFileInfo[] a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i].LowerFileName == s) return a[i];
+            }
+            return null;
+        }
+
+        internal static void strArrayRemove(List<string> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].ToLower() == s)
+                {
+                    a.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+        internal static void strArrayRemove(List<DataFileInfo> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].LowerFileName == s)
+                {
+                    a.RemoveAt(i);
+                    return;
+                }
+            }
         }
     }
 }
