@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace OblivionModManager.Scripting
 {
@@ -138,6 +139,24 @@ namespace OblivionModManager.Scripting
             if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
             if (!Program.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
             if (!(testMode ? ExistsIn(path, dataFolderList) : Directory.Exists(DataFiles + path))) throw new Exception("Folder " + path + " not found");
+        }
+
+        // Looks sick but is just used to see what files will be affected and only called when testmode is true
+        // dunno if actually useful maybe delete later
+        private string[] SimulateFSOutput(string[] fsList, string path, string pattern, bool recurse)
+        {
+            pattern = "^" + (pattern == "" ? ".*" : pattern.Replace("[", @"\[").Replace(@"\", "\\").Replace("^", @"\^").Replace("$", @"\$").
+                Replace("|", @"\|").Replace("+", @"\+").Replace("(", @"\(").Replace(")", @"\)").
+                Replace(".", @"\.").Replace("*", ".*").Replace("?", ".{0,1}")) + "$";
+            return Array.FindAll(fsList, delegate (string value)
+            {
+                if ((path.Length > 0 && value.StartsWith(path.ToLower() + @"\")) || path.Length == 0)
+                {
+                    if (value == "" || (!recurse && Regex.Matches(value.Substring(path.Length), @"\\", RegexOptions.None).Count > 1)) return false;
+                    if (Regex.IsMatch(value.Substring(value.LastIndexOf('\\') + 1), pattern)) return true;
+                }
+                return false;
+            });
         }
 
         public void CancelDataFileCopy(string file)
