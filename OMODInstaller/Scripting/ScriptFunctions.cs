@@ -361,10 +361,7 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public void FatalError()
-        {
-            throw new NotImplementedException();
-        }
+        public void FatalError() { srd.CancelInstall = true; }
 
         public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel)
         {
