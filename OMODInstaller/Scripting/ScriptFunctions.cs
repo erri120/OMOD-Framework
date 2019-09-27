@@ -98,7 +98,7 @@ namespace OblivionModManager.Scripting
         private bool ExistsIn(string path, string[] files)
         {
             if (files == null) return false;
-            return Array.Exists<string>(files, new Predicate<string>(path.ToLower().Equals));
+            return Array.Exists(files, new Predicate<string>(path.ToLower().Equals));
         }
 
         private void CheckPathSafety(string path)
@@ -159,18 +159,38 @@ namespace OblivionModManager.Scripting
             });
         }
 
+        /// <summary>
+        /// Returns all files within a folder that match the pattern
+        /// </summary>
+        /// <param name="path">Path to the folder</param>
+        /// <param name="pattern">The regex pattern</param>
+        /// <param name="recurse">To check for only the top-level directory or sub-directories</param>
+        /// <returns></returns>
         private string[] GetFilePaths(string path, string pattern, bool recurse)
         {
             permissions.Assert();
             return Directory.GetFiles(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
+        /// <summary>
+        /// Returns all directories within a folder that match the pattern
+        /// </summary>
+        /// <param name="path">Path to the folder</param>
+        /// <param name="pattern">The regex pattern</param>
+        /// <param name="recurse">To check for only the top-level directory or sub-directories</param>
+        /// <returns></returns>
         private string[] GetDirectoryPaths(string path, string pattern, bool recurse)
         {
             permissions.Assert();
             return Directory.GetDirectories(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
+        /// <summary>
+        /// Removes the rooted element of all paths in an array (rooted meaning C:dir, /dir or C:/dir)
+        /// </summary>
+        /// <param name="paths">Array of paths to strip</param>
+        /// <param name="baseLength">The position where the new path starts</param>
+        /// <returns></returns>
         private string[] StripPathList(string[] paths, int baseLength)
         {
             for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
