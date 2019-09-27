@@ -39,6 +39,60 @@ namespace OblivionModManager.Scripting
             testMode = false;
         }
 
+        internal ScriptFunctions(ScriptReturnData srd, string[] dataFiles, string[] plugins)
+        {
+            this.srd = srd;
+            dataFileList = (string[])dataFiles.Clone();
+            pluginList = (string[])plugins.Clone();
+
+            //temp
+            List<string> df = new List<string>();
+            string dir;
+
+            df.Add("");
+            for (int i = 0; i < dataFileList.Length; i++)
+            {
+                dataFileList[i] = dataFileList[i].ToLower();
+                dir = dataFileList[i];
+                while (dir.Contains(@"\"))
+                {
+                    dir = Path.GetDirectoryName(dir);
+                    if (dir != null && dir != "")
+                    {
+                        if (!df.Contains(dir)) df.Add(dir);
+                    }
+                    else break;
+                }
+            }
+            dataFolderList = df.ToArray();
+
+            df.Clear();
+            df.Add("");
+            for(int i = 0; i < pluginList.Length; i++)
+            {
+                pluginList[i] = pluginList[i].ToLower();
+                dir = pluginList[i];
+                while (dir.Contains(@"\"))
+                {
+                    dir = Path.GetDirectoryName(dir);
+                    if (dir != null && dir != "")
+                    {
+                        if (!df.Contains(dir)) df.Add(dir);
+                    }
+                    else break;
+                }
+            }
+            pluginFolderList = df.ToArray();
+
+            string[] paths = new string[2];
+            paths[0] = Program.CurrentDir;
+            paths[1] = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\Oblivion");
+            permissions = new PermissionSet(PermissionState.None);
+            permissions.AddPermission(new FileIOPermission(FileIOPermissionAccess.PathDiscovery | FileIOPermissionAccess.Read, paths));
+            permissions.AddPermission(new UIPermission(UIPermissionWindow.AllWindows));
+            testMode = true;
+        }
+
         public void CancelDataFileCopy(string file)
         {
             throw new NotImplementedException();
