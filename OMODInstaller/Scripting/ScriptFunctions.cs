@@ -93,6 +93,52 @@ namespace OblivionModManager.Scripting
             testMode = true;
         }
 
+        private bool ExistsIn(string path, string[] files)
+        {
+            if (files == null) return false;
+            return Array.Exists<string>(files, new Predicate<string>(path.ToLower().Equals));
+        }
+
+        private void CheckPathSafty(string path)
+        {
+            if(!Program.IsSafeFileName(path)) throw new Exception("Illegal file name: "+path);
+        }
+
+        private void CheckPluginSafty(string path)
+        {
+            permissions.Assert();
+            if (!Program.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path);
+            if (!(testMode ? ExistsIn(path, pluginList) : File.Exists(Plugins + path))) throw new Exception("File " + path + " not found");
+        }
+
+        private void CheckDataSafty(string path)
+        {
+            permissions.Assert();
+            if (!Program.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path);
+            if (!(testMode ? ExistsIn(path, dataFileList) : File.Exists(DataFiles + path))) throw new Exception("File " + path + " not found");
+        }
+
+        private void CheckFolderSafty(string path)
+        {
+            if (!Program.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
+        }
+
+        private void CheckPluginFolderSafty(string path)
+        {
+            permissions.Assert();
+            if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
+            if (!Program.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
+            if (!(testMode ? ExistsIn(path, pluginFolderList) : Directory.Exists(Plugins + path))) throw new ScriptingException("Folder " + path + " not found");
+        }
+
+        private void CheckDataFolderSafty(string path)
+        {
+            permissions.Assert();
+            if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
+            if (!Program.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
+            if (!(testMode ? ExistsIn(path, dataFolderList) : Directory.Exists(DataFiles + path))) throw new Exception("Folder " + path + " not found");
+        }
+
         public void CancelDataFileCopy(string file)
         {
             throw new NotImplementedException();
