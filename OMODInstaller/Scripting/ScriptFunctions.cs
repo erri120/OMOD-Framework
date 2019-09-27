@@ -516,17 +516,44 @@ namespace OblivionModManager.Scripting
 
         public void InstallDataFile(string name)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(name);
+            Program.strArrayRemove(srd.IgnoreData, name);
+            if (!Program.strArrayContains(srd.InstallData, name)) srd.InstallData.Add(name);
         }
 
         public void InstallDataFolder(string folder, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(folder);
+            if (testMode)
+            {
+                folder = folder.ToLower();
+                if (folder.EndsWith("\\") || folder.EndsWith("/")) folder = folder.Remove(folder.Length - 1);
+                foreach (string s in dataFileList)
+                {
+                    if (s.StartsWith(folder) && (recurse || s.IndexOf('\\', folder.Length + 1) == -1))
+                    {
+                        Program.strArrayRemove(srd.IgnoreData, s);
+                        if (!Program.strArrayContains(srd.InstallData, s)) srd.InstallData.Add(s);
+                    }
+                }
+            }
+            else
+            {
+                permissions.Assert();
+                foreach (string path in Directory.GetFiles(DataFiles + folder, "*", recurse ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly))
+                {
+                    string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                    Program.strArrayRemove(srd.IgnoreData, file);
+                    if (!Program.strArrayContains(srd.InstallData, file)) srd.InstallData.Add(file);
+                }
+            }
         }
 
         public void InstallPlugin(string name)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(name);
+            Program.strArrayRemove(srd.IgnorePlugins, name);
+            if (!Program.strArrayContains(srd.InstallPlugins, name)) srd.InstallPlugins.Add(name);
         }
 
         public bool IsSimulation()
