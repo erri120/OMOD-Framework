@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMODExtractor", "OMODExtrac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMODExtractorDLL", "OMODExtractorDLL\OMODExtractorDLL.csproj", "{EB003D18-DFFB-49C7-B054-FB375345AE26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMODInstaller", "OMODInstaller\OMODInstaller.csproj", "{515BAA01-738F-4B00-98EB-3ACE9EFB5AB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{EB003D18-DFFB-49C7-B054-FB375345AE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB003D18-DFFB-49C7-B054-FB375345AE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB003D18-DFFB-49C7-B054-FB375345AE26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{515BAA01-738F-4B00-98EB-3ACE9EFB5AB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{515BAA01-738F-4B00-98EB-3ACE9EFB5AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{515BAA01-738F-4B00-98EB-3ACE9EFB5AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{515BAA01-738F-4B00-98EB-3ACE9EFB5AB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
