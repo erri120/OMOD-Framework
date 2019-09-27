@@ -3,6 +3,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace OblivionModManager.Scripting
@@ -364,29 +365,39 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
+        // TODO: OBMM had to be placed inside the oblivion folder, need to change that
         public Version GetOBGEVersion()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            if (!File.Exists("data\\obse\\plugins\\obge.dll")) return null;
+            else return new Version(FileVersionInfo.GetVersionInfo("data\\obse\\plugins\\obge.dll").FileVersion.Replace(", ", "."));
         }
 
         public Version GetOblivionVersion()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            return new Version(FileVersionInfo.GetVersionInfo("oblivion.exe").FileVersion.Replace(", ", "."));
         }
 
         public Version GetOBMMVersion()
         {
-            throw new NotImplementedException();
+            return new Version(Program.MajorVersion, Program.MinorVersion, Program.BuildNumber, 0);
         }
 
         public Version GetOBSEPluginVersion(string plugin)
         {
-            throw new NotImplementedException();
+            plugin = Path.ChangeExtension(Path.Combine("data\\obse\\plugins", plugin), ".dll");
+            CheckPathSafety(plugin);
+            permissions.Assert();
+            if (!File.Exists(plugin)) return null;
+            else return new Version(FileVersionInfo.GetVersionInfo(plugin).FileVersion.Replace(", ", "."));
         }
 
         public Version GetOBSEVersion()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            if (!File.Exists("obse_loader.exe")) return null;
+            else return new Version(FileVersionInfo.GetVersionInfo("obse_loader.exe").FileVersion.Replace(", ", "."));
         }
 
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
