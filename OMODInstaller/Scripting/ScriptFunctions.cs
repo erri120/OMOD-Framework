@@ -374,12 +374,26 @@ namespace OblivionModManager.Scripting
 
         public void EditXMLLine(string file, int line, string value)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(file);
+            string ext = Path.GetExtension(file).ToLower();
+            if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
+            permissions.Assert();
+            string[] lines = File.ReadAllLines(DataFiles + file);
+            if (line < 0 || line >= lines.Length) throw new Exception("Invalid line number");
+            lines[line] = value;
+            File.WriteAllLines(DataFiles + file, lines);
+
         }
 
         public void EditXMLReplace(string file, string find, string replace)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(file);
+            string ext = Path.GetExtension(file).ToLower();
+            if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
+            permissions.Assert();
+            string text = File.ReadAllText(DataFiles + file);
+            text = text.Replace(find, replace);
+            File.WriteAllText(DataFiles + file, text);
         }
 
         public void FatalError() { srd.CancelInstall = true; }
