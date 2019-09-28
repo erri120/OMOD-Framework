@@ -769,34 +769,65 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public void SetNewLoadOrder(string[] plugins)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetNewLoadOrder(string[] plugins) {}
 
         public void SetPluginByte(string file, long offset, byte value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            permissions.Assert();
+            using(FileStream fs = File.OpenWrite(Plugins+ file))
+            {
+                fs.Position = offset;
+                fs.WriteByte(value);
+            }
         }
 
         public void SetPluginFloat(string file, long offset, float value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            permissions.Assert();
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Plugins + file))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 2);
+            }
         }
 
         public void SetPluginInt(string file, long offset, int value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            permissions.Assert();
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Plugins + file))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 4);
+            }
         }
 
         public void SetPluginLong(string file, long offset, long value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            permissions.Assert();
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Plugins + file))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 8);
+            }
         }
 
         public void SetPluginShort(string file, long offset, short value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            permissions.Assert();
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Plugins + file))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 4);
+            }
         }
 
         public void UncheckEsp(string plugin)
