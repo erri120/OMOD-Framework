@@ -14,6 +14,8 @@ namespace OMODInstaller
         {
             Parser.Default.ParseArguments<Options>(args).WithParsed(o =>
             {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
                 Program.CurrentDir = (Path.GetDirectoryName(Application.ExecutablePath) + "\\").ToLower();
                 Program.OblivionINIDir = o.INIDir+"\\";
                 Program.OblivionESPDir = o.PluginsDir + "\\";
@@ -32,10 +34,7 @@ namespace OMODInstaller
 
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
-
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MainForm());
+                //Application.Run(new MainForm());
                 //Application.Run(new TextEditor("Test", "None", true, true));
 
                 Program.ClearTempFiles();
