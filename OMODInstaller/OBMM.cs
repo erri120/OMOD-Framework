@@ -13,14 +13,13 @@ namespace OblivionModManager
         internal const byte BuildNumber = 12;
         internal const byte CurrentOmodVersion = 4;
 
-        internal static string TempDir
-        {
-            get { return Path.GetTempPath() + @"obmm\"; }
-        }
+        internal static string TempDir { get; set; } = Path.GetTempPath() + @"obmm\";
 
-        internal static readonly string CurrentDir = (Path.GetDirectoryName(Application.ExecutablePath) + "\\").ToLower();
-        internal static readonly string OblivionINIDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\oblivion\\");
-        internal static readonly string OblivionESPDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "oblivion\\");
+        internal static string CurrentDir { get; set; }
+
+        internal static string OblivionINIDir { get; set; }
+
+        internal static string OblivionESPDir { get; set; }
 
         internal static sData Data;
 

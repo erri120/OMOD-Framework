@@ -31,7 +31,7 @@ namespace OblivionModManager.Scripting
             List<string> paths = new List<string>(4);
 
             paths.Add(Program.CurrentDir);
-            paths.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\Oblivion"));
+            paths.Add(Program.OblivionINIDir);
             if (dataFilesPath != null) paths.Add(dataFilesPath);
             if (pluginsPath != null) paths.Add(pluginsPath);
 
@@ -88,7 +88,7 @@ namespace OblivionModManager.Scripting
 
             string[] paths = new string[2];
             paths[0] = Program.CurrentDir;
-            paths[1] = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My games\\Oblivion");
+            paths[1] = Program.OblivionINIDir;
             permissions = new PermissionSet(PermissionState.None);
             permissions.AddPermission(new FileIOPermission(FileIOPermissionAccess.PathDiscovery | FileIOPermissionAccess.Read, paths));
             permissions.AddPermission(new UIPermission(UIPermissionWindow.AllWindows));
@@ -464,14 +464,14 @@ namespace OblivionModManager.Scripting
         public Version GetOBGEVersion()
         {
             permissions.Assert();
-            if (!File.Exists("data\\obse\\plugins\\obge.dll")) return null;
-            else return new Version(FileVersionInfo.GetVersionInfo("data\\obse\\plugins\\obge.dll").FileVersion.Replace(", ", "."));
+            if (!File.Exists(Path.Combine(Program.CurrentDir,"obse","plugins")+"\\obge.dll")) return null;
+            else return new Version(FileVersionInfo.GetVersionInfo(Path.Combine(Program.CurrentDir, "obse", "plugins") + "\\obge.dll").FileVersion.Replace(", ", "."));
         }
 
         public Version GetOblivionVersion()
         {
             permissions.Assert();
-            return new Version(FileVersionInfo.GetVersionInfo("oblivion.exe").FileVersion.Replace(", ", "."));
+            return new Version(FileVersionInfo.GetVersionInfo(Program.CurrentDir+"oblivion.exe").FileVersion.Replace(", ", "."));
         }
 
         public Version GetOBMMVersion()
@@ -481,7 +481,7 @@ namespace OblivionModManager.Scripting
 
         public Version GetOBSEPluginVersion(string plugin)
         {
-            plugin = Path.ChangeExtension(Path.Combine("data\\obse\\plugins", plugin), ".dll");
+            plugin = Path.ChangeExtension(Path.Combine(Program.CurrentDir, "obse", "plugins", plugin), ".dll");
             CheckPathSafety(plugin);
             permissions.Assert();
             if (!File.Exists(plugin)) return null;
@@ -492,7 +492,7 @@ namespace OblivionModManager.Scripting
         {
             permissions.Assert();
             if (!File.Exists("obse_loader.exe")) return null;
-            else return new Version(FileVersionInfo.GetVersionInfo("obse_loader.exe").FileVersion.Replace(", ", "."));
+            else return new Version(FileVersionInfo.GetVersionInfo(Program.CurrentDir + "obse_loader.exe").FileVersion.Replace(", ", "."));
         }
 
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
@@ -554,7 +554,7 @@ namespace OblivionModManager.Scripting
             else
             {
                 permissions.Assert();
-                foreach (string path in Directory.GetFiles(DataFiles + folder, "*", recurse ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly))
+                foreach (string path in Directory.GetFiles(DataFiles + folder, "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                 {
                     string file = Path.GetFullPath(path).Substring(DataFiles.Length);
                     Program.strArrayRemove(srd.IgnoreData, file);

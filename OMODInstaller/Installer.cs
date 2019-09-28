@@ -1,18 +1,28 @@
 ﻿using OblivionModManager;
 using OMODInstaller.Forms;
-using System;
+using CommandLine;
 using System.Windows.Forms;
+using System;
+using System.IO;
 
 namespace OMODInstaller
 {
-    class Installer
+    internal class Installer
     {
-        static void Main()
+        static void Main(String[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new MainForm());
-            Application.Run(new TextEditor("Test","None",true,true));
+            Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o =>
+            {
+                Program.CurrentDir = (Path.GetDirectoryName(Application.ExecutablePath) + "\\").ToLower();
+                Program.OblivionINIDir = o.INIDir;
+                Program.OblivionESPDir = o.PluginsDir;
+                if (o.TempDir != null) Program.TempDir = o.TempDir;
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                //Application.Run(new MainForm());
+                Application.Run(new TextEditor("Test", "None", true, true));
+            });
         }
     }
 }
