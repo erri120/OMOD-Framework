@@ -199,12 +199,30 @@ namespace OblivionModManager.Scripting
 
         public void CancelDataFileCopy(string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            permissions.Assert();
+            string tempFile = Path.Combine(DataFiles, file);
+            string toL = file.ToLower();
+            for(int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+            }
+            File.Delete(tempFile);
         }
 
         public void CancelDataFolderCopy(string folder)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(folder);
+            permissions.Assert();
+            string toL = folder.ToLower();
+            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo.StartsWith(toL))
+                {
+                    File.Delete(Path.Combine(DataFiles, srd.CopyDataFiles[i].CopyTo));
+                    srd.CopyDataFiles.RemoveAt(i--);
+                }
+            }
         }
 
         public void ConflictsWith(string filename)
