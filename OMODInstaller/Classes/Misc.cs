@@ -80,7 +80,7 @@ namespace OblivionModManager
         internal readonly List<ScriptEspWarnAgainst> EspDeactivation = new List<ScriptEspWarnAgainst>();
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
-        //internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+        internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
     }
 
     internal class ScriptExecutationData

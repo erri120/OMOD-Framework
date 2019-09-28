@@ -49,7 +49,7 @@ namespace OblivionModManager
         internal string[] Plugins;
         internal DataFileInfo[] DataFiles;
         internal string[] BSAs;
-        //TODO: internal List<INIEditInfo> INIEdits;
+        internal List<INIEditInfo> INIEdits;
 
         private ZipFile ModFile
         {
@@ -129,11 +129,11 @@ namespace OblivionModManager
                 string s = Path.GetDirectoryName(DataFiles[x].FileName);
                 if (Program.UseOutputDir)
                 {
-                    if (!Directory.Exists(Program.OutputDir + "data\\" + s)) Directory.CreateDirectory(Program.OutputDir + "data\\" + s);
+                    if (!Directory.Exists(Program.OutputDir + s)) Directory.CreateDirectory(Program.OutputDir + s);
                 }
                 else
                 {
-                    if (!Directory.Exists(Program.CurrentDir + "data\\" + s)) Directory.CreateDirectory(Program.CurrentDir + "data\\" + s);
+                    if (!Directory.Exists(Program.CurrentDir + s)) Directory.CreateDirectory(Program.CurrentDir + s);
                 }
             }
         }
@@ -141,11 +141,8 @@ namespace OblivionModManager
         private ScriptExecutationData ExecuteScript(string plugins, string data)
         {
             ScriptReturnData srd = Scripting.ScriptRunner.ExecuteScript(GetScript(), data, plugins);
-            bool HasClickedYesToAll;
-            bool HasClickedNoToAll;
 
             if (srd.CancelInstall) return null;
-            HasClickedYesToAll = false;
 
             List<string> strtemp1 = new List<string>();
 
@@ -215,6 +212,15 @@ namespace OblivionModManager
 
             //TODO: Register BSAs
             //TODO: Edit ini files
+            INIEdits = new List<INIEditInfo>();
+            foreach (INIEditInfo iei in srd.INIEdits)
+            {
+                iei.OldValue = OblivionINI.GetINIValue(iei.Section, iei.Name);
+                iei.Plugin = this;
+                OblivionINI.WriteINIValue(iei.Section, iei.Name, iei.NewValue);
+                Program.Data.INIEdits.Add(iei);
+                INIEdits.Add(iei);
+            }
             //TOOD: Edit shader files
 
             //return
@@ -242,7 +248,7 @@ namespace OblivionModManager
             CreateDirectoryStructure();
             for(int i = 0; i < DataFiles.Length; i++)
             {
-                File.Move(DataPath + DataFiles[i].FileName, Program.OutputDir + "data\\" + DataFiles[i].FileName);
+                File.Move(DataPath + DataFiles[i].FileName, Program.OutputDir + DataFiles[i].FileName);
             }
         }
 

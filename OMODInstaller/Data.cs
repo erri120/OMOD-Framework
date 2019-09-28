@@ -8,5 +8,6 @@ namespace OblivionModManager
     internal class sData
     {
         internal readonly List<EspInfo> Esps = new List<EspInfo>();
+        internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
     }
 }

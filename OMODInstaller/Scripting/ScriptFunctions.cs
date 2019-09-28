@@ -399,7 +399,7 @@ namespace OblivionModManager.Scripting
 
         public void EditINI(string section, string key, string value)
         {
-            //throw new NotImplementedException();
+            srd.INIEdits.Add(new INIEditInfo(section, key, value));
         }
 
         public void EditShader(byte package, string name, string path)
