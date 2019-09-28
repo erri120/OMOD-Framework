@@ -691,12 +691,44 @@ namespace OblivionModManager.Scripting
 
         public void PatchDataFile(string from, string to, bool create)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (toL.EndsWith(".esp") || toL.EndsWith(".esm")) throw new Exception("Cant be esp or esm files");
+            to = Program.DataDir + to;
+
+            permissions.Assert();
+
+            DateTime timeStamp = File.GetLastWriteTime(DataFiles + from);
+            if (File.Exists(to))
+            {
+                timeStamp = File.GetLastWriteTime(to);
+                File.Delete(to);
+            }
+            else if (!create) return;
+            File.Move(DataFiles + from, to);
+            File.SetLastWriteTime(to, timeStamp);
         }
 
         public void PatchPlugin(string from, string to, bool create)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Must be esp or esm files");
+            to = Program.DataDir + to;
+
+            permissions.Assert();
+
+            DateTime timeStamp = File.GetLastWriteTime(Plugins + from);
+            if (File.Exists(to))
+            {
+                timeStamp = File.GetLastWriteTime(to);
+                File.Delete(to);
+            }
+            else if (!create) return;
+            File.Move(Plugins + from, to);
+            File.SetLastWriteTime(to, timeStamp);
         }
 
         public byte[] ReadDataFile(string file)
