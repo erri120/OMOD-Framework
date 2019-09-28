@@ -131,6 +131,95 @@ namespace OblivionModManager
             }
         }
 
+        public ScriptExecutationData ExecuteScript(string plugins, string data)
+        {
+            ScriptReturnData srd = Scripting.ScriptRunner.ExecuteScript(GetScript(), data, plugins);
+            bool HasClickedYesToAll;
+            bool HasClickedNoToAll;
+
+            if (srd.CancelInstall) return null;
+            HasClickedYesToAll = false;
+
+            List<string> strtemp1 = new List<string>();
+
+            // put all data files to be installed in the data file array
+            if (srd.InstallAllPlugins)
+            {
+                foreach (string s in AllPlugins) if (!s.Contains("\\")) strtemp1.Add(s);
+            }
+            foreach (string s in srd.InstallPlugins) { if (!Program.strArrayContains(strtemp1, s)) strtemp1.Add(s); }
+            foreach (string s in srd.IgnorePlugins) { Program.strArrayRemove(strtemp1, s); }
+            foreach (ScriptCopyDataFile scd in srd.CopyPlugins)
+            {
+                if (!File.Exists(plugins + scd.CopyFrom))
+                {
+                    MessageBox.Show($"The script attempted to copy the plugin {scd.hCopyFrom} but it did not exist", "Warning");
+                }
+                else
+                {
+                    if (scd.CopyFrom != scd.CopyTo)
+                    {
+                        if (File.Exists(plugins + scd.CopyTo)) File.Delete(plugins + scd.CopyTo);
+                        File.Copy(plugins + scd.CopyFrom, plugins + scd.hCopyTo);
+                    }
+                    if (!Program.strArrayContains(strtemp1, scd.CopyTo)) strtemp1.Add(scd.hCopyTo);
+                }
+            }
+            for (int i = 0; i < strtemp1.Count; i++) if (!File.Exists(plugins + strtemp1[i])) strtemp1.RemoveAt(i--);
+            Plugins = strtemp1.ToArray();
+            strtemp1.Clear();
+            // put all data files to be installed in the data file array
+            if (srd.InstallAllData)
+            {
+                for (int i = 0; i < AllDataFiles.Length; i++) strtemp1.Add(AllDataFiles[i].FileName);
+            }
+            foreach (string s in srd.InstallData) { if (!Program.strArrayContains(strtemp1, s)) strtemp1.Add(s); }
+            foreach (string s in srd.IgnoreData) { Program.strArrayRemove(strtemp1, s); }
+            foreach (ScriptCopyDataFile scd in srd.CopyDataFiles)
+            {
+                if (!File.Exists(data + scd.CopyFrom))
+                {
+                    MessageBox.Show($"The script attempted to copy the data file {scd.hCopyFrom} but it did not exist", "Warning");
+                }
+                else
+                {
+                    if (scd.CopyFrom != scd.CopyTo)
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(data + scd.CopyTo))) Directory.CreateDirectory(Path.GetDirectoryName(data + scd.hCopyTo));
+                        if (File.Exists(data + scd.CopyTo)) File.Delete(data + scd.CopyTo);
+                        File.Copy(data + scd.CopyFrom, data + scd.hCopyTo);
+                    }
+                    if (!Program.strArrayContains(strtemp1, scd.CopyTo)) strtemp1.Add(scd.hCopyTo);
+                }
+            }
+            for (int i = 0; i < strtemp1.Count; i++) if (!File.Exists(data + strtemp1[i])) strtemp1.RemoveAt(i--);
+            List<DataFileInfo> dtemp1 = new List<DataFileInfo>();
+            foreach (string s in strtemp1)
+            {
+                DataFileInfo dfi;//=Program.Data.GetDataFile(s);
+                dfi = Program.strArrayGet(AllDataFiles, s);
+                if (dfi != null) dtemp1.Add(new DataFileInfo(dfi));
+                //else dtemp1.Add(new DataFileInfo(s, CompressionHandler.CRC(data + s)));
+            }
+
+            DataFiles = dtemp1.ToArray();
+            strtemp1.Clear();
+            dtemp1.Clear();
+
+            //TODO: Register BSAs
+            //TODO: Edit ini files
+            //TOOD: Edit shader files
+
+            //return
+            ScriptExecutationData sed = new ScriptExecutationData();
+            //sed.PluginOrder = srd.LoadOrderList.ToArray();
+            sed.UncheckedPlugins = srd.UncheckedPlugins.ToArray();
+            sed.EspDeactivationWarning = srd.EspDeactivation.ToArray();
+            //sed.EspEdits = srd.EspEdits.ToArray();
+            //sed.EarlyPlugins = srd.EarlyPlugins.ToArray();
+            return sed;
+        }
+
         private string[] GetPluginList()
         {
             Stream TempStream = ExtractWholeFile("plugins.crc");

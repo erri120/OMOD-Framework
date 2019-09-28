@@ -299,7 +299,7 @@ namespace OblivionModManager.Scripting
 
         public bool DataFileExists(string path)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public void DependsOn(string filename)
@@ -399,7 +399,7 @@ namespace OblivionModManager.Scripting
 
         public void EditINI(string section, string key, string value)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void EditShader(byte package, string name, string path)
