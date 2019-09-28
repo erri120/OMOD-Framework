@@ -10,13 +10,13 @@ namespace OMODInstaller
         [Option('o', "output", Required = false, HelpText = "The output folder")]
         public string OutputDir { get; set; }
 
-        [Option('w', "write", Required = true, HelpText = "Write to game file or to output?")]
-        public bool WriteData { get; set; } = true;
+        [Option('w', "write", Default = true, Required = true, HelpText = "Write output files to output folder or game folder?")]
+        public bool WriteData { get; set; }
 
         [Option('d', "data", Required = true, HelpText = "The data folder")]
         public string DataDir { get; set; }
 
-        [Option('p', "plugins", Required = true, HelpText = "Folder containting plugins.txt")]
+        [Option('p', "plugins", Required = true, HelpText = "Folder containing plugins.txt")]
         public string PluginsDir { get; set; }
 
         [Option('n', "ini", Required = true, HelpText = "Folder containing Oblivion.ini")]
@@ -24,5 +24,8 @@ namespace OMODInstaller
 
         [Option('t', "temp", Required = false, HelpText = "Temp folder")]
         public string TempDir { get; set; } = null;
+
+        [Option('x', "exe", Required = false, HelpText = "Path to OMODInstaller.exe")]
+        public string EXEFile { get; set; } = null;
     }
 }

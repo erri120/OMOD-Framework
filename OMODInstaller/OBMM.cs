@@ -24,6 +24,9 @@ namespace OblivionModManager
         internal static string OutputDir { get; set; }
         internal static bool UseOutputDir { get; set; } = false;
 
+        internal static string EXEFile { get; set; }
+        internal static bool UseEXE { get; set; } = false;
+
         internal static sData Data = new sData();
 
         internal static bool IsSafeFileName(string s)

@@ -22,7 +22,14 @@ namespace OblivionModManager.Scripting
             cParams.GenerateInMemory = false;
             cParams.IncludeDebugInformation = false;
             cParams.OutputAssembly = ScriptOutputPath;
-            cParams.ReferencedAssemblies.Add(Program.CurrentDir+"OMODInstaller.exe");
+            if (Program.UseEXE)
+            {
+                cParams.ReferencedAssemblies.Add(Program.EXEFile);
+            }
+            else
+            {
+                cParams.ReferencedAssemblies.Add(Program.CurrentDir + "OMODInstaller.exe");
+            }
             cParams.ReferencedAssemblies.Add("System.dll");
             cParams.ReferencedAssemblies.Add("System.Drawing.dll");
             cParams.ReferencedAssemblies.Add("System.Windows.Forms.dll");

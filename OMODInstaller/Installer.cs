@@ -23,6 +23,11 @@ namespace OMODInstaller
                     Program.UseOutputDir = true;
                     Program.OutputDir = o.OutputDir + "\\";
                 }
+                if(o.EXEFile != null)
+                {
+                    Program.UseEXE = true;
+                    Program.EXEFile = o.EXEFile;
+                }
 
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
