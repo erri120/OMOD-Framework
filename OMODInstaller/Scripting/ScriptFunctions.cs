@@ -244,17 +244,51 @@ namespace OblivionModManager.Scripting
 
         public void CopyDataFile(string from, string to)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Esm and Esp files are illegal");
+            for(int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+            }
+            srd.CopyDataFiles.Add(new ScriptCopyDataFile(from, to));
         }
 
         public void CopyDataFolder(string from, string to, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(from);
+            CheckFolderSafety(to);
+
+            permissions.Assert();
+            from = Path.GetFullPath(Path.Combine(DataFiles, from));
+            foreach(string path in Directory.GetFiles(from, "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            {
+                string fileFrom = Path.GetFullPath(path).Substring(DataFiles.Length);
+                string fileTo = Path.GetFullPath(path).Substring(from.Length);
+                if (fileTo.StartsWith("" + Path.DirectorySeparatorChar) || fileTo.StartsWith("" + Path.AltDirectorySeparatorChar)) fileTo = fileTo.Substring(1);
+                fileTo = Path.Combine(to, fileTo);
+                string toL = fileTo.ToLower();
+                for(int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(fileFrom, fileTo));
+            }
         }
 
         public void CopyPlugin(string from, string to)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Copied plugins must have a .esp or .esm file extension");
+            if (to.Contains("\\") || to.Contains("/")) throw new Exception("Cannot copy a plugin to a subdirectory of the data folder");
+            for (int i = 0; i < srd.CopyPlugins.Count; i++)
+            {
+                if (srd.CopyPlugins[i].CopyTo == toL) srd.CopyPlugins.RemoveAt(i--);
+            }
+            srd.CopyPlugins.Add(new ScriptCopyDataFile(from, to));
         }
 
         public Form CreateCustomDialog()
