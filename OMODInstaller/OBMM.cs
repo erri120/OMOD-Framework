@@ -103,6 +103,51 @@ namespace OblivionModManager
             }
         }
 
+        internal static FileStream CreateTempFile()
+        {
+            string s;
+            return CreateTempFile(out s);
+        }
+        internal static FileStream CreateTempFile(out string path)
+        {
+            int i = 0;
+            for (i = 0; i < 32000; i++)
+            {
+                if (!File.Exists(TempDir + "tmp" + i.ToString()))
+                {
+                    path = TempDir + "tmp" + i.ToString();
+                    return File.Create(path);
+                }
+            }
+            throw new Exception("Could not create temp file because directory is full");
+        }
+
+        internal static string CreateTempDirectory()
+        {
+            for (int i = 0; i < 32000; i++)
+            {
+                if (!Directory.Exists(TempDir + i.ToString()))
+                {
+                    Directory.CreateDirectory(TempDir + i.ToString() + "\\");
+                    return TempDir + i.ToString() + "\\";
+                }
+            }
+            throw new Exception("Could not create temp folder because directory is full");
+        }
+
+        internal static void ClearTempFiles() { ClearTempFiles(""); }
+        internal static void ClearTempFiles(string subfolder)
+        {
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            if (!Directory.Exists(TempDir + subfolder)) return;
+            foreach (string file in Directory.GetFiles(TempDir + subfolder))
+            {
+                try { File.Delete(file); } catch { }
+            }
+            try { Directory.Delete(TempDir + subfolder, true); } catch { }
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+        }
+
         internal static string ReadAllText(string file)
         {
             if (!File.Exists(file)) return null;
