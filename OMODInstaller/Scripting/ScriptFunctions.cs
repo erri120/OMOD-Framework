@@ -480,9 +480,15 @@ namespace OblivionModManager.Scripting
             return names.ToArray();
         }
 
+        /// <summary>
+        /// This will always return an empty array due to this being an installer and not a omod manager
+        /// </summary>
+        /// <returns></returns>
         public string[] GetActiveOmodNames()
         {
-            throw new NotImplementedException();
+            string[] names = new string[Program.Data.omods.Count];
+            for (int i = 0; i < names.Length; i++) names[i] = Program.Data.omods[i].ModName;
+            return names;
         }
 
         public byte[] GetDataFileFromBSA(string file)
