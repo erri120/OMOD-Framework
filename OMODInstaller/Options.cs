@@ -7,11 +7,11 @@ namespace OMODInstaller
         [Option('i', "input", Required = true, HelpText = "The OMOD file")]
         public string InputFile { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "The output folder")]
+        [Option('o', "output", Required = false, HelpText = "The output folder")]
         public string OutputDir { get; set; }
 
         [Option('w', "write", Required = true, HelpText = "Write to game file or to output?")]
-        public bool WriteData { get; set; }
+        public bool WriteData { get; set; } = true;
 
         [Option('d', "data", Required = true, HelpText = "The data folder")]
         public string DataDir { get; set; }

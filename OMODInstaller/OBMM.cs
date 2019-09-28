@@ -21,6 +21,9 @@ namespace OblivionModManager
 
         internal static string OblivionESPDir { get; set; }
 
+        internal static string OutputDir { get; set; }
+        internal static bool UseOutputDir { get; set; } = false;
+
         internal static sData Data;
 
         internal static bool IsSafeFileName(string s)

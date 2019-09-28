@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="Classes\BSA.cs" />
     <Compile Include="Classes\Misc.cs" />
+    <Compile Include="Classes\Oblivion.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Forms\FindForm.cs">
       <SubType>Form</SubType>

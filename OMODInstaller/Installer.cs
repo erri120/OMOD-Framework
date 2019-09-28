@@ -17,6 +17,11 @@ namespace OMODInstaller
                 Program.OblivionINIDir = o.INIDir;
                 Program.OblivionESPDir = o.PluginsDir;
                 if (o.TempDir != null) Program.TempDir = o.TempDir;
+                if (o.WriteData)
+                {
+                    Program.UseOutputDir = true;
+                    Program.OutputDir = o.OutputDir;
+                }
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);

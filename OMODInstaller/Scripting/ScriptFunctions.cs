@@ -626,7 +626,8 @@ namespace OblivionModManager.Scripting
 
         public string ReadINI(string section, string value)
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            return OblivionINI.GetINIValue(section, value);
         }
 
         public string ReadRendererInfo(string value)
