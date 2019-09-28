@@ -685,15 +685,9 @@ namespace OblivionModManager.Scripting
             }
         }
 
-        public void Message(string msg)
-        {
-            throw new NotImplementedException();
-        }
+        public void Message(string msg) { MessageBox.Show(msg); }
 
-        public void Message(string msg, string title)
-        {
-            throw new NotImplementedException();
-        }
+        public void Message(string msg, string title) { MessageBox.Show(msg, title); }
 
         public void PatchDataFile(string from, string to, bool create)
         {
