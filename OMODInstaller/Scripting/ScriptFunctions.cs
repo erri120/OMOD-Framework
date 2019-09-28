@@ -761,7 +761,26 @@ namespace OblivionModManager.Scripting
 
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            if (previews != null)
+            {
+                for (int i = 0; i < previews.Length; i++)
+                {
+                    if (previews[i] != null)
+                    {
+                        CheckDataSafety(previews[i]);
+                        previews[i] = DataFiles + previews[i];
+                    }
+                }
+            }
+            Forms.SelectForm sf = new Forms.SelectForm(items, title, many, previews, descs);
+            sf.ShowDialog();
+            string[] result = new string[sf.SelectedIndex.Length];
+            for (int i = 0; i < sf.SelectedIndex.Length; i++)
+            {
+                result[i] = items[sf.SelectedIndex[i]];
+            }
+            return result;
         }
 
         public void SetDeactivationWarning(string plugin, DeactiveStatus warning) { }
