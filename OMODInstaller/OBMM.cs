@@ -17,6 +17,8 @@ namespace OblivionModManager
 
         internal static string CurrentDir { get; set; }
 
+        internal static string DataDir { get; set; }
+
         internal static string OblivionINIDir { get; set; }
 
         internal static string OblivionESPDir { get; set; }
@@ -28,6 +30,34 @@ namespace OblivionModManager
         internal static bool UseEXE { get; set; } = false;
 
         internal static sData Data = new sData();
+
+        public static void ReadPlugins()
+        {
+            List<string> Plugins = new List<string>();
+            foreach(string s in Directory.GetFiles(DataDir))
+            {
+                if (Path.GetExtension(s) != ".esp" && Path.GetExtension(s) != ".esm") continue;
+                Plugins.Add(Path.GetFileName(s));
+            }
+            if (Plugins.Count > 0)
+            {
+                string[] files = Plugins.ToArray();
+                for(int i = 0; i<files.Length; i++)
+                {
+                    EspInfo ei;
+                    try
+                    {
+                        ei = new EspInfo(files[i]);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    ei.Active = true;
+                    Data.Esps.Add(ei);
+                }
+            }
+        }
 
         internal static bool IsSafeFileName(string s)
         {
