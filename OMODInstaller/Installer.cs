@@ -37,7 +37,7 @@ namespace OMODInstaller
                     DirectoryInfo di = new DirectoryInfo(Program.OutputDir);
                     foreach (FileInfo file in di.GetFiles())
                     {
-                        file.Delete();
+                        if(!file.Name.Equals("meta.ini")) file.Delete();
                     }
                     foreach (DirectoryInfo dir in di.GetDirectories())
                     {
