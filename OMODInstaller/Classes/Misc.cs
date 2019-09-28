@@ -107,9 +107,9 @@ namespace OblivionModManager
         internal readonly string LowerFileName;
         internal string BelongsTo;
         internal bool Active;
-        internal omod Parent;
+        internal OMOD Parent;
 
-        internal EspInfo(string fileName, omod parent)
+        internal EspInfo(string fileName, OMOD parent)
         {
             FileName = fileName;
             LowerFileName = FileName.ToLower();
