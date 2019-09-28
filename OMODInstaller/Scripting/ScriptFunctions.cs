@@ -509,19 +509,19 @@ namespace OblivionModManager.Scripting
                 : StripPathList(GetFilePaths(Plugins + path, pattern, recurse), Plugins.Length);
         }
 
-        public string InputString()
-        {
-            throw new NotImplementedException();
-        }
+        public string InputString() { return InputString("", ""); }
 
-        public string InputString(string title)
-        {
-            throw new NotImplementedException();
-        }
+        public string InputString(string title) { return InputString(title, ""); }
 
         public string InputString(string title, string initial)
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            using(TextEditor te = new TextEditor(title, initial, false, true))
+            {
+                te.ShowDialog();
+                if (te.DialogResult != DialogResult.Yes) return "";
+                else return te.Result;
+            }
         }
 
         public void InstallAllDataFiles() { srd.InstallAllData = true; }
