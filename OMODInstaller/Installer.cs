@@ -17,7 +17,7 @@ namespace OMODInstaller
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Program.CurrentDir = (Path.GetDirectoryName(Application.ExecutablePath) + "\\").ToLower();
-                Program.DataDir = o.DataDir;
+                Program.DataDir = o.DataDir+"\\";
                 Program.OblivionINIDir = o.INIDir+"\\";
                 Program.OblivionESPDir = o.PluginsDir + "\\";
                 if (o.TempDir != null) Program.TempDir = o.TempDir+"\\";

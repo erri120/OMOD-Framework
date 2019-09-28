@@ -313,7 +313,9 @@ namespace OblivionModManager.Scripting
 
         public bool DataFileExists(string path)
         {
-            return false;
+            CheckPathSafety(path);
+            permissions.Assert();
+            return File.Exists(Program.DataDir + path);
         }
 
         public void DependsOn(string filename) { DependsOn(filename, 0, 0, 0, 0, null, false); }
