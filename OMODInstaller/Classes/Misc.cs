@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using omod = OMODExtractorDLL.OMOD;
 
 namespace OblivionModManager
 {

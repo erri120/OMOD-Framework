@@ -142,12 +142,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OMODExtractorDLL\OMODExtractorDLL.csproj">
-      <Project>{eb003d18-dffb-49c7-b054-fb375345ae26}</Project>
-      <Name>OMODExtractorDLL</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
