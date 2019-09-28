@@ -641,22 +641,62 @@ namespace OblivionModManager.Scripting
 
         public bool IsSimulation()
         {
-            throw new NotImplementedException();
+            return false;
         }
+
+        private enum LoadOrderTypes {AFTER, BEFORE, EARLY};
 
         public void LoadAfter(string plugin1, string plugin2)
         {
-            throw new NotImplementedException();
+            CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER);
         }
 
         public void LoadBefore(string plugin1, string plugin2)
         {
-            throw new NotImplementedException();
+            CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER);
         }
 
         public void LoadEarly(string plugin)
         {
-            throw new NotImplementedException();
+            CreateLoadOrderAdvise(plugin);
+        }
+
+        private void CreateLoadOrderAdvise(string plugin) { CreateLoadOrderAdvise(plugin, null, LoadOrderTypes.EARLY); }
+
+        private void CreateLoadOrderAdvise(string plugin1, string plugin2, LoadOrderTypes type)
+        {
+            string adviseFile = Program.OutputDir + "loadorder_advise.txt";
+            List<string> contents = new List<string>();
+            if (File.Exists(adviseFile))
+            {
+                using(StreamReader sr = new StreamReader(File.OpenRead(adviseFile), System.Text.Encoding.Default))
+                {
+                    while(sr.Peek() != -1)
+                    {
+                        contents.Add(sr.ReadLine());
+                    }
+                }
+                File.Delete(adviseFile);
+            }
+            switch (type)
+            {
+                case LoadOrderTypes.AFTER:
+                    contents.Add($"Place {plugin1} after {plugin2}");
+                    break;
+                case LoadOrderTypes.BEFORE:
+                    contents.Add($"Place {plugin1} before {plugin2}");
+                    break;
+                case LoadOrderTypes.EARLY:
+                    contents.Add($"Place {plugin1} early in your load order");
+                    break;
+            }
+            using(StreamWriter sw = new StreamWriter(File.Create(adviseFile), System.Text.Encoding.Default))
+            {
+                foreach(string s in contents)
+                {
+                    sw.WriteLine(s);
+                }
+            }
         }
 
         public void Message(string msg)
