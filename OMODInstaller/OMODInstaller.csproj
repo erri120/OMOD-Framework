@@ -95,6 +95,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\FindForm.Designer.cs" />
+    <Compile Include="Forms\ImageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImageForm.Designer.cs">
+      <DependentUpon>ImageForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,6 +122,9 @@
     <Compile Include="Scripting\ScriptFunctions.cs" />
     <Compile Include="Scripting\ScriptRunner.cs" />
     <EmbeddedResource Include="Forms\FindForm.resx" />
+    <EmbeddedResource Include="Forms\ImageForm.resx">
+      <DependentUpon>ImageForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

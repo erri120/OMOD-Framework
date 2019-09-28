@@ -352,7 +352,11 @@ namespace OblivionModManager.Scripting
 
         public void DisplayImage(string path, string title)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(path);
+            permissions.Assert();
+            System.Drawing.Image image = System.Drawing.Image.FromFile(DataFiles + path);
+            new ImageForm(image, (title!=null)?title:path).ShowDialog();
+            image.Dispose();
         }
 
         public void DisplayText(string path) { DisplayText(path, null); }
