@@ -1,4 +1,5 @@
 ﻿using System;
+using omod = OblivionModManager.OMOD;
 using System.Collections.Generic;
 
 namespace OblivionModManager
@@ -74,6 +75,9 @@ namespace OblivionModManager
         internal readonly List<string> IgnoreData = new List<string>();
         internal readonly List<string> InstallData = new List<string>();
         internal bool InstallAllData = true;
+        internal readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
+        internal readonly List<ConflictData> ConflictsWith = new List<ConflictData>();
+        internal readonly List<ConflictData> DependsOn = new List<ConflictData>();
         internal readonly List<string> RegisterBSAList = new List<string>();
         internal bool CancelInstall = false;
         internal readonly List<string> UncheckedPlugins = new List<string>();
@@ -81,6 +85,65 @@ namespace OblivionModManager
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+    }
+
+    [Serializable]
+    internal struct ConflictData
+    {
+        internal ConflictLevel level;
+        internal string File;
+        internal int MinMajorVersion;
+        internal int MinMinorVersion;
+        internal int MaxMajorVersion;
+        internal int MaxMinorVersion;
+        internal string Comment;
+        internal bool Partial;
+
+        public static bool operator ==(ConflictData cd, omod o)
+        {
+            if (!cd.Partial && cd.File != o.ModName) return false;
+            if (cd.Partial)
+            {
+                System.Text.RegularExpressions.Regex reg = new System.Text.RegularExpressions.Regex(cd.File, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (!reg.IsMatch(o.ModName)) return false;
+            }
+            if (cd.MaxMajorVersion != 0 || cd.MaxMinorVersion != 0)
+            {
+                if (cd.MaxMajorVersion > o.MajorVersion) return false;
+                if (cd.MaxMajorVersion == o.MajorVersion && cd.MaxMinorVersion > o.MinorVersion) return false;
+            }
+            if (cd.MinMajorVersion != 0 || cd.MinMinorVersion != 0)
+            {
+                if (cd.MinMajorVersion < o.MajorVersion) return false;
+                if (cd.MinMajorVersion == o.MajorVersion && cd.MinMinorVersion < o.MinorVersion) return false;
+            }
+            return true;
+        }
+        public static bool operator !=(ConflictData cd, omod o)
+        {
+            return !(cd == o);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is ConflictData)
+            {
+                ConflictData cd = (ConflictData)obj;
+                if (File == cd.File && MinMajorVersion == cd.MinMajorVersion && MinMinorVersion == cd.MinMinorVersion &&
+                    MaxMajorVersion == cd.MaxMajorVersion && MaxMinorVersion == cd.MaxMinorVersion && Comment == cd.Comment)
+                {
+                    return true;
+                }
+            }
+            else if (obj is omod)
+            {
+                return (this == (omod)obj);
+            }
+            return false;
+        }
     }
 
     internal class ScriptExecutationData

@@ -225,39 +225,35 @@ namespace OblivionModManager.Scripting
             }
         }
 
-        public void ConflictsWith(string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ConflictsWith(string filename, string comment, ConflictLevel level)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void ConflictsWith(string filename) { ConflictsWith(filename, 0, 0, 0, 0, null, ConflictLevel.MajorConflict, false); }
+        public void ConslictsWith(string filename, string comment) { ConflictsWith(filename, 0, 0, 0, 0, comment, ConflictLevel.MajorConflict, false); }
+        public void ConflictsWith(string filename, string comment, ConflictLevel level) { ConflictsWith(filename, 0, 0, 0, 0, comment, level, false); }
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, null, ConflictLevel.MajorConflict, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, ConflictLevel.MajorConflict, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, level, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex)
         {
-            throw new NotImplementedException();
-        }
-
-        public void ConslictsWith(string filename, string comment)
-        {
-            throw new NotImplementedException();
+            ConflictData cd = new ConflictData
+            {
+                File = name,
+                Comment = comment,
+                level = level,
+                MinMajorVersion = minMajorVersion,
+                MinMinorVersion = minMinorVersion,
+                MaxMajorVersion = maxMajorVersion,
+                MaxMinorVersion = maxMinorVersion,
+                Partial = regex
+            };
+            srd.ConflictsWith.Add(cd);
         }
 
         public void CopyDataFile(string from, string to)
@@ -320,29 +316,27 @@ namespace OblivionModManager.Scripting
             return false;
         }
 
-        public void DependsOn(string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DependsOn(string filename, string comment)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void DependsOn(string filename) { DependsOn(filename, 0, 0, 0, 0, null, false); }
+        public void DependsOn(string filename, string comment) { DependsOn(filename, 0, 0, 0, 0, comment, false); }
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion)
         {
-            throw new NotImplementedException();
+            DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, null, false);
         }
-
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment)
         {
-            throw new NotImplementedException();
+            DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, false);
         }
-
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex)
         {
-            throw new NotImplementedException();
+            ConflictData cd = new ConflictData();
+            cd.File = name;
+            cd.Comment = comment;
+            cd.MinMajorVersion = minMajorVersion;
+            cd.MinMinorVersion = minMinorVersion;
+            cd.MaxMajorVersion = maxMajorVersion;
+            cd.MaxMinorVersion = maxMinorVersion;
+            cd.Partial = regex;
+            srd.DependsOn.Add(cd);
         }
 
         public bool DialogYesNo(string msg) { return DialogYesNo(msg, "Question"); }
