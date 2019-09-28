@@ -9,7 +9,17 @@ namespace OblivionModManager
     public enum DeactiveStatus { Allow, WarnAgainst, Disallow }
     internal enum ScriptType { obmmScript, Python, cSharp, vb, Count }
 
-    internal struct ScriptEspWarnAgainst { }
+    internal struct ScriptEspWarnAgainst
+    {
+        internal string Plugin;
+        internal DeactiveStatus Status;
+
+        internal ScriptEspWarnAgainst(string plugin, DeactiveStatus status)
+        {
+            Plugin = plugin;
+            Status = status;
+        }
+    }
 
     internal struct ScriptCopyDataFile
     {
@@ -23,6 +33,36 @@ namespace OblivionModManager
             CopyTo = to.ToLower();
             hCopyFrom = from;
             hCopyTo = to;
+        }
+    }
+
+    internal struct PluginLoadInfo
+    {
+        internal string Plugin;
+        internal string Target;
+        internal bool LoadAfter;
+
+        internal PluginLoadInfo(string plugin, string target, bool loadAfter)
+        {
+            Plugin = plugin;
+            Target = target;
+            LoadAfter = loadAfter;
+        }
+    }
+
+    internal struct ScriptEspEdit
+    {
+        internal readonly bool IsGMST;
+        internal readonly string Plugin;
+        internal readonly string EDID;
+        internal readonly string Value;
+
+        internal ScriptEspEdit(bool gmst, string plugin, string edid, string value)
+        {
+            IsGMST = gmst;
+            Plugin = plugin;
+            EDID = edid;
+            Value = value;
         }
     }
 
@@ -41,6 +81,15 @@ namespace OblivionModManager
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         //internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+    }
+
+    internal class ScriptExecutationData
+    {
+        internal PluginLoadInfo[] PluginOrder;
+        internal string[] UncheckedPlugins;
+        internal ScriptEspWarnAgainst[] EspDeactivationWarning;
+        internal ScriptEspEdit[] EspEdits;
+        internal string[] EarlyPlugins;
     }
 
     [Serializable]
@@ -129,6 +178,43 @@ namespace OblivionModManager
                 BelongsTo = UnknownOwner;
             }
             Parent = null;
+        }
+    }
+
+    [Serializable]
+    internal class INIEditInfo
+    {
+        internal readonly string Section;
+        internal readonly string Name;
+        internal string OldValue;
+        internal readonly string NewValue;
+        internal OMOD Plugin;
+
+        internal INIEditInfo(string section, string name, string newvalue)
+        {
+            Section = section.ToLower();
+            Name = name.ToLower();
+            NewValue = newvalue;
+        }
+
+        public static bool operator ==(INIEditInfo a, INIEditInfo b) { return (a.Section == b.Section) && (a.Name == b.Name); }
+        public static bool operator !=(INIEditInfo a, INIEditInfo b) { return (a.Section != b.Section) || (a.Name != b.Name); }
+        public override bool Equals(object obj) { return this == (obj as INIEditInfo); }
+        public override int GetHashCode() { return Section.GetHashCode() + Name.GetHashCode(); }
+    }
+
+    [Serializable]
+    internal class SDPEditInfo
+    {
+        internal readonly byte Package;
+        internal readonly string Shader;
+        internal string BinaryObject;
+
+        internal SDPEditInfo(byte package, string shader, string binaryObject)
+        {
+            Package = package;
+            Shader = shader.ToLower();
+            BinaryObject = binaryObject.ToLower();
         }
     }
 }
