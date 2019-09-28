@@ -32,6 +32,23 @@ namespace OMODInstaller
                     Program.EXEFile = o.EXEFile;
                 }
 
+                if (Directory.Exists(Program.OutputDir))
+                {
+                    DirectoryInfo di = new DirectoryInfo(Program.OutputDir);
+                    foreach (FileInfo file in di.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                    foreach (DirectoryInfo dir in di.GetDirectories())
+                    {
+                        dir.Delete(true);
+                    }
+                }
+                else
+                {
+                    Directory.CreateDirectory(Program.OutputDir);
+                }
+
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
                 //Application.Run(new MainForm());
