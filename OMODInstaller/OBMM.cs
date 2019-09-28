@@ -100,5 +100,29 @@ namespace OblivionModManager
                 }
             }
         }
+
+        internal static string ReadAllText(string file)
+        {
+            if (!File.Exists(file)) return null;
+            return File.ReadAllText(file, System.Text.Encoding.Default);
+        }
+
+        internal static string ReadBString(BinaryReader br, int len)
+        {
+            string s = "";
+            byte[] bs = br.ReadBytes(len);
+            foreach (byte b in bs) s += (char)b;
+            return s;
+        }
+        internal static string ReadCString(BinaryReader br)
+        {
+            string s = "";
+            while (true)
+            {
+                byte b = br.ReadByte();
+                if (b == 0) return s;
+                s += (char)b;
+            }
+        }
     }
 }
