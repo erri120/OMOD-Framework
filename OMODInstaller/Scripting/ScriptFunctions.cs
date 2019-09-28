@@ -293,7 +293,8 @@ namespace OblivionModManager.Scripting
 
         public Form CreateCustomDialog()
         {
-            throw new NotImplementedException();
+            permissions.Assert();
+            return new Form();
         }
 
         public bool DataFileExists(string path)
