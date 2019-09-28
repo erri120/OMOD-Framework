@@ -296,7 +296,7 @@ namespace OblivionModManager.Scripting
 
         public bool DialogYesNo(string msg, string title)
         {
-            return MessageBox.Show(msg, title, System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes;
+            return MessageBox.Show(msg, title, MessageBoxButtons.YesNo) == DialogResult.Yes;
         }
 
         public void DisplayImage(string path) { DisplayImage(path, null); }
