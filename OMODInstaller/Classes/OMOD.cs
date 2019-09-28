@@ -127,11 +127,18 @@ namespace OblivionModManager
             for (int x = 0; x < DataFiles.Length; x++)
             {
                 string s = Path.GetDirectoryName(DataFiles[x].FileName);
-                if (!Directory.Exists(Program.CurrentDir + "data\\" + s)) Directory.CreateDirectory(Program.CurrentDir + "data\\" + s);
+                if (Program.UseOutputDir)
+                {
+                    if (!Directory.Exists(Program.OutputDir + "data\\" + s)) Directory.CreateDirectory(Program.OutputDir + "data\\" + s);
+                }
+                else
+                {
+                    if (!Directory.Exists(Program.CurrentDir + "data\\" + s)) Directory.CreateDirectory(Program.CurrentDir + "data\\" + s);
+                }
             }
         }
 
-        public ScriptExecutationData ExecuteScript(string plugins, string data)
+        private ScriptExecutationData ExecuteScript(string plugins, string data)
         {
             ScriptReturnData srd = Scripting.ScriptRunner.ExecuteScript(GetScript(), data, plugins);
             bool HasClickedYesToAll;
@@ -218,6 +225,25 @@ namespace OblivionModManager
             //sed.EspEdits = srd.EspEdits.ToArray();
             //sed.EarlyPlugins = srd.EarlyPlugins.ToArray();
             return sed;
+        }
+
+        public void InstallOMOD()
+        {
+            //Extract plugins and data files
+            string PluginsPath = GetPlugins();
+            string DataPath = GetDataFiles();
+            if (PluginsPath != null) PluginsPath = Path.GetFullPath(PluginsPath);
+            if (DataPath != null) DataPath = Path.GetFullPath(DataPath);
+            //Run the script
+            ScriptExecutationData sed = ExecuteScript(PluginsPath, DataPath);
+            if (sed == null) return;
+
+            //copy data files
+            CreateDirectoryStructure();
+            for(int i = 0; i < DataFiles.Length; i++)
+            {
+                File.Move(DataPath + DataFiles[i].FileName, Program.OutputDir + "data\\" + DataFiles[i].FileName);
+            }
         }
 
         private string[] GetPluginList()

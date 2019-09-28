@@ -34,7 +34,7 @@ namespace OblivionModManager.Scripting
                     //TODO: pythonScriptHandler.Execute(script, sf);
                     break;
                 case ScriptType.cSharp:
-                    TODO: DotNetScriptHandler.ExecuteCS(script, sf);
+                    DotNetScriptHandler.ExecuteCS(script, sf);
                     break;
                 case ScriptType.vb:
                     //TODO: DotNetScriptHandler.ExecuteVB(script, sf);
