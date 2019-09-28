@@ -23,6 +23,8 @@ namespace OMODInstaller
                     Program.OutputDir = o.OutputDir;
                 }
 
+                OMOD omod = new OMOD(o.InputFile);
+
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 //Application.Run(new MainForm());
