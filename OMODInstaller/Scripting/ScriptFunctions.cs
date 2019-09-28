@@ -454,7 +454,21 @@ namespace OblivionModManager.Scripting
 
         public void GenerateNewDataFile(string file, byte[] data)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            permissions.Assert();
+            string tempFile = Path.Combine(DataFiles, file);
+            if (!File.Exists(tempFile))
+            {
+                string toL = file.ToLower();
+                if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Data files can't be an esp or esm");
+                for(int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(file, tempFile));
+            }
+            if(!Directory.Exists(Path.GetDirectoryName(tempFile))) Directory.CreateDirectory(Path.GetDirectoryName(tempFile));
+            File.WriteAllBytes(tempFile, data);
         }
 
         public string[] GetActiveEspNames()
