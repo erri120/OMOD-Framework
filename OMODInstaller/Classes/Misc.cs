@@ -85,6 +85,7 @@ namespace OblivionModManager
         internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+        internal readonly List<SDPEditInfo> SDPEdits = new List<SDPEditInfo>();
     }
 
     [Serializable]

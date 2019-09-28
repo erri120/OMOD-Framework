@@ -88,6 +88,7 @@
     <Compile Include="Classes\CompressionHandler.cs" />
     <Compile Include="Classes\Misc.cs" />
     <Compile Include="Classes\Oblivion.cs" />
+    <Compile Include="Classes\OblivionSDP.cs" />
     <Compile Include="Classes\OMOD.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Forms\FindForm.cs">

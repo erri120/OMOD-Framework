@@ -50,6 +50,7 @@ namespace OblivionModManager
         internal DataFileInfo[] DataFiles;
         internal string[] BSAs;
         internal List<INIEditInfo> INIEdits;
+        internal List<SDPEditInfo> SDPEdits;
 
         private ZipFile ModFile
         {
@@ -220,15 +221,25 @@ namespace OblivionModManager
                 Program.Data.INIEdits.Add(iei);
                 INIEdits.Add(iei);
             }
-            //TOOD: Edit shader files
+            if (INIEdits.Count == 0) INIEdits = null;
+
+            SDPEdits = new List<SDPEditInfo>();
+            foreach(SDPEditInfo sei in srd.SDPEdits)
+            {
+                if (Classes.OblivionSDP.EditShader(sei.Package, sei.Shader, sei.BinaryObject, FileName)) SDPEdits.Add(sei);
+                sei.BinaryObject = null;
+            }
+            if (SDPEdits.Count == 0) SDPEdits = null;
 
             //return
-            ScriptExecutationData sed = new ScriptExecutationData();
-            //sed.PluginOrder = srd.LoadOrderList.ToArray();
-            sed.UncheckedPlugins = srd.UncheckedPlugins.ToArray();
-            sed.EspDeactivationWarning = srd.EspDeactivation.ToArray();
-            //sed.EspEdits = srd.EspEdits.ToArray();
-            //sed.EarlyPlugins = srd.EarlyPlugins.ToArray();
+            ScriptExecutationData sed = new ScriptExecutationData
+            {
+                //sed.PluginOrder = srd.LoadOrderList.ToArray();
+                UncheckedPlugins = srd.UncheckedPlugins.ToArray(),
+                EspDeactivationWarning = srd.EspDeactivation.ToArray()
+                //sed.EspEdits = srd.EspEdits.ToArray();
+                //sed.EarlyPlugins = srd.EarlyPlugins.ToArray();
+            };
             return sed;
         }
 

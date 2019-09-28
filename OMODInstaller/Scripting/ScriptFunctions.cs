@@ -418,7 +418,8 @@ namespace OblivionModManager.Scripting
 
         public void EditShader(byte package, string name, string path)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(path);
+            srd.SDPEdits.Add(new SDPEditInfo(package, name, DataFiles + path));
         }
 
         public void EditXMLLine(string file, int line, string value)

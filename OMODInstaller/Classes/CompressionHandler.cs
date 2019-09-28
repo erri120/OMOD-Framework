@@ -243,6 +243,8 @@ namespace OblivionModManager
     {
         private static SevenZipHandler SevenZip = new SevenZipHandler();
         private static ZipHandler Zip = new ZipHandler();
+        private static ICSharpCode.SharpZipLib.Checksum.Crc32 CRC32 = new ICSharpCode.SharpZipLib.Checksum.Crc32();
+
         internal static string DecompressFiles(Stream FileList, Stream CompressedStream, CompressionType type)
         {
             switch (type)
@@ -251,6 +253,37 @@ namespace OblivionModManager
                 case CompressionType.Zip: return Zip.DecompressAll(FileList, CompressedStream);
                 default: throw new Exception("Unrecognised compression type");
             }
+        }
+
+        internal static uint CRC(string s)
+        {
+            FileStream fs = File.OpenRead(s);
+            uint i = CRC(fs);
+            fs.Close();
+            return i;
+        }
+        internal static uint CRC(Stream InputStream)
+        {
+            byte[] buffer = new byte[4096];
+            CRC32.Reset();
+            while (InputStream.Position + 4096 < InputStream.Length)
+            {
+                InputStream.Read(buffer, 0, 4096);
+                CRC32.Update(buffer);
+            }
+            if (InputStream.Position < InputStream.Length)
+            {
+                int i = (int)(InputStream.Length - InputStream.Position);
+                InputStream.Read(buffer, 0, i);
+                CRC32.Update(buffer);
+            }
+            return (uint)CRC32.Value;
+        }
+        internal static uint CRC(byte[] b)
+        {
+            CRC32.Reset();
+            CRC32.Update(b);
+            return (uint)CRC32.Value;
         }
 
         protected abstract string DecompressAll(Stream FileList, Stream CompressedStream);
