@@ -38,32 +38,39 @@ namespace OblivionModManager
 
         internal static void WriteINIValue(string section, string name, string value)
         {
-            List<string> ss = new List<string>(GetINISection(section));
-            //if (ss == null) throw new Exception("Oblivion.ini section " + section + " does not exist");
-            if(ss != null)
+            if (Program.UseOutputDir)
             {
-                bool matched = false;
-                string lname = name.ToLower();
-                for (int i = 0; i < ss.Count; i++)
+                CreateINITweak(section, name, value);
+            }
+            else
+            {
+                List<string> ss = new List<string>(GetINISection(section));
+                //if (ss == null) throw new Exception("Oblivion.ini section " + section + " does not exist");
+                if (ss != null)
                 {
-                    string s = ss[i];
-                    if (s.Trim().ToLower().StartsWith(lname + "="))
+                    bool matched = false;
+                    string lname = name.ToLower();
+                    for (int i = 0; i < ss.Count; i++)
                     {
-                        if (value == null)
+                        string s = ss[i];
+                        if (s.Trim().ToLower().StartsWith(lname + "="))
                         {
-                            ss.RemoveAt(i--);
-                        }
-                        else
-                        {
-                            ss[i] = name + "=" + value;
+                            if (value == null)
+                            {
+                                ss.RemoveAt(i--);
+                            }
+                            else
+                            {
+                                ss[i] = name + "=" + value;
 
+                            }
+                            matched = true;
+                            break;
                         }
-                        matched = true;
-                        break;
                     }
+                    if (!matched) ss.Add(name + "=" + value);
+                    ReplaceINISection(section, ss.ToArray());
                 }
-                if (!matched) ss.Add(name + "=" + value);
-                ReplaceINISection(section, ss.ToArray());
             }
         }
 
@@ -95,6 +102,33 @@ namespace OblivionModManager
             }
             if (!InSection) return null;
             return contents.ToArray();
+        }
+
+        private static void CreateINITweak(string section, string name, string value)
+        {
+            string sectionName = section.Replace("[", "").Replace("]", "");
+            List<string> contents = new List<string>();
+            string tweakPath = Program.OutputDir + sectionName + "TWEAK.ini";
+            if (File.Exists(tweakPath))
+            {
+                using (StreamReader sr = new StreamReader(tweakPath, System.Text.Encoding.Default))
+                {
+                    while(sr.Peek() != -1)
+                    {
+                        string s = sr.ReadLine();
+                        contents.Add(s);
+                    }
+                }
+            }
+            using(StreamWriter sw = new StreamWriter(File.Create(tweakPath), System.Text.Encoding.Default))
+            {
+                if(!contents.Contains(section)) contents.Add(section);
+                contents.Add(name + "=" + value);
+                foreach (string s in contents)
+                {
+                    sw.WriteLine(s);
+                }
+            }
         }
 
         private static void ReplaceINISection(string section, string[] ReplaceWith)

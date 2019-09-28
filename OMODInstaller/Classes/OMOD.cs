@@ -211,7 +211,6 @@ namespace OblivionModManager
             dtemp1.Clear();
 
             //TODO: Register BSAs
-            //TODO: Edit ini files
             INIEdits = new List<INIEditInfo>();
             foreach (INIEditInfo iei in srd.INIEdits)
             {
