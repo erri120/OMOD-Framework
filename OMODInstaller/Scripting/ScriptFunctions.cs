@@ -355,14 +355,14 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        public void DisplayText(string path)
-        {
-            throw new NotImplementedException();
-        }
+        public void DisplayText(string path) { DisplayText(path, null); }
 
         public void DisplayText(string path, string title)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(path);
+            permissions.Assert();
+            string s = File.ReadAllText(DataFiles + path, System.Text.Encoding.Default);
+            new TextEditor((title != null) ? title : path, s, true, false).ShowDialog();
         }
 
         public void DontInstallAnyDataFiles() { srd.InstallAllData = false; }
