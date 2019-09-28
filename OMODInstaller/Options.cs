@@ -19,7 +19,7 @@ namespace OMODInstaller
         [Option('p', "plugins", Required = true, HelpText = "Folder containting plugins.txt")]
         public string PluginsDir { get; set; }
 
-        [Option('n', "ini", Required = true, HelpText = "Folder contianing Oblivion.ini")]
+        [Option('n', "ini", Required = true, HelpText = "Folder containing Oblivion.ini")]
         public string INIDir { get; set; }
 
         [Option('t', "temp", Required = false, HelpText = "Temp folder")]
