@@ -447,10 +447,7 @@ namespace OblivionModManager.Scripting
 
         public void FatalError() { srd.CancelInstall = true; }
 
-        public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel)
-        {
-            throw new NotImplementedException();
-        }
+        public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel) { }
 
         public void GenerateNewDataFile(string file, byte[] data)
         {
@@ -639,27 +636,15 @@ namespace OblivionModManager.Scripting
             if (!Program.strArrayContains(srd.InstallPlugins, name)) srd.InstallPlugins.Add(name);
         }
 
-        public bool IsSimulation()
-        {
-            return false;
-        }
+        public bool IsSimulation() { return false; }
 
         private enum LoadOrderTypes {AFTER, BEFORE, EARLY};
 
-        public void LoadAfter(string plugin1, string plugin2)
-        {
-            CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER);
-        }
+        public void LoadAfter(string plugin1, string plugin2) { CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER); }
 
-        public void LoadBefore(string plugin1, string plugin2)
-        {
-            CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER);
-        }
+        public void LoadBefore(string plugin1, string plugin2)  { CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER); }
 
-        public void LoadEarly(string plugin)
-        {
-            CreateLoadOrderAdvise(plugin);
-        }
+        public void LoadEarly(string plugin) { CreateLoadOrderAdvise(plugin); }
 
         private void CreateLoadOrderAdvise(string plugin) { CreateLoadOrderAdvise(plugin, null, LoadOrderTypes.EARLY); }
 
@@ -739,35 +724,20 @@ namespace OblivionModManager.Scripting
             return OblivionINI.GetINIValue(section, value);
         }
 
-        public string ReadRendererInfo(string value)
-        {
-            throw new NotImplementedException();
-        }
+        public string ReadRendererInfo(string value) { return ""; }
 
-        public void RegisterBSA(string path)
-        {
-            throw new NotImplementedException();
-        }
+        public void RegisterBSA(string path) { }
 
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)
         {
             throw new NotImplementedException();
         }
 
-        public void SetDeactivationWarning(string plugin, DeactiveStatus warning)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetDeactivationWarning(string plugin, DeactiveStatus warning) { }
 
-        public void SetGlobal(string file, string edid, string value)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetGlobal(string file, string edid, string value) { }
 
-        public void SetGMST(string file, string edid, string value)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetGMST(string file, string edid, string value) { }
 
         public void SetNewLoadOrder(string[] plugins) {}
 
@@ -830,14 +800,8 @@ namespace OblivionModManager.Scripting
             }
         }
 
-        public void UncheckEsp(string plugin)
-        {
-            throw new NotImplementedException();
-        }
+        public void UncheckEsp(string plugin) {}
 
-        public void UnregisterBSA(string path)
-        {
-            throw new NotImplementedException();
-        }
+        public void UnregisterBSA(string path) {}
     }
 }
