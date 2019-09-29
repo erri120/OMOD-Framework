@@ -1284,20 +1284,11 @@ namespace OblivionModManager.Scripting
             throw new NotImplementedException();
         }
 
-        private static void FunctionRegisterBSA(string[] line, bool Register)
-        {
-            throw new NotImplementedException();
-        }
+        private static void FunctionRegisterBSA(string[] line, bool Register) { }
 
-        private static void FunctionUncheckESP(string[] line)
-        {
-            throw new NotImplementedException();
-        }
+        private static void FunctionUncheckESP(string[] line) { }
 
-        private static void FunctionSetDeactivationWarning(string[] line)
-        {
-            throw new NotImplementedException();
-        }
+        private static void FunctionSetDeactivationWarning(string[] line) { }
 
         private static void FunctionCopyDataFile(string[] line, bool Plugin)
         {
