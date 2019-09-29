@@ -1607,7 +1607,14 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionExecLines(string[] line, Queue<string> queue)
         {
-            throw new NotImplementedException();
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to function 'ExecLines'");
+                return;
+            }
+            if (line.Length > 2) Warn("Unexpected extra arguments to function 'ExecLines'");
+            string[] lines = line[1].Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in lines) queue.Enqueue(s);
         }
 
         private static int iSet(List<string> func)
