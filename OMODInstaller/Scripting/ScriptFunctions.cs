@@ -28,10 +28,11 @@ namespace OblivionModManager.Scripting
             Plugins = pluginsPath;
 
             permissions = new PermissionSet(PermissionState.None);
-            List<string> paths = new List<string>(4);
-
-            paths.Add(Program.CurrentDir);
-            paths.Add(Program.OblivionINIDir);
+            List<string> paths = new List<string>(4)
+            {
+                Program.CurrentDir,
+                Program.OblivionINIDir
+            };
             if (dataFilesPath != null) paths.Add(dataFilesPath);
             if (pluginsPath != null) paths.Add(pluginsPath);
 

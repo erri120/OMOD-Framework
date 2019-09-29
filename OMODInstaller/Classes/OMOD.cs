@@ -272,7 +272,7 @@ namespace OblivionModManager
                 DataFileInfo dfi;//=Program.Data.GetDataFile(s);
                 dfi = Program.strArrayGet(AllDataFiles, s);
                 if (dfi != null) dtemp1.Add(new DataFileInfo(dfi));
-                //else dtemp1.Add(new DataFileInfo(s, CompressionHandler.CRC(data + s)));
+                else dtemp1.Add(new DataFileInfo(s, CompressionHandler.CRC(data + s)));
             }
 
             DataFiles = dtemp1.ToArray();

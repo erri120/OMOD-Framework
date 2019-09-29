@@ -102,8 +102,7 @@ namespace OblivionModManager.Scripting
             }
             //Assembly asm = AppDomain.CurrentDomain.Load(data, null, evidence);
             Assembly asm = AppDomain.CurrentDomain.Load(data, null);
-            IScript s = asm.CreateInstance("Script") as IScript;
-            if (s == null)
+            if (!(asm.CreateInstance("Script") is IScript s))
             {
                 System.Windows.Forms.MessageBox.Show("C# or vb script did not contain a 'Script' class in the root namespace, or IScript was not implemented",
                     "Error");
