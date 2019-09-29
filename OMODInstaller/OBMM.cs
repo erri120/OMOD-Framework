@@ -62,6 +62,13 @@ namespace OblivionModManager
             }
         }
 
+        internal static string MakeValidFolderPath(string s)
+        {
+            s = s.Replace('/', '\\');
+            if (!s.EndsWith("\\")) s += "\\";
+            return s;
+        }
+
         internal static bool IsSafeFileName(string s)
         {
             s = s.Replace('/', '\\');
