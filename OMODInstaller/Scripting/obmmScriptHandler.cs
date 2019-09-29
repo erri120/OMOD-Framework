@@ -1316,12 +1316,40 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionEditINI(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to EditINI");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to EditINI");
+            srd.INIEdits.Add(new INIEditInfo(line[1], line[2], line[3]));
         }
 
         private static void FunctionEditShader(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to 'EditShader'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to 'EditShader'");
+            if (!Program.IsSafeFileName(line[3]))
+            {
+                Warn($"Invalid argument to 'EditShader'\n'{ line[3]}' is not a valid file name");
+                return;
+            }
+            if (!File.Exists(DataFiles + line[3]))
+            {
+                Warn($"Invalid argument to 'EditShader'\nFile '{line[3]}' does not exist");
+                return;
+            }
+            byte package;
+            if (!byte.TryParse(line[1], out package))
+            {
+                Warn($"Invalid argument to function 'EditShader'\n'{line[1]}' is not a valid shader package ID");
+                return;
+            }
+            srd.SDPEdits.Add(new SDPEditInfo(package, line[2], DataFiles + line[3]));
         }
 
         private static void FunctionSetEspVar(string[] line, bool GMST)
@@ -1386,7 +1414,17 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionReadINI(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function ReadINI");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function ReadINI");
+            try
+            {
+                variables[line[1]] = OblivionINI.GetINIValue(line[2], line[3]);
+            }
+            catch (Exception e) { variables[line[1]] = e.Message; }
         }
 
         private static void FunctionReadRenderer(string[] line)
@@ -1396,12 +1434,64 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionEditXMLLine(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function 'EditXMLLine'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function 'EditXMLLine'");
+            line[1] = line[1].ToLower();
+            if (!Program.IsSafeFileName(line[1]) || !File.Exists(DataFiles + line[1]))
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            string ext = Path.GetExtension(line[1]);
+            if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            int index;
+            if (!int.TryParse(line[2], out index) || index < 1)
+            {
+                Warn("Invalid line number supplied to function 'EditXMLLine'");
+                return;
+            }
+            index -= 1;
+            string[] lines = File.ReadAllLines(DataFiles + line[1]);
+            if (lines.Length <= index)
+            {
+                Warn("Invalid line number supplied to function 'EditXMLLine'");
+                return;
+            }
+            lines[index] = line[3];
+            File.WriteAllLines(DataFiles + line[1], lines);
         }
 
         private static void FunctionEditXMLReplace(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function 'EditXMLReplace'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function 'EditXMLReplace'");
+            line[1] = line[1].ToLower();
+            if (!Program.IsSafeFileName(line[1]) || !File.Exists(DataFiles + line[1]))
+            {
+                Warn("Invalid filename supplied to function 'EditXMLReplace'");
+                return;
+            }
+            string ext = Path.GetExtension(line[1]);
+            if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            string text = File.ReadAllText(DataFiles + line[1]);
+            text = text.Replace(line[2], line[3]);
+            File.WriteAllText(DataFiles + line[1], text);
         }
 
         private static void FunctionExecLines(string[] line, Queue<string> queue)
