@@ -939,7 +939,27 @@ namespace OblivionModManager.Scripting
 
         private static string[] FunctionSelectVar(string[] line, bool IsVariable)
         {
-            throw new NotImplementedException();
+            string Func;
+            if (IsVariable) Func = " to function 'SelectVar'"; else Func = "to function 'SelectString'";
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments" + Func);
+                return new string[0];
+            }
+            if (line.Length > 2) Warn("Unexpected arguments" + Func);
+            if (IsVariable)
+            {
+                if (!variables.ContainsKey(line[1]))
+                {
+                    Warn("Invalid argument" + Func + "\nVariable '" + line[1] + "' does not exist");
+                    return new string[0];
+                }
+                else return new string[] { "Case " + variables[line[1]] };
+            }
+            else
+            {
+                return new string[] { "Case " + line[1] };
+            }
         }
 
         private static FlowControlStruct FunctionFor(string[] line, int LineNo)
