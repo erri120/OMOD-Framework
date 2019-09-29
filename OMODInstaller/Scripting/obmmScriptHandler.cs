@@ -1355,7 +1355,35 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionDisplayFile(string[] line, bool Image)
         {
-            throw new NotImplementedException();
+            string WarnMess;
+            if (Image) WarnMess = "function 'DisplayImage'"; else WarnMess = "function 'DisplayText'";
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to " + WarnMess);
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected extra arguments to " + WarnMess);
+            if (!Program.IsSafeFileName(line[1]))
+            {
+                Warn("Illegal path supplied to " + WarnMess);
+                return;
+            }
+            if (!File.Exists(DataFiles + line[1]))
+            {
+                Warn($"Non-existant file '{line[1]}' supplied to " + WarnMess);
+                return;
+            }
+            if (Image)
+            {
+                System.Drawing.Image image = System.Drawing.Image.FromFile(DataFiles + line[1]);
+                new ImageForm(image, (line.Length > 2) ? line[2] : line[1]).ShowDialog();
+                image.Dispose();
+            }
+            else
+            {
+                string s = File.ReadAllText(DataFiles + line[1], System.Text.Encoding.Default);
+                new TextEditor((line.Length > 2) ? line[2] : line[1], s, true, false).ShowDialog();
+            }
         }
 
         private static void FunctionSetVar(string[] line)
@@ -1510,7 +1538,24 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionInputString(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to InputString");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to InputString");
+
+            string title = "";
+            string initial = "";
+
+            if (line.Length > 2) title = line[2];
+            if (line.Length > 3) initial = line[3];
+
+            TextEditor te = new TextEditor(title, initial, false, true);
+            te.ShowDialog();
+
+            if (te.DialogResult != DialogResult.Yes) variables[line[1]] = "";
+            else variables[line[1]] = te.Result;
         }
 
         private static void FunctionReadINI(string[] line)
