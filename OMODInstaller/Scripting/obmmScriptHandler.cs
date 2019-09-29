@@ -1437,17 +1437,69 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionSubstring(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to Substring");
+                return;
+            }
+            if (line.Length > 5) Warn("Unexpected extra arguments to Substring");
+            if (line.Length == 4)
+            {
+                if (!int.TryParse(line[3], out int start))
+                {
+                    Warn("Invalid argument to Substring");
+                    return;
+                }
+                variables[line[1]] = line[2].Substring(start);
+            }
+            else
+            {
+                if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end))
+                {
+                    Warn("Invalid argument to Substring");
+                    return;
+                }
+                variables[line[1]] = line[2].Substring(start, end);
+            }
         }
 
         private static void FunctionRemoveString(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to RemoveString");
+                return;
+            }
+            if (line.Length > 5) Warn("Unexpected extra arguments to RemoveString");
+            if (line.Length == 4)
+            {
+                if (!int.TryParse(line[3], out int start))
+                {
+                    Warn("Invalid argument to RemoveString");
+                    return;
+                }
+                variables[line[1]] = line[2].Remove(start);
+            }
+            else
+            {
+                if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end))
+                {
+                    Warn("Invalid argument to RemoveString");
+                    return;
+                }
+                variables[line[1]] = line[2].Remove(start, end);
+            }
         }
 
         private static void FunctionStringLength(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to StringLength");
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected extra arguments to StringLength");
+            variables[line[1]] = line[2].Length.ToString();
         }
 
         private static void FunctionInputString(string[] line)
