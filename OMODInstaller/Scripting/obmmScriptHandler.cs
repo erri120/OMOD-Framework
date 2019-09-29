@@ -848,13 +848,93 @@ namespace OblivionModManager.Scripting
                     Warn("Unknown argument '" + line[1] + "' supplied to 'If'");
                     return false;
             }
-
-            throw new NotImplementedException();
         }
 
         private static string[] FunctionSelect(string[] line, bool many, bool Previews, bool Descriptions)
         {
-            throw new NotImplementedException();
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to function 'Select'");
+                return new string[0];
+            }
+
+            string[] items;
+            string[] previews;
+            string[] descs;
+            int argsPerOption = 1 + (Previews ? 1 : 0) + (Descriptions ? 1 : 0);
+
+            string title = line[1];
+            items = new string[line.Length - 2];
+            Array.Copy(line, 2, items, 0, line.Length - 2);
+            line = items;
+
+            if (line.Length % argsPerOption != 0)
+            {
+                Warn("Unexpected extra arguments to 'Select'");
+                Array.Resize(ref line, line.Length - line.Length % argsPerOption);
+            }
+
+            // Create arrays to pass to the select form
+            items = new string[line.Length / argsPerOption];
+            previews = Previews ? new string[line.Length / argsPerOption] : null;
+            descs = Descriptions ? new string[line.Length / argsPerOption] : null;
+
+            for(int i = 0; i < line.Length / argsPerOption; i++)
+            {
+                items[i] = line[i * argsPerOption];
+                if (Previews)
+                {
+                    previews[i] = line[i * argsPerOption + 1];
+                    if (Descriptions) descs[i] = line[i * argsPerOption + 2];
+                }
+                else
+                {
+                    if (Descriptions) descs[i] = line[i * argsPerOption + 1];
+                }
+            }
+
+            // Check for previews
+            if (previews != null)
+            {
+                for (int i = 0; i < previews.Length; i++)
+                {
+                    if (previews[i] == "None")
+                    {
+                        previews[i] = null;
+                    }
+                    else if (!Program.IsSafeFileName(previews[i]))
+                    {
+                        Warn($"Preview file path '{previews[i]}' was invalid");
+                        previews[i] = null;
+                    }
+                    else if (!File.Exists(DataFiles + previews[i]))
+                    {
+                        Warn($"Preview file path '{previews[i]}' does not exist");
+                        previews[i] = null;
+                    }
+                    else
+                    {
+                        previews[i] = DataFiles + previews[i];
+                    }
+                }
+            }
+
+            // Display the select form
+            Forms.SelectForm sf = new Forms.SelectForm(items, title, many, previews, descs);
+            try
+            {
+                sf.ShowDialog();
+            } catch (ExecutionCancelledException)
+            {
+                srd.CancelInstall = true;
+                return new string[0];
+            }
+            string[] result = new string[sf.SelectedIndex.Length];
+            for(int i = 0; i < sf.SelectedIndex.Length; i++)
+            {
+                result[i] = $"Case {items[sf.SelectedIndex[i]]}";
+            }
+            return result;
         }
 
         private static string[] FunctionSelectVar(string[] line, bool IsVariable)
