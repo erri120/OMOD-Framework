@@ -145,6 +145,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scripting\DotNetScriptHandler.cs" />
+    <Compile Include="Scripting\obmmScriptHandler.cs" />
     <Compile Include="Scripting\Public.cs" />
     <Compile Include="Scripting\pythonScriptHandler.cs" />
     <Compile Include="Scripting\ScriptFunctions.cs" />
