@@ -150,60 +150,66 @@ namespace OblivionModManager
             if (srd.CancelInstall) return null;
 
             // create conflict advise file
-            string conflictAdvise = Program.OutputDir + "conflict_advise.txt";
-            List<string> conflictContents = new List<string>();
-            if (File.Exists(conflictAdvise))
+            if(srd.ConflictsWith.Count > 0)
             {
-                using(StreamReader sr = new StreamReader(File.OpenRead(conflictAdvise), System.Text.Encoding.Default))
+                string conflictAdvise = Program.OutputDir + "conflict_advise.txt";
+                List<string> conflictContents = new List<string>();
+                if (File.Exists(conflictAdvise))
                 {
-                    while(sr.Peek() != -1)
+                    using (StreamReader sr = new StreamReader(File.OpenRead(conflictAdvise), System.Text.Encoding.Default))
                     {
-                        conflictContents.Add(sr.ReadLine());
+                        while (sr.Peek() != -1)
+                        {
+                            conflictContents.Add(sr.ReadLine());
+                        }
+                    }
+                }
+                File.Delete(conflictAdvise);
+                foreach (ConflictData cd in srd.ConflictsWith)
+                {
+                    conflictContents.Add($"This mod conflicts with {cd.File}, " +
+                            $"Max Version: {cd.MaxMajorVersion}.{cd.MaxMajorVersion}, " +
+                            $"Min Version: {cd.MinMajorVersion}.{cd.MinMinorVersion}, " +
+                            $"Conflict level: {cd.level}, " +
+                            $"Comment: {cd.Comment}");
+                }
+                using (StreamWriter sw = new StreamWriter(File.Create(conflictAdvise), System.Text.Encoding.Default))
+                {
+                    foreach (string s in conflictContents)
+                    {
+                        sw.WriteLine(s);
                     }
                 }
             }
-            File.Delete(conflictAdvise);
-            foreach (ConflictData cd in srd.ConflictsWith)
+            if(srd.DependsOn.Count > 0)
             {
-                conflictContents.Add($"This mod conflicts with {cd.File}, " +
-                        $"Max Version: {cd.MaxMajorVersion}.{cd.MaxMajorVersion}, " +
-                        $"Min Version: {cd.MinMajorVersion}.{cd.MinMinorVersion}, " +
-                        $"Conflict level: {cd.level}, " +
-                        $"Comment: {cd.Comment}");
-            }
-            using (StreamWriter sw = new StreamWriter(File.Create(conflictAdvise), System.Text.Encoding.Default))
-            {
-                foreach(string s in conflictContents)
+                // create depends advise file
+                string dependsAdvise = Program.OutputDir + "depends_advise.txt";
+                List<string> dependsContents = new List<string>();
+                if (File.Exists(dependsAdvise))
                 {
-                    sw.WriteLine(s);
-                }
-            }
-            // create depends advise file
-            string dependsAdvise = Program.OutputDir + "depends_advise.txt";
-            List<string> dependsContents = new List<string>();
-            if (File.Exists(dependsAdvise))
-            {
-                using (StreamReader sr = new StreamReader(File.OpenRead(conflictAdvise), System.Text.Encoding.Default))
-                {
-                    while (sr.Peek() != -1)
+                    using (StreamReader sr = new StreamReader(File.OpenRead(dependsAdvise), System.Text.Encoding.Default))
                     {
-                        dependsContents.Add(sr.ReadLine());
+                        while (sr.Peek() != -1)
+                        {
+                            dependsContents.Add(sr.ReadLine());
+                        }
                     }
                 }
-            }
-            File.Delete(dependsAdvise);
-            foreach (ConflictData cd in srd.DependsOn)
-            {
-                dependsContents.Add($"This mod depends on {cd.File}, " +
-                        $"Max Version: {cd.MaxMajorVersion}.{cd.MaxMajorVersion}, " +
-                        $"Min Version: {cd.MinMajorVersion}.{cd.MinMinorVersion}, " +
-                        $"Comment: {cd.Comment}");
-            }
-            using (StreamWriter sw = new StreamWriter(File.Create(dependsAdvise), System.Text.Encoding.Default))
-            {
-                foreach (string s in dependsContents)
+                File.Delete(dependsAdvise);
+                foreach (ConflictData cd in srd.DependsOn)
                 {
-                    sw.WriteLine(s);
+                    dependsContents.Add($"This mod depends on {cd.File}, " +
+                            $"Max Version: {cd.MaxMajorVersion}.{cd.MaxMajorVersion}, " +
+                            $"Min Version: {cd.MinMajorVersion}.{cd.MinMinorVersion}, " +
+                            $"Comment: {cd.Comment}");
+                }
+                using (StreamWriter sw = new StreamWriter(File.Create(dependsAdvise), System.Text.Encoding.Default))
+                {
+                    foreach (string s in dependsContents)
+                    {
+                        sw.WriteLine(s);
+                    }
                 }
             }
 
