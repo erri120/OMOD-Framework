@@ -31,7 +31,7 @@ namespace OblivionModManager.Scripting
             switch (type)
             {
                 case ScriptType.Python:
-                    //TODO: pythonScriptHandler.Execute(script, sf);
+                    pythonScriptHandler.Execute(script, sf);
                     break;
                 case ScriptType.cSharp:
                     DotNetScriptHandler.ExecuteCS(script, sf);
