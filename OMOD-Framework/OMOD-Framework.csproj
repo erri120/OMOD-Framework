@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Misc.cs" />
     <Compile Include="Classes\OMOD.cs" />
     <Compile Include="Framework.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

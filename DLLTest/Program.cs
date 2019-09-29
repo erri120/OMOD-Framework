@@ -8,12 +8,9 @@ namespace DLLTest
     {
         static void Main(string[] args)
         {
-            string z = "out\\";
-            string a = args[0];
-            string b = Path.GetFullPath(a);
-            string c = args[1];
-            string d = Path.Combine(z, c);
-            string result = Console.ReadLine();
+            Framework f = new Framework();
+            OMOD omod = new OMOD(args[0],f);
+            omod.GetDataFiles();
         }
     }
 }

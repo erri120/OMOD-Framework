@@ -5,19 +5,22 @@ namespace OMODFramework
 {
     public class Framework
     {
+        #region Internal Variables
         internal string OBMMFakeVersion = "1.1.12";
         internal byte OBMMFakeMajorVersion = 1;
         internal byte OBMMFakeMinorVersion = 1;
         internal byte OBMMFakeBuildNumber = 12;
+        internal byte OBMMFakeCurrentOmodVersion = 4;
 
-        internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(),"obmm");
+        internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(), "obmm");
         internal static string OblivionDir { get; set; }
         internal static string DataDir { get; set; }
         internal static string OblivionINIPath { get; set; }
         internal static string OblivionESPPath { get; set; }
         internal static string OutputDir { get; set; }
+        #endregion
 
-        #region OBMM
+        #region OBMM Functions
         internal static bool IsSafeFileName(string s)
         {
             s = s.Replace('/', '\\');
@@ -28,7 +31,6 @@ namespace OMODFramework
             if (s.EndsWith(".") || Array.IndexOf(Path.GetInvalidFileNameChars(), s[s.Length - 1]) != -1) return false;
             return true;
         }
-
         internal static bool IsSafeFolderName(string s)
         {
             if (s.Length == 0) return true;
@@ -40,7 +42,6 @@ namespace OMODFramework
             if (s.EndsWith(".")) return false;
             return true;
         }
-
         internal static bool strArrayContains(List<string> a, string s)
         {
             s = s.ToLower();
@@ -60,7 +61,6 @@ namespace OMODFramework
             }
             return false;
         }*/
-
         /*
         internal static DataFileInfo strArrayGet(DataFileInfo[] a, string s)
         {
@@ -71,7 +71,6 @@ namespace OMODFramework
             }
             return null;
         }*/
-
         internal static void strArrayRemove(List<string> a, string s)
         {
             s = s.ToLower();
@@ -84,7 +83,6 @@ namespace OMODFramework
                 }
             }
         }
-
         /*
         internal static void strArrayRemove(List<DataFileInfo> a, string s)
         {
@@ -98,9 +96,7 @@ namespace OMODFramework
                 }
             }
         }*/
-
         internal static FileStream CreateTempFile() { return CreateTempFile(out string s); }
-
         internal static FileStream CreateTempFile(out string path)
         {
             for(int i = 0; i < 32000; i++)
@@ -113,7 +109,6 @@ namespace OMODFramework
             }
             throw new Exception("Could not create a new temp file because the directory is full!");
         }
-
         internal static string CreateTempDirectory()
         {
             for (int i = 0; i < 32000; i++)
@@ -126,9 +121,7 @@ namespace OMODFramework
             }
             throw new Exception("Could not create a new temp folder because directory is full!");
         }
-
         internal static void ClearTempFiles() { ClearTempFiles(""); }
-
         internal static void ClearTempFiles(string subfolder)
         {
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
@@ -140,11 +133,9 @@ namespace OMODFramework
             try { Directory.Delete(Path.Combine(TempDir, subfolder), true); } catch { }
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
         }
-
         #endregion
 
-
-        #region API
+        #region API Functions
 
         /// <summary>
         /// Sets all internal variables if you don't want to call each setter separately,
