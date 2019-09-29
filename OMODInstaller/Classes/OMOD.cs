@@ -321,7 +321,11 @@ namespace OblivionModManager
             //Run the script
             ScriptExecutationData sed = ExecuteScript(PluginsPath, DataPath);
             if (sed == null) return;
-
+            //copy plugin files
+            for(int i = 0; i < Plugins.Length; i++)
+            {
+                File.Move(PluginsPath + Plugins[i], Program.OutputDir + Plugins[i]);
+            }
             //copy data files
             CreateDirectoryStructure();
             for(int i = 0; i < DataFiles.Length; i++)
