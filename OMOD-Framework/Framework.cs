@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 namespace OMODFramework
 {
     public class Framework
@@ -9,7 +10,7 @@ namespace OMODFramework
         internal byte OBMMFakeMinorVersion = 1;
         internal byte OBMMFakeBuildNumber = 12;
 
-        internal static string TempDir { get; set; } = Path.GetTempPath() + @"obmm\";
+        internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(),"obmm")+"\\";
         internal static string OblivionDir { get; set; }
         internal static string DataDir { get; set; }
         internal static string OblivionINIPath { get; set; }
@@ -17,6 +18,133 @@ namespace OMODFramework
         internal static string OutputDir { get; set; }
 
         internal string CorrectPath(string path) { return path.Trim().EndsWith("\\") ? path : path += "\\"; }
+
+        #region OBMM
+        internal static bool IsSafeFileName(string s)
+        {
+            s = s.Replace('/', '\\');
+            if (s.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
+            if (Path.IsPathRooted(s)) return false;
+            if (s.StartsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
+            if (s.Contains("\\..\\")) return false;
+            if (s.EndsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[s.Length - 1]) != -1) return false;
+            return true;
+        }
+
+        internal static bool IsSafeFolderName(string s)
+        {
+            if (s.Length == 0) return true;
+            s = s.Replace('/', '\\');
+            if (s.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
+            if (Path.IsPathRooted(s)) return false;
+            if (s.StartsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
+            if (s.Contains("\\..\\")) return false;
+            if (s.EndsWith(".")) return false;
+            return true;
+        }
+
+        internal static bool strArrayContains(List<string> a, string s)
+        {
+            s = s.ToLower();
+            foreach (string s2 in a)
+            {
+                if (s2.ToLower() == s) return true;
+            }
+            return false;
+        }
+        /*
+        internal static bool strArrayContains(List<DataFileInfo> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].LowerFileName == s) return true;
+            }
+            return false;
+        }*/
+
+        /*
+        internal static DataFileInfo strArrayGet(DataFileInfo[] a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i].LowerFileName == s) return a[i];
+            }
+            return null;
+        }*/
+
+        internal static void strArrayRemove(List<string> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].ToLower() == s)
+                {
+                    a.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+
+        /*
+        internal static void strArrayRemove(List<DataFileInfo> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].LowerFileName == s)
+                {
+                    a.RemoveAt(i);
+                    return;
+                }
+            }
+        }*/
+
+        internal static FileStream CreateTempFile() { return CreateTempFile(out string s); }
+
+        internal static FileStream CreateTempFile(out string path)
+        {
+            for(int i = 0; i < 32000; i++)
+            {
+                if (!File.Exists(Path.Combine(TempDir,"tmp_" + i.ToString())))
+                {
+                    path = Path.Combine(TempDir, "tmp_" + i.ToString());
+                    return File.Create(path);
+                }
+            }
+            throw new Exception("Could not create a new temp file because the directory is full!");
+        }
+
+        internal static string CreateTempDirectory()
+        {
+            for (int i = 0; i < 32000; i++)
+            {
+                if (!Directory.Exists(Path.Combine(TempDir + i.ToString())))
+                {
+                    Directory.CreateDirectory(Path.Combine(TempDir,i.ToString()) + "\\");
+                    return Path.Combine(TempDir,i.ToString()) + "\\";
+                }
+            }
+            throw new Exception("Could not create a new temp folder because directory is full!");
+        }
+
+        internal static void ClearTempFiles() { ClearTempFiles(""); }
+
+        internal static void ClearTempFiles(string subfolder)
+        {
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            if (!Directory.Exists(Path.Combine(TempDir, subfolder))) return;
+            foreach (string file in Directory.GetFiles(Path.Combine(TempDir, subfolder)))
+            {
+                try { File.Delete(file); } catch { }
+            }
+            try { Directory.Delete(Path.Combine(TempDir, subfolder), true); } catch { }
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+        }
+
+        #endregion
+
 
         #region API
 
