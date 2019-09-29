@@ -1302,7 +1302,65 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionPatch(string[] line, bool Plugin)
         {
-            throw new NotImplementedException();
+            string WarnMess;
+            if (Plugin) WarnMess = "function 'PatchPlugin'"; else WarnMess = "function 'PatchDataFile'";
+            if (line.Length < 3)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 4) Warn($"Unexpected arguments to {WarnMess}");
+            string lowerTo = line[2].ToLower();
+            if (!Program.IsSafeFileName(line[1]) || !Program.IsSafeFileName(line[2]))
+            {
+                Warn($"Invalid argument to {WarnMess}");
+                return;
+            }
+            string copypath;
+            if (Plugin)
+            {
+                copypath = Plugins + line[1];
+                if (!File.Exists(copypath))
+                {
+                    Warn($"Invalid argument to PatchPlugin\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (line[2].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                {
+                    Warn("Plugins cannot be copied to subdirectories of the data folder");
+                    return;
+                }
+                if (!(lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm")))
+                {
+                    Warn("Plugins must have a .esp or .esm extension");
+                    return;
+                }
+
+            }
+            else
+            {
+                copypath = DataFiles + line[1];
+                if (!File.Exists(copypath))
+                {
+                    Warn($"Invalid argument to PatchDataFile\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm"))
+                {
+                    Warn("Data files cannot have a .esp or .esm extension");
+                    return;
+                }
+            }
+            DateTime timestamp = File.GetLastWriteTime(copypath);
+            if (File.Exists(Program.DataDir+line[2]))
+            {
+                timestamp = File.GetLastWriteTime(Program.DataDir + line[2]);
+                //TODO: make this non-destructive
+                File.Delete(Program.DataDir + line[2]);
+            }
+            else if (line.Length < 4 || line[3] != "True") return;
+            File.Move(copypath, Program.DataDir + line[2]);
+            File.SetLastWriteTime(Program.DataDir + line[2], timestamp);
         }
 
         private static void FunctionEditINI(string[] line)
