@@ -1180,7 +1180,22 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionMessage(string[] line)
         {
-            throw new NotImplementedException();
+            switch (line.Length)
+            {
+                case 1:
+                    Warn("Missing arguments to function 'Message'");
+                    break;
+                case 2:
+                    MessageBox.Show(line[1]);
+                    break;
+                case 3:
+                    MessageBox.Show(line[1], line[2]);
+                    break;
+                default:
+                    MessageBox.Show(line[1], line[2]);
+                    Warn("Unexpected arguments after 'Message'");
+                    break;
+            }
         }
 
         private static void FunctionLoadEarly(string[] line)
