@@ -230,7 +230,7 @@ namespace OblivionModManager.Scripting
                 cLine = i.ToString();
                 if (AllowRunOnLines)
                 {
-                    while (s.EndsWith("\'))
+                    while (s.EndsWith("\\"))
                     {
                         s = s.Remove(s.Length - 1);
                         if (ExtraLines.Count > 0) s += ExtraLines.Dequeue().Replace('\t', ' ').Trim();
