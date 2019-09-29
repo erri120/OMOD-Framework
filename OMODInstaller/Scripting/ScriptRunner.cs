@@ -20,8 +20,7 @@ namespace OblivionModManager.Scripting
             }
             if (type == ScriptType.obmmScript)
             {
-                obmmScriptHandler.Execute(script, DataPath, PluginsPath);
-                return null;
+                return obmmScriptHandler.Execute(script, DataPath, PluginsPath);
             }
 
             ScriptReturnData srd = new ScriptReturnData();
