@@ -1365,22 +1365,74 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionGetDirectoryName(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to GetDirectoryName");
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected arguments to GetDirectoryName");
+            try
+            {
+                variables[line[1]] = Path.GetDirectoryName(line[2]);
+            }
+            catch
+            {
+                Warn("Invalid argument to GetDirectoryName");
+            }
         }
 
         private static void FunctionGetFileName(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to GetFileName");
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected arguments to GetFileName");
+            try
+            {
+                variables[line[1]] = Path.GetFileName(line[2]);
+            }
+            catch
+            {
+                Warn("Invalid argument to GetFileName");
+            }
         }
 
         private static void FunctionGetFileNameWithoutExtension(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to GetFileNameWithoutExtension");
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected arguments to GetFileNameWithoutExtension");
+            try
+            {
+                variables[line[1]] = Path.GetFileNameWithoutExtension(line[2]);
+            }
+            catch
+            {
+                Warn("Invalid argument to GetFileNameWithoutExtension");
+            }
         }
 
         private static void FunctionCombinePaths(string[] line)
         {
-            throw new NotImplementedException();
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to CombinePaths");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to CombinePaths");
+            try
+            {
+                variables[line[1]] = Path.Combine(line[2], line[3]);
+            }
+            catch
+            {
+                Warn("Invalid argument to CombinePaths");
+            }
         }
 
         private static void FunctionSubstring(string[] line)
