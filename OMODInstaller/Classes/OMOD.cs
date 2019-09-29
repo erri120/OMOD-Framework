@@ -314,8 +314,10 @@ namespace OblivionModManager
         public void InstallOMOD()
         {
             //Extract plugins and data files
+            Console.WriteLine("Extracting plugins and files, please wait until completion!");
             string PluginsPath = GetPlugins();
             string DataPath = GetDataFiles();
+            Console.WriteLine("\nAll files extracted, starting the installer...");
             if (PluginsPath != null) PluginsPath = Path.GetFullPath(PluginsPath);
             if (DataPath != null) DataPath = Path.GetFullPath(DataPath);
             //Run the script
@@ -411,12 +413,14 @@ namespace OblivionModManager
         private string ParseCompressedStream(string fileList, string compressedStream)
         {
             string path;
+            Console.Write("\nExtracting: " + fileList);
             Stream FileList = ExtractWholeFile(fileList);
             if (FileList == null) return null;
             Stream CompressedStream = ExtractWholeFile(compressedStream);
             path = CompressionHandler.DecompressFiles(FileList, CompressedStream, CompType);
             FileList.Close();
             CompressedStream.Close();
+            Console.Write(" DONE");
             return path;
         }
 

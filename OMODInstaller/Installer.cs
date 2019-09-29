@@ -50,10 +50,11 @@ namespace OMODInstaller
                 {
                     Directory.CreateDirectory(Program.OutputDir);
                 }
-
+                
                 // read the existing plugins
                 Program.ReadPlugins();
 
+                Console.WriteLine("OMODInstaller by erri120, please wait until the Installer interface opens");
                 // start out installer
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
