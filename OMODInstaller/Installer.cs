@@ -57,6 +57,13 @@ namespace OMODInstaller
                 // start out installer
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
+
+
+                //string s = omod.GetScript();
+                //using(StreamWriter sw = new StreamWriter(File.Create(Program.OutputDir + "script")))
+                //{
+                //    sw.WriteLine(s);
+                //}
                 //Application.Run(new MainForm());
                 //Application.Run(new TextEditor("Test", "None", true, true));
 

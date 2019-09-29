@@ -37,7 +37,7 @@ namespace OblivionModManager.Scripting
                     DotNetScriptHandler.ExecuteCS(script, sf);
                     break;
                 case ScriptType.vb:
-                    //TODO: DotNetScriptHandler.ExecuteVB(script, sf);
+                    DotNetScriptHandler.ExecuteVB(script, sf);
                     break;
             }
             return srd;

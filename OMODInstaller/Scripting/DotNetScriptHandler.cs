@@ -128,5 +128,10 @@ namespace OblivionModManager.Scripting
         {
             Execute(script, functions, ScriptType.cSharp);
         }
+
+        internal static void ExecuteVB(string script, IScriptFunctions functions)
+        {
+            Execute(script, functions, ScriptType.vb);
+        }
     }
 }
