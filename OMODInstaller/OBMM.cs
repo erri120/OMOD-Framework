@@ -31,6 +31,9 @@ namespace OblivionModManager
 
         internal static sData Data = new sData();
 
+        /// <summary>
+        /// Fills the plugins list with existing plugins form the data folder
+        /// </summary>
         public static void ReadPlugins()
         {
             List<string> Plugins = new List<string>();

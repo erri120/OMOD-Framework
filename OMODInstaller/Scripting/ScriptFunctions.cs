@@ -746,7 +746,7 @@ namespace OblivionModManager.Scripting
         {
             CheckPathSafety(file);
             permissions.Assert();
-            return File.ReadAllBytes("data\\" + file);
+            return File.ReadAllBytes(Program.DataDir + file);
         }
 
         public string ReadINI(string section, string value)

@@ -16,6 +16,7 @@ namespace OMODInstaller
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                // parse the arguments
                 Program.CurrentDir = (Path.GetDirectoryName(Application.ExecutablePath) + "\\").ToLower();
                 Program.DataDir = o.DataDir+"\\";
                 Program.OblivionINIDir = o.INIDir+"\\";
@@ -32,7 +33,7 @@ namespace OMODInstaller
                     Program.UseEXE = true;
                     Program.EXEFile = o.EXEFile;
                 }
-
+                // cleanup leftovers
                 if (Directory.Exists(Program.OutputDir))
                 {
                     DirectoryInfo di = new DirectoryInfo(Program.OutputDir);
@@ -50,13 +51,16 @@ namespace OMODInstaller
                     Directory.CreateDirectory(Program.OutputDir);
                 }
 
+                // read the existing plugins
                 Program.ReadPlugins();
 
+                // start out installer
                 OMOD omod = new OMOD(o.InputFile);
                 omod.InstallOMOD();
                 //Application.Run(new MainForm());
                 //Application.Run(new TextEditor("Test", "None", true, true));
 
+                // cleanup
                 Program.ClearTempFiles();
             });
         }

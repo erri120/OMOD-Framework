@@ -108,7 +108,7 @@ namespace OblivionModManager
         {
             string sectionName = section.Replace("[", "").Replace("]", "");
             List<string> contents = new List<string>();
-            string tweakPath = Program.OutputDir + sectionName + "TWEAK.ini";
+            string tweakPath = Program.OutputDir + sectionName + "_tweak.ini";
             if (File.Exists(tweakPath))
             {
                 using (StreamReader sr = new StreamReader(tweakPath, System.Text.Encoding.Default))
