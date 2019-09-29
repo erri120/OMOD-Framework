@@ -1354,12 +1354,114 @@ namespace OblivionModManager.Scripting
 
         private static void FunctionModifyInstall(string[] line, bool plugins, bool Install)
         {
-            throw new NotImplementedException();
+            string WarnMess;
+            if (plugins)
+            {
+                if (Install) WarnMess = "function 'InstallPlugin'"; else WarnMess = "function 'DontInstallPlugin'";
+            }
+            else
+            {
+                if (Install) WarnMess = "function 'InstallDataFile'"; else WarnMess = "function 'DontInstallDataFile'";
+            }
+            if (line.Length == 1)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 2) Warn($"Unexpected arguments after {WarnMess}");
+            if (plugins)
+            {
+                if (!File.Exists(Plugins + line[1]))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (line[1].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                {
+                    Warn($"Invalid argument to {WarnMess}\nThis function cannot be used on plugins stored in subdirectories");
+                    return;
+                }
+                if (Install)
+                {
+                    Program.strArrayRemove(srd.IgnorePlugins, line[1]);
+                    if (!Program.strArrayContains(srd.InstallPlugins, line[1])) srd.InstallPlugins.Add(line[1]);
+                }
+                else
+                {
+                    Program.strArrayRemove(srd.InstallPlugins, line[1]);
+                    if (!Program.strArrayContains(srd.IgnorePlugins, line[1])) srd.IgnorePlugins.Add(line[1]);
+                }
+            }
+            else
+            {
+                if (!File.Exists(DataFiles + line[1]))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (Install)
+                {
+                    Program.strArrayRemove(srd.IgnoreData, line[1]);
+                    if (!Program.strArrayContains(srd.InstallData, line[1])) srd.InstallData.Add(line[1]);
+                }
+                else
+                {
+                    Program.strArrayRemove(srd.InstallData, line[1]);
+                    if (!Program.strArrayContains(srd.IgnoreData, line[1])) srd.IgnoreData.Add(line[1]);
+                }
+            }
         }
 
         private static void FunctionModifyInstallFolder(string[] line, bool Install)
         {
-            throw new NotImplementedException();
+            string WarnMess;
+            if (Install) WarnMess = "function 'InstallDataFolder'"; else WarnMess = "function 'DontInstallDataFolder'";
+            if (line.Length == 1)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 3) Warn($"Unexpected arguments to {WarnMess}");
+            line[1] = Program.MakeValidFolderPath(line[1]);
+
+            if (!Directory.Exists(DataFiles + line[1]))
+            {
+                Warn($"Invalid argument to {WarnMess}\nFolder '{line[1]} ' is not part of this plugin");
+                return;
+            }
+
+            if (line.Length >= 3)
+            {
+                switch (line[2])
+                {
+                    case "True":
+                        foreach (string folder in Directory.GetDirectories(DataFiles + line[1]))
+                        {
+                            FunctionModifyInstallFolder(new string[] { "", folder.Substring(DataFiles.Length), "True" }, Install);
+                        }
+                        break;
+                    case "False":
+                        break;
+                    default:
+                        Warn($"Invalid argument to {WarnMess}\nExpected True or False");
+                        return;
+                }
+            }
+
+            foreach (string path in Directory.GetFiles(DataFiles + line[1]))
+            {
+                string file = line[1] + Path.GetFileName(path);
+                if (Install)
+                {
+                    Program.strArrayRemove(srd.IgnoreData, file);
+                    if (!Program.strArrayContains(srd.InstallData, file)) srd.InstallData.Add(file);
+                }
+                else
+                {
+                    Program.strArrayRemove(srd.InstallData, file);
+                    if (!Program.strArrayContains(srd.IgnoreData, file)) srd.IgnoreData.Add(file);
+                }
+            }
         }
 
         private static void FunctionRegisterBSA(string[] line, bool Register) { }
