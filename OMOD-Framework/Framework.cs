@@ -10,14 +10,12 @@ namespace OMODFramework
         internal byte OBMMFakeMinorVersion = 1;
         internal byte OBMMFakeBuildNumber = 12;
 
-        internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(),"obmm")+"\\";
+        internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(),"obmm");
         internal static string OblivionDir { get; set; }
         internal static string DataDir { get; set; }
         internal static string OblivionINIPath { get; set; }
         internal static string OblivionESPPath { get; set; }
         internal static string OutputDir { get; set; }
-
-        internal string CorrectPath(string path) { return path.Trim().EndsWith("\\") ? path : path += "\\"; }
 
         #region OBMM
         internal static bool IsSafeFileName(string s)
@@ -25,9 +23,9 @@ namespace OMODFramework
             s = s.Replace('/', '\\');
             if (s.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
             if (Path.IsPathRooted(s)) return false;
-            if (s.StartsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
+            if (s.StartsWith(".") || Array.IndexOf(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
             if (s.Contains("\\..\\")) return false;
-            if (s.EndsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[s.Length - 1]) != -1) return false;
+            if (s.EndsWith(".") || Array.IndexOf(Path.GetInvalidFileNameChars(), s[s.Length - 1]) != -1) return false;
             return true;
         }
 
@@ -37,7 +35,7 @@ namespace OMODFramework
             s = s.Replace('/', '\\');
             if (s.IndexOfAny(Path.GetInvalidPathChars()) != -1) return false;
             if (Path.IsPathRooted(s)) return false;
-            if (s.StartsWith(".") || Array.IndexOf<char>(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
+            if (s.StartsWith(".") || Array.IndexOf(Path.GetInvalidFileNameChars(), s[0]) != -1) return false;
             if (s.Contains("\\..\\")) return false;
             if (s.EndsWith(".")) return false;
             return true;
@@ -122,8 +120,8 @@ namespace OMODFramework
             {
                 if (!Directory.Exists(Path.Combine(TempDir + i.ToString())))
                 {
-                    Directory.CreateDirectory(Path.Combine(TempDir,i.ToString()) + "\\");
-                    return Path.Combine(TempDir,i.ToString()) + "\\";
+                    Directory.CreateDirectory(Path.Combine(TempDir,i.ToString()));
+                    return Path.Combine(TempDir,i.ToString());
                 }
             }
             throw new Exception("Could not create a new temp folder because directory is full!");
@@ -178,39 +176,39 @@ namespace OMODFramework
         /// Sets the internal path to the output directory of any write action, needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the output folder</param>
-        public void SetOutputDirectory(string path) { OutputDir = CorrectPath(path); }
+        public void SetOutputDirectory(string path) { OutputDir = path; }
 
         /// <summary>
         /// Sets the internal path to the plugins.txt file normally found in the AppData/Oblivion folder,
         /// needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the plugins.txt file</param>
-        public void SetPluginsListPath(string path) { OblivionESPPath = CorrectPath(path); }
+        public void SetPluginsListPath(string path) { OblivionESPPath = path; }
 
         /// <summary>
         /// Sets the internal path to the Oblivion.ini file normally found in the My Games folder,
         /// needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the Oblivion.ini file</param>
-        public void SetOblivionINIPath(string path) { OblivionINIPath = CorrectPath(path); }
+        public void SetOblivionINIPath(string path) { OblivionINIPath = path; }
 
         /// <summary>
         /// Sets the internal path to the Oblivion game folder, needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the Oblivion game folder</param>
-        public void SetOblivionDirectory(string path) { OblivionDir = CorrectPath(path); }
+        public void SetOblivionDirectory(string path) { OblivionDir = path; }
 
         /// <summary>
         /// Sets the internal path to the Oblivion data folder, needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the Oblivion data folder</param>
-        public void SetDataDirectory(string path) { DataDir = CorrectPath(path); }
+        public void SetDataDirectory(string path) { DataDir = path; }
 
         /// <summary>
         /// Sets the internal path to the temp folder, needs to be an absolute path
         /// </summary>
         /// <param name="path">Path to the temp folder</param>
-        public void SetTempDirectory(string path) { TempDir = CorrectPath(path); }
+        public void SetTempDirectory(string path) { TempDir = path; }
 
         /// <summary>
         /// Sets the internal fake version of OBMM, useful when mod needs a certain version
