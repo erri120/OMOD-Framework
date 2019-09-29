@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -229,7 +230,7 @@ namespace OblivionModManager.Scripting
                 cLine = i.ToString();
                 if (AllowRunOnLines)
                 {
-                    while (s.EndsWith("\\"))
+                    while (s.EndsWith("\'))
                     {
                         s = s.Remove(s.Length - 1);
                         if (ExtraLines.Count > 0) s += ExtraLines.Dequeue().Replace('\t', ' ').Trim();
@@ -669,6 +670,185 @@ namespace OblivionModManager.Scripting
 
         private static bool FunctionIf(string[] line)
         {
+            if(line.Length == 1)
+            {
+                Warn("Missing arguments for IF statement!");
+                return false;
+            }
+            switch (line[1])
+            {
+                case "DialogYesNo":
+                    switch (line.Length)
+                    {
+                        case 2:
+                            Warn("Missing arguments to function 'If DialogYesNo'");
+                            return false;
+                        case 3:
+                            return MessageBox.Show(line[2], "", MessageBoxButtons.YesNo) == DialogResult.Yes;
+                        case 4:
+                            return MessageBox.Show(line[2], line[3], MessageBoxButtons.YesNo) == DialogResult.Yes;
+                        default:
+                            Warn("Unexpected arguments after function 'If DialogYesNo'");
+                            goto case 4;
+                    }
+                case "DataFileExists":
+                    if(line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If DataFileExists'");
+                        return false;
+                    }
+                    return File.Exists(Program.DataDir + line[2]);
+                case "VersionGreaterThan":
+                    if(line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If VersionGreaterThan'");
+                        return false;
+                    }
+                    try
+                    {
+                        Version v = new Version(line[2]+".0");
+                        Version v2 = new Version(Program.MajorVersion.ToString() + "." + Program.MinorVersion.ToString() + "." + Program.BuildNumber.ToString() + ".0");
+                        return (v2 > v);
+                    }
+                    catch
+                    {
+                        Warn("Invalid argument to function 'If VersionGreaterThan'");
+                        return false;
+                    }
+                case "VersionLessThan":
+                    if (line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If VersionLessThan'");
+                        return false;
+                    }
+                    try
+                    {
+                        Version v = new Version(line[2] + ".0");
+                        Version v2 = new Version(Program.MajorVersion.ToString() + "." +
+                            Program.MinorVersion.ToString() + "." + Program.BuildNumber.ToString() + ".0");
+                        return (v2 < v);
+                    }
+                    catch
+                    {
+                        Warn("Invalid argument to function 'If VersionLessThan'");
+                        return false;
+                    }
+                case "ScriptExtenderPresent":
+                    if (line.Length > 2) Warn("Unexpected arguments to 'If ScriptExtenderPresent'");
+                    return File.Exists(Directory.GetParent(Program.DataDir) + "obse_loader.exe");
+                case "ScriptExtenderNewerThan":
+                    if (line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If ScriptExtenderNewerThan'");
+                        return false;
+                    }
+                    if (line.Length > 3) Warn("Unexpected arguments to 'If ScriptExtenderNewerThan'");
+                    if (!File.Exists(Directory.GetParent(Program.DataDir)+"obse_loader.exe")) return false;
+                    try
+                    {
+                        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Directory.GetParent(Program.DataDir) + "obse_loader.exe");
+                        if (fvi.FileVersion == null) return false;
+                        Version v = new Version(line[2]); ;
+                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
+                        return (v2 >= v);
+                    }
+                    catch
+                    {
+                        Warn("Invalid argument to function 'If ScriptExtenderNewerThan'");
+                        return false;
+                    }
+                case "GraphicsExtenderPresent":
+                    if (line.Length > 2) Warn("Unexpected arguments to 'If GraphicsExtenderPresent'");
+                    return File.Exists(Program.DataDir+@"obse\plugins\obge.dll");
+                case "GraphicsExtenderNewerThan":
+                    if (line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If GraphicsExtenderNewerThan'");
+                        return false;
+                    }
+                    if (line.Length > 3) Warn("Unexpected arguments to 'If GraphicsExtenderNewerThan'");
+                    if (!File.Exists(Program.DataDir + @"obse\plugins\obge.dll")) return false;
+                    try
+                    {
+                        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Program.DataDir + @"obse\plugins\obge.dll");
+                        if (fvi.FileVersion == null) return false;
+                        Version v = new Version(line[2]); ;
+                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
+                        return (v2 >= v);
+                    }
+                    catch
+                    {
+                        Warn("Invalid argument to function 'If GraphicsExtenderNewerThan'");
+                        return false;
+                    }
+                case "OblivionNewerThan":
+                    if (line.Length == 2)
+                    {
+                        Warn("Missing arguments to function 'If OblivionNewerThan'");
+                        return false;
+                    }
+                    if (line.Length > 3) Warn("Unexpected arguments to 'If OblivionNewerThan'");
+                    try
+                    {
+                        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Directory.GetParent(Program.DataDir)+"oblivion.exe");
+                        if (fvi.FileVersion == null) return false;
+                        Version v = new Version(line[2]); ;
+                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
+                        bool b = v2 >= v;
+                        return (v2 >= v);
+                    }
+                    catch
+                    {
+                        Warn("Invalid argument to function 'If OblivionNewerThan'");
+                        return false;
+                    }
+                case "Equal":
+                    if (line.Length < 4)
+                    {
+                        Warn("Missing arguments to function 'If Equal'");
+                        return false;
+                    }
+                    if (line.Length > 4) Warn("Unexpected arguments to 'If Equal'");
+                    return line[2] == line[3];
+                case "GreaterEqual":
+                case "GreaterThan":
+                    {
+                        if (line.Length < 4)
+                        {
+                            Warn("Missing arguments to function 'If Greater'");
+                            return false;
+                        }
+                        if (line.Length > 4) Warn("Unexpected arguments to 'If Greater'");
+                        if (!int.TryParse(line[2], out int arg1) || !int.TryParse(line[3], out int arg2))
+                        {
+                            Warn("Invalid argument upplied to function 'If Greater'");
+                            return false;
+                        }
+                        if (line[1] == "GreaterEqual") return arg1 >= arg2;
+                        else return arg1 > arg2;
+                    }
+                case "fGreaterEqual":
+                case "fGreaterThan":
+                    {
+                        if (line.Length < 4)
+                        {
+                            Warn("Missing arguments to function 'If fGreater'");
+                            return false;
+                        }
+                        if (line.Length > 4) Warn("Unexpected arguments to 'If fGreater'");
+                        if (!double.TryParse(line[2], out double arg1) || !double.TryParse(line[3], out double arg2))
+                        {
+                            Warn("Invalid argument upplied to function 'If fGreater'");
+                            return false;
+                        }
+                        if (line[1] == "fGreaterEqual") return arg1 >= arg2;
+                        else return arg1 > arg2;
+                    }
+                default:
+                    Warn("Unknown argument '" + line[1] + "' supplied to 'If'");
+                    return false;
+            }
+
             throw new NotImplementedException();
         }
 
