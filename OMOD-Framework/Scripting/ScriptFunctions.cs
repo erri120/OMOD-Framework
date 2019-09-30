@@ -120,12 +120,6 @@ namespace OblivionModManager.Scripting
             Plugins = pluginsPath;
         }
 
-        private bool ExistsIn(string path, string[] files)
-        {
-            if (files == null) return false;
-            return Array.Exists(files, new Predicate<string>(path.ToLower().Equals));
-        }
-
         private void CheckPathSafety(string path) { if (!Framework.IsSafeFileName(path)) throw new Exception("Illegal file name: " + path); }
 
         private void CheckPluginSafety(string path) { if (!Framework.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path); }
