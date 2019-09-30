@@ -17,7 +17,7 @@ namespace OMODFramework.Scripting
 
         public ScriptRunner(OMOD omod)
         {
-            this.OMOD = omod;
+            OMOD = omod;
             script = omod.GetScript();
             if ((byte)script[0] >= (byte)ScriptType.Count) type = ScriptType.obmmScript;
             else

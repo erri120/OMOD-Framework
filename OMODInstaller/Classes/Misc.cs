@@ -70,6 +70,7 @@ namespace OblivionModManager
     internal class ScriptReturnData
     {
         internal readonly List<string> IgnorePlugins = new List<string>();
+        internal readonly List<string> testList = new List<string>();
         internal readonly List<string> InstallPlugins = new List<string>();
         internal bool InstallAllPlugins = true;
         internal readonly List<string> IgnoreData = new List<string>();

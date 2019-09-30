@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Security;
-using System.Security.Permissions;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
@@ -12,7 +10,6 @@ namespace OblivionModManager.Scripting
 {
     internal class ScriptFunctions : IScriptFunctions
     {
-        private readonly PermissionSet permissions;
         private readonly ScriptReturnData srd;
         private readonly string DataFiles;
         private readonly string Plugins;
@@ -23,13 +20,52 @@ namespace OblivionModManager.Scripting
 
         internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath)
         {
-
+            this.srd = srd;
+            DataFiles = dataFilesPath;
+            Plugins = pluginsPath;
         }
 
-        internal ScriptFunctions(ScriptReturnData srd, string[] dataFiles, string[] plugins)
+        private bool ExistsIn(string path, string[] files)
         {
+            if (files == null) return false;
+            return Array.Exists(files, new Predicate<string>(path.ToLower().Equals));
         }
 
+        private void CheckPathSafety(string path) { if (!Framework.IsSafeFileName(path)) throw new Exception("Illegal file name: " + path); }
+
+        private void CheckPluginSafety(string path) { if (!Framework.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path); }
+
+        private void CheckDataSafety(string path) { if (!Framework.IsSafeFileName(path)) throw new ScriptingException("Illegal file name: " + path); }
+
+        private void CheckFolderSafety(string path) { if (!Framework.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path); }
+
+        private void CheckPluginFolderSafety(string path)
+        {
+            if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
+            if (!Framework.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
+        }
+
+        private void CheckDataFolderSafety(string path)
+        {
+            if (path.EndsWith("\\") || path.EndsWith("/")) path = path.Remove(path.Length - 1);
+            if (!Framework.IsSafeFolderName(path)) throw new ScriptingException("Illegal folder name: " + path);
+        }
+
+        private string[] GetFilePaths(string path, string pattern, bool recurse)
+        {
+            return Directory.GetFiles(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        }
+
+        private string[] GetDirectoryPaths(string path, string pattern, bool recurse)
+        {;
+            return Directory.GetDirectories(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        }
+
+        private string[] StripPathList(string[] paths, int baseLength)
+        {
+            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
+            return paths;
+        }
 
         public void CancelDataFileCopy(string file)
         {
