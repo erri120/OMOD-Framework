@@ -256,7 +256,7 @@ namespace OMODFramework.Scripting
         private static Func<string, string, string> InputString;
 
 
-        internal static ScriptReturnData Execute(Framework f, 
+        internal static ScriptReturnData Execute(Framework _f, 
             string InputScript, 
             string DataPath, 
             string PluginsPath,
@@ -270,6 +270,7 @@ namespace OMODFramework.Scripting
             Action<string, string> displayText,
             Func<string, string, string> inputString)
         {
+            f = _f;
             Warn = warn;
             DialogYesNo = dialogYesNo;
             ExistsFile = existsFile;
