@@ -1502,6 +1502,137 @@ namespace OMODFramework.Scripting
 
         private static void FunctionSetDeactivationWarning(string[] line) { }
 
+        private static void FunctionCopyDataFile(string[] line, bool Plugin)
+        {
+            string WarnMess;
+            if (Plugin) WarnMess = "function 'CopyPlugin'"; else WarnMess = "function 'CopyDataFile'";
+            if (line.Length < 3)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 3) Warn($"Unexpected arguments to {WarnMess}");
+            string upperfrom = line[1];
+            string upperto = line[2];
+            line[1] = line[1].ToLower();
+            line[2] = line[2].ToLower();
+            if (!Framework.IsSafeFileName(line[1]) || !Framework.IsSafeFileName(line[2]))
+            {
+                Warn($"Invalid argument to {WarnMess}");
+                return;
+            }
+            if (line[1] == line[2])
+            {
+                Warn($"Invalid argument to {WarnMess}\nYou cannot copy a file over itself");
+                return;
+            }
+            if (Plugin)
+            {
+                if (!File.Exists(Path.Combine(Plugins, line[1])))
+                {
+                    Warn($"Invalid argument to CopyPlugin\nFile '{upperfrom}' is not part of this plugin");
+                    return;
+                }
+                if (line[2].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                {
+                    Warn("Plugins cannot be copied to subdirectories of the data folder");
+                    return;
+                }
+                if (!(line[2].EndsWith(".esp") || line[2].EndsWith(".esm")))
+                {
+                    Warn("Copied plugins must have a .esp or .esm extension");
+                    return;
+                }
+            }
+            else
+            {
+                if (!File.Exists(Path.Combine(DataFiles, line[1])))
+                {
+                    Warn($"Invalid argument to CopyDataFile\nFile '{upperfrom}' is not part of this plugin");
+                    return;
+                }
+                if (line[2].EndsWith(".esp") || line[2].EndsWith(".esm"))
+                {
+                    Warn("Copied data files cannot have a .esp or .esm extension");
+                    return;
+                }
+            }
+
+            if (Plugin)
+            {
+                for (int i = 0; i < srd.CopyPlugins.Count; i++)
+                {
+                    if (srd.CopyPlugins[i].CopyTo == line[2]) srd.CopyPlugins.RemoveAt(i--);
+                }
+                srd.CopyPlugins.Add(new ScriptCopyDataFile(upperfrom, upperto));
+            }
+            else
+            {
+                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == line[2]) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(upperfrom, upperto));
+            }
+        }
+
+        private static void FunctionCopyDataFolder(string[] line)
+        {
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to CopyDataFolder");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to CopyDataFolder");
+            line[1] = MakeValidFolderPath(line[1].ToLower());
+            line[2] = MakeValidFolderPath(line[2].ToLower());
+            if (!Framework.IsSafeFolderName(line[1]) || !Framework.IsSafeFolderName(line[2]))
+            {
+                Warn("Invalid argument to CopyDataFolder");
+                return;
+            }
+            if (!Directory.Exists(Path.Combine(DataFiles, line[1])))
+            {
+                Warn($"Invalid argument to CopyDataFolder\nFolder '{line[1]}' is not part of this plugin");
+                return;
+            }
+            if (line[1] == line[2])
+            {
+                Warn("Invalid argument to CopyDataFolder\nYou cannot copy a folder over itself");
+                return;
+            }
+
+            if (line.Length >= 4)
+            {
+                switch (line[3])
+                {
+                    case "True":
+                        foreach (string folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
+                        {
+                            FunctionCopyDataFolder(new string[] { "", folder.Substring(DataFiles.Length), line[2] + folder.Substring(DataFiles.Length + line[1].Length), "True" });
+                        }
+                        break;
+                    case "False":
+                        break;
+                    default:
+                        Warn("Invalid argument to CopyDataFolder\nExpected True or False");
+                        return;
+                }
+            }
+
+            foreach (string s in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
+            {
+                string from = line[1] + Path.GetFileName(s);
+                string to = line[2] + Path.GetFileName(s);
+                string lto = to.ToLower();
+                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == lto) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(from, to));
+            }
+        }
+
         private static void FunctionSetEspVar(string[] line, bool GMST) { }
 
         #endregion
