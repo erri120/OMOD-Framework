@@ -24,6 +24,13 @@ namespace OMODFramework.Scripting
             }
         }
 
+        // bool showWarnings - show warn boxes
+        // Action<string> Warn - displays a warn box
+        public void ExecuteOBMMScript()
+        {
+
+        }
+
         /// <summary>
         /// Returns the name of the script type
         /// </summary>

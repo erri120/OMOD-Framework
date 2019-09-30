@@ -1,25 +1,30 @@
-﻿using OMODFramework;
-using System;
+﻿using System;
 using System.IO;
 
 namespace DLLTest
 {
-    class Program
+    class Hello
     {
-        enum MyEnum
+        internal Action<string> Message;
+
+        public Hello(Action<string> message)
         {
-            TEST,
-            NIGGA
+            Message = message;
         }
 
+        public void ShowMessage(string msg)
+        {
+            Message(msg);
+        }
+    }
+
+    class Program
+    {
         static void Main(string[] args)
         {
-            //Framework f = new Framework();
-            //OMOD omod = new OMOD(args[0],f);
-            //omod.GetDataFiles();
-
-            string a = Enum.GetName(typeof(MyEnum), MyEnum.TEST);
-            _ = a.Length;
+            Hello h = new Hello((str) => { Console.WriteLine(str); });
+            h.ShowMessage("nice");
+            bool b = true;
         }
     }
 }
