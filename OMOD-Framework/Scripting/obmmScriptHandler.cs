@@ -273,7 +273,7 @@ namespace OMODFramework.Scripting
             DialogSelect = dialogSelect;
             Message = message;
             DisplayImage = displayImage;
-            InputScript = inputString;
+            InputString = inputString;
 
             srd = new ScriptReturnData();
             if (InputScript == null) return srd;

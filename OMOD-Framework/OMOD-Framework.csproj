@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Classes\CompressionHandler.cs" />
     <Compile Include="Classes\Misc.cs" />
+    <Compile Include="Classes\OblivionINI.cs" />
     <Compile Include="Classes\OMOD.cs" />
     <Compile Include="Framework.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
