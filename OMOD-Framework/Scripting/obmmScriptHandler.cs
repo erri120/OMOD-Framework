@@ -984,6 +984,223 @@ namespace OMODFramework.Scripting
             }
         }
 
+        private static FlowControlStruct FunctionFor(string[] line, int LineNo)
+        {
+            FlowControlStruct NullLoop = new FlowControlStruct(2);
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to function 'For'");
+                return NullLoop;
+            }
+
+            if (line[1] == "Each") line[1] = line[2];
+            switch (line[1])
+            {
+                case "Count":
+                    {
+                        if (line.Length < 5)
+                        {
+                            Warn("Missing arguments to function 'For Count'");
+                            return NullLoop;
+                        }
+                        if (line.Length > 6) Warn("Unexpected extra arguments to 'For Count'");
+                        int step = 1;
+                        if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end) || (line.Length >= 6 && !int.TryParse(line[5], out step)))
+                        {
+                            Warn("Invalid argument to 'For Count'");
+                            return NullLoop;
+                        }
+                        List<string> steps = new List<string>();
+                        for (int i = start; i <= end; i += step)
+                        {
+                            steps.Add(i.ToString());
+                        }
+                        return new FlowControlStruct(steps.ToArray(), line[2], LineNo);
+                    }
+                case "DataFolder":
+                    {
+                        if (line.Length < 5)
+                        {
+                            Warn("Missing arguments to function 'For Each DataFolder'");
+                            return NullLoop;
+                        }
+                        if (line.Length > 7) Warn("Unexpected extra arguments to 'For Each DataFolder'");
+                        if (!Framework.IsSafeFolderName(line[4]))
+                        {
+                            Warn($"Invalid argument to 'For Each DataFolder'\nDirectory '{line[4]}' is not valid");
+                            return NullLoop;
+                        }
+                        if (!Directory.Exists(Path.Combine(DataFiles, line[4])))
+                        {
+                            Warn($"Invalid argument to 'For Each DataFolder'\nDirectory '{line[4]}' is not a part of this plugin");
+                            return NullLoop;
+                        }
+                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        if (line.Length > 5)
+                        {
+                            switch (line[5])
+                            {
+                                case "True":
+                                    option = SearchOption.AllDirectories;
+                                    break;
+                                case "False":
+                                    break;
+                                default:
+                                    Warn($"Invalid argument '{line[5]}' to 'For Each DataFolder'.\nExpected 'True' or 'False'");
+                                    break;
+                            }
+                        }
+                        try
+                        {
+                            string[] paths = Directory.GetDirectories(Path.Combine(DataFiles, line[4]), line.Length > 6 ? line[6] : "*", option);
+                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
+                            return new FlowControlStruct(paths, line[3], LineNo);
+                        }
+                        catch
+                        {
+                            Warn("Invalid argument to 'For Each DataFolder'");
+                            return NullLoop;
+                        }
+                    }
+                case "PluginFolder":
+                    {
+                        if (line.Length < 5)
+                        {
+                            Warn("Missing arguments to function 'For Each PluginFolder'");
+                            return NullLoop;
+                        }
+                        if (line.Length > 7) Warn("Unexpected extra arguments to 'For Each PluginFolder'");
+                        if (!Framework.IsSafeFolderName(line[4]))
+                        {
+                            Warn($"Invalid argument to 'For Each PluginFolder'\nDirectory '{line[4]}' is not valid");
+                            return NullLoop;
+                        }
+                        if (!Directory.Exists(Path.Combine(Plugins, line[4])))
+                        {
+                            Warn($"Invalid argument to 'For Each PluginFolder'\nDirectory '{line[4]}' is not a part of this plugin");
+                            return NullLoop;
+                        }
+                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        if (line.Length > 5)
+                        {
+                            switch (line[5])
+                            {
+                                case "True":
+                                    option = SearchOption.AllDirectories;
+                                    break;
+                                case "False":
+                                    break;
+                                default:
+                                    Warn($"Invalid argument '{line[5]}' to 'For Each PluginFolder'.\nExpected 'True' or 'False'");
+                                    break;
+                            }
+                        }
+                        try
+                        {
+                            string[] paths = Directory.GetDirectories(Path.Combine(Plugins, line[4]), line.Length > 6 ? line[6] : "*", option);
+                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
+                            return new FlowControlStruct(paths, line[3], LineNo);
+                        }
+                        catch
+                        {
+                            Warn("Invalid argument to 'For Each PluginFolder'");
+                            return NullLoop;
+                        }
+                    }
+                case "DataFile":
+                    {
+                        if (line.Length < 5)
+                        {
+                            Warn("Missing arguments to function 'For Each DataFile'");
+                            return NullLoop;
+                        }
+                        if (line.Length > 7) Warn("Unexpected extra arguments to 'For Each DataFile'");
+                        if (!Framework.IsSafeFolderName(line[4]))
+                        {
+                            Warn($"Invalid argument to 'For Each DataFile'\nDirectory '{line[4]}' is not valid");
+                            return NullLoop;
+                        }
+                        if (!Directory.Exists(Path.Combine(DataFiles, line[4])))
+                        {
+                            Warn($"Invalid argument to 'For Each DataFile'\nDirectory '{line[4]}' is not a part of this plugin");
+                            return NullLoop;
+                        }
+                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        if (line.Length > 5)
+                        {
+                            switch (line[5])
+                            {
+                                case "True":
+                                    option = SearchOption.AllDirectories;
+                                    break;
+                                case "False":
+                                    break;
+                                default:
+                                    Warn($"Invalid argument '{line[5]}' to 'For Each DataFile'.\nExpected 'True' or 'False'");
+                                    break;
+                            }
+                        }
+                        try
+                        {
+                            string[] paths = Directory.GetFiles(Path.Combine(DataFiles, line[4]), line.Length > 6 ? line[6] : "*", option);
+                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
+                            return new FlowControlStruct(paths, line[3], LineNo);
+                        }
+                        catch
+                        {
+                            Warn("Invalid argument to 'For Each DataFile'");
+                            return NullLoop;
+                        }
+                    }
+                case "Plugin":
+                    {
+                        if (line.Length < 5)
+                        {
+                            Warn("Missing arguments to function 'For Each Plugin'");
+                            return NullLoop;
+                        }
+                        if (line.Length > 7) Warn("Unexpected extra arguments to 'For Each Plugin'");
+                        if (!Framework.IsSafeFolderName(line[4]))
+                        {
+                            Warn($"Invalid argument to 'For Each Plugin'\nDirectory '{line[4]}' is not valid");
+                            return NullLoop;
+                        }
+                        if (!Directory.Exists(Path.Combine(Plugins, line[4])))
+                        {
+                            Warn($"Invalid argument to 'For Each Plugin'\nDirectory '{line[4]}' is not a part of this plugin");
+                            return NullLoop;
+                        }
+                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        if (line.Length > 5)
+                        {
+                            switch (line[5])
+                            {
+                                case "True":
+                                    option = SearchOption.AllDirectories;
+                                    break;
+                                case "False":
+                                    break;
+                                default:
+                                    Warn($"Invalid argument '{line[5]}' to 'For Each Plugin'.\nExpected 'True' or 'False'");
+                                    break;
+                            }
+                        }
+                        try
+                        {
+                            string[] paths = Directory.GetFiles(Path.Combine(Plugins, line[4]), line.Length > 6 ? line[6] : "*", option);
+                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
+                            return new FlowControlStruct(paths, line[3], LineNo);
+                        }
+                        catch
+                        {
+                            Warn("Invalid argument to 'For Each Plugin'");
+                            return NullLoop;
+                        }
+                    }
+            }
+            return NullLoop;
+        }
+
         #endregion
     }
 }
