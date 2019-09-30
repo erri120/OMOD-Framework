@@ -82,6 +82,12 @@ namespace OMODFramework.Scripting
         {
             srd = new ScriptReturnData();
 
+            OblivionModManager.Scripting.ScriptFunctions sf = new OblivionModManager.Scripting.ScriptFunctions(
+                srd, DataPath, PluginsPath,OMOD.GetFramework(), warn,
+                dialogYesNo, existsFile, getFileVersion, dialogSelect,
+                message, displayImage, displayText, inputString,
+                getActiveESPNames, getFileFromPath);
+
             switch (type)
             {
                 case ScriptType.obmmScript:
@@ -93,9 +99,11 @@ namespace OMODFramework.Scripting
                 case ScriptType.Python:
                     throw new NotImplementedException();
                 case ScriptType.cSharp:
-                    throw new NotImplementedException();
+                    DotNetScriptHandler.ExecuteCS(script, sf);
+                    break;
                 case ScriptType.vb:
-                    throw new NotImplementedException();
+                    DotNetScriptHandler.ExecuteVB(script, sf);
+                    break;
             }
         }
 
