@@ -25,6 +25,9 @@ namespace OMODFramework.Scripting
                 type = (ScriptType)script[0];
                 script = script.Substring(1);
             }
+
+            DataPath = omod.ExtractPlugins();
+            PluginsPath = omod.ExtractPlugins();
         }
 
         /// <summary>

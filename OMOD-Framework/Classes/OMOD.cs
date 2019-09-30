@@ -32,7 +32,7 @@ namespace OMODFramework
         internal string[] AllPlugins;
         internal DataFileInfo[] AllDataFiles;
         internal CompressionType CompType;
-        private byte FileVersion;
+        private readonly byte FileVersion;
 
         internal bool initConfig;
         internal string Version { get { return "" + MajorVersion + ((MinorVersion != -1) ? ("." + MinorVersion + ((BuildVersion != -1) ? ("." + BuildVersion) : "")) : ""); } }
