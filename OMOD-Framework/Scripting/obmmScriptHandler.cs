@@ -248,6 +248,13 @@ namespace OMODFramework.Scripting
         /// string: initial contents
         /// </summary>
         private static Action<string, string> DisplayText;
+        /// <summary>
+        /// Opens a text editor to input a string
+        /// string: title
+        /// string: inital contents
+        /// string: return value either the user input or null if operation got aborted
+        /// </summary>
+        private static Func<string, string, string> InputString;
 
 
         internal static ScriptReturnData Execute(Framework f, string InputScript, string DataPath, string PluginsPath,
@@ -255,7 +262,8 @@ namespace OMODFramework.Scripting
             Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
             Func<string[], string, bool, string[], string[], int[]> dialogSelect,
             Action<string, string> message,
-            Action<string> displayImage)
+            Action<string> displayImage,
+            Func<string, string, string> inputString)
         {
             ShowWarnings = showWarnings;
             Warn = warn;
@@ -265,6 +273,7 @@ namespace OMODFramework.Scripting
             DialogSelect = dialogSelect;
             Message = message;
             DisplayImage = displayImage;
+            InputScript = inputString;
 
             srd = new ScriptReturnData();
             if (InputScript == null) return srd;
@@ -2008,6 +2017,26 @@ namespace OMODFramework.Scripting
             }
             if (line.Length > 3) Warn("Unexpected extra arguments to StringLength");
             variables[line[1]] = line[2].Length.ToString();
+        }
+
+        private static void FunctionInputString(string[] line)
+        {
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to InputString");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to InputString");
+
+            string title = "";
+            string initial = "";
+
+            if (line.Length > 2) title = line[2];
+            if (line.Length > 3) initial = line[3];
+
+            string result = InputString(title, initial);
+            if (result == null) variables[line[1]] = "";
+            else variables[line[1]] = result;
         }
 
         private static int iSet(List<string> func)
