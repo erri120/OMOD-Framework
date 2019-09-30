@@ -237,13 +237,25 @@ namespace OMODFramework.Scripting
         /// string: input value the title (can be null if no title given)
         /// </summary>
         private static Action<string, string> Message;
+        /// <summary>
+        /// Displays an image
+        /// string: absolute path to the image
+        /// </summary>
+        private static Action<string> DisplayImage;
+        /// <summary>
+        /// Displays text
+        /// string: title
+        /// string: initial contents
+        /// </summary>
+        private static Action<string, string> DisplayText;
 
 
         internal static ScriptReturnData Execute(Framework f, string InputScript, string DataPath, string PluginsPath,
             bool showWarnings, Action<string> warn, Func<string, string, int> dialogYesNo,
             Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
             Func<string[], string, bool, string[], string[], int[]> dialogSelect,
-            Action<string, string> message)
+            Action<string, string> message,
+            Action<string> displayImage)
         {
             ShowWarnings = showWarnings;
             Warn = warn;
@@ -252,6 +264,7 @@ namespace OMODFramework.Scripting
             GetFileVersion = getFileVersion;
             DialogSelect = dialogSelect;
             Message = message;
+            DisplayImage = displayImage;
 
             srd = new ScriptReturnData();
             if (InputScript == null) return srd;
@@ -1813,6 +1826,37 @@ namespace OMODFramework.Scripting
                 }
                 fs.Position = offset;
                 fs.Write(data, 0, data.Length);
+            }
+        }
+
+        private static void FunctionDisplayFile(string[] line, bool Image)
+        {
+            string WarnMess;
+            if (Image) WarnMess = "function 'DisplayImage'"; else WarnMess = "function 'DisplayText'";
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to " + WarnMess);
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected extra arguments to " + WarnMess);
+            if (!Framework.IsSafeFileName(line[1]))
+            {
+                Warn("Illegal path supplied to " + WarnMess);
+                return;
+            }
+            if (!File.Exists(DataFiles + line[1]))
+            {
+                Warn($"Non-existant file '{line[1]}' supplied to " + WarnMess);
+                return;
+            }
+            if (Image)
+            {
+                DisplayImage(Path.Combine(DataFiles, line[1]));
+            }
+            else
+            {
+                string s = File.ReadAllText(Path.Combine(DataFiles + line[1]), System.Text.Encoding.Default);
+                DisplayText((line.Length > 2) ? line[2] : line[1], s);
             }
         }
 
