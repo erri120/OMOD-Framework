@@ -263,6 +263,7 @@ namespace OMODFramework.Scripting
             Func<string[], string, bool, string[], string[], int[]> dialogSelect,
             Action<string, string> message,
             Action<string> displayImage,
+            Action<string, string> displayText,
             Func<string, string, string> inputString)
         {
             ShowWarnings = showWarnings;
@@ -273,6 +274,7 @@ namespace OMODFramework.Scripting
             DialogSelect = dialogSelect;
             Message = message;
             DisplayImage = displayImage;
+            DisplayText = displayText;
             InputString = inputString;
 
             srd = new ScriptReturnData();
@@ -619,7 +621,6 @@ namespace OMODFramework.Scripting
                             srd.CancelInstall = true;
                             break;
                         case "Return":
-                            Break = true;
                             break;
                         case "UncheckESP":
                             FunctionUncheckESP(line);
