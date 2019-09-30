@@ -1633,6 +1633,62 @@ namespace OMODFramework.Scripting
             }
         }
 
+        private static void FunctionPatch(string[] line, bool Plugin)
+        {
+            string WarnMess;
+            if (Plugin) WarnMess = "function 'PatchPlugin'"; else WarnMess = "function 'PatchDataFile'";
+            if (line.Length < 3)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 4) Warn($"Unexpected arguments to {WarnMess}");
+            string lowerTo = line[2].ToLower();
+            if (!Framework.IsSafeFileName(line[1]) || !Framework.IsSafeFileName(line[2]))
+            {
+                Warn($"Invalid argument to {WarnMess}");
+                return;
+            }
+            string copypath;
+            if (Plugin)
+            {
+                copypath = Path.Combine(Plugins, line[1]);
+                if (!File.Exists(copypath))
+                {
+                    Warn($"Invalid argument to PatchPlugin\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (line[2].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                {
+                    Warn("Plugins cannot be copied to subdirectories of the data folder");
+                    return;
+                }
+                if (!(lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm")))
+                {
+                    Warn("Plugins must have a .esp or .esm extension");
+                    return;
+                }
+
+            }
+            else
+            {
+                copypath = Path.Combine(DataFiles, line[1]);
+                if (!File.Exists(copypath))
+                {
+                    Warn($"Invalid argument to PatchDataFile\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm"))
+                {
+                    Warn("Data files cannot have a .esp or .esm extension");
+                    return;
+                }
+            }
+            if (line.Length < 4 || line[3] != "True") return;
+            //TODO: check if this actually works
+            File.Move(copypath, Path.Combine(Framework.OutputDir, line[2]));
+        }
+
         private static void FunctionSetEspVar(string[] line, bool GMST) { }
 
         #endregion
