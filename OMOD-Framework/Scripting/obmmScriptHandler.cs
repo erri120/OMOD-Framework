@@ -56,7 +56,6 @@ namespace OMODFramework.Scripting
             }
         }
 
-        private static bool ShowWarnings;
         private static ScriptReturnData srd;
         private static Dictionary<string, string> variables;
 
@@ -257,16 +256,20 @@ namespace OMODFramework.Scripting
         private static Func<string, string, string> InputString;
 
 
-        internal static ScriptReturnData Execute(Framework f, string InputScript, string DataPath, string PluginsPath,
-            bool showWarnings, Action<string> warn, Func<string, string, int> dialogYesNo,
-            Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
+        internal static ScriptReturnData Execute(Framework f, 
+            string InputScript, 
+            string DataPath, 
+            string PluginsPath,
+            Action<string> warn, 
+            Func<string, string, int> dialogYesNo,
+            Func<string, bool> existsFile, 
+            Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
             Func<string[], string, bool, string[], string[], int[]> dialogSelect,
             Action<string, string> message,
             Action<string> displayImage,
             Action<string, string> displayText,
             Func<string, string, string> inputString)
         {
-            ShowWarnings = showWarnings;
             Warn = warn;
             DialogYesNo = dialogYesNo;
             ExistsFile = existsFile;
