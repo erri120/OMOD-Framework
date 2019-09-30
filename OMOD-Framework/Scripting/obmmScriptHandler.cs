@@ -1496,6 +1496,13 @@ namespace OMODFramework.Scripting
             }
         }
 
+        private static void FunctionRegisterBSA(string[] line, bool Register) { }
+
+        private static void FunctionUncheckESP(string[] line) { }
+
+        private static void FunctionSetDeactivationWarning(string[] line) { }
+
+        private static void FunctionSetEspVar(string[] line, bool GMST) { }
 
         #endregion
     }
