@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.Zip;
+using OMODFramework.Classes;
 
 namespace OMODFramework
 {
@@ -230,7 +231,7 @@ namespace OMODFramework
             using(Stream FileList = ExtractWholeFile(fileList))
             using(Stream CompressedStream = ExtractWholeFile(compressedStream))
             {
-                //TODO: path = CompressionHandler.DecompressFiles(FileList, CompressedStream, CompType);
+                path = CompressionHandler.DecompressFiles(FileList, CompressedStream, CompType);
             }
             return path;
         }

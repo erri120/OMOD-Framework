@@ -18,8 +18,11 @@ namespace DLLTest
             f.SetPluginsListPath("");
             f.SetTempDirectory(@"M:\Projects\omod\testDLL\temp");
             OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", f);
+            Console.WriteLine(omod.ExtractDataFiles());
+            Console.WriteLine(omod.ExtractPlugins());
             ScriptRunner sr = new ScriptRunner(omod);
             sr.ExecuteScript(null, null, null, null, null, null, null, null, null, null, null);
+            Console.WriteLine("hi");
         }
     }
 }
