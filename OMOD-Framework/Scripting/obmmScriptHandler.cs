@@ -66,6 +66,13 @@ namespace OMODFramework.Scripting
 
         private static Framework f;
 
+        private static string MakeValidFolderPath(string s)
+        {
+            s = s.Replace('/', '\\');
+            if (!s.EndsWith("\\")) s += "\\";
+            return s;
+        }
+
         private static string[] SplitLine(string s)
         {
             List<string> temp = new List<string>();
@@ -1382,6 +1389,113 @@ namespace OMODFramework.Scripting
             cd.Partial = Regex;
             if (Conflicts) srd.ConflictsWith.Add(cd); else srd.DependsOn.Add(cd);
         }
+
+        private static void FunctionModifyInstall(string[] line, bool plugins, bool Install)
+        {
+            string WarnMess;
+            if (plugins) { if (Install) WarnMess = "function 'InstallPlugin'"; else WarnMess = "function 'DontInstallPlugin'"; }
+            else { if (Install) WarnMess = "function 'InstallDataFile'"; else WarnMess = "function 'DontInstallDataFile'"; }
+            if (line.Length == 1)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 2) Warn($"Unexpected arguments after {WarnMess}");
+            if (plugins)
+            {
+                if (!File.Exists(Path.Combine(Plugins, line[1])))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (line[1].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                {
+                    Warn($"Invalid argument to {WarnMess}\nThis function cannot be used on plugins stored in subdirectories");
+                    return;
+                }
+                if (Install)
+                {
+                    Framework.strArrayRemove(srd.IgnorePlugins, line[1]);
+                    if (!Framework.strArrayContains(srd.InstallPlugins, line[1])) srd.InstallPlugins.Add(line[1]);
+                }
+                else
+                {
+                    Framework.strArrayRemove(srd.InstallPlugins, line[1]);
+                    if (!Framework.strArrayContains(srd.IgnorePlugins, line[1])) srd.IgnorePlugins.Add(line[1]);
+                }
+            }
+            else
+            {
+                if (!File.Exists(Path.Combine(DataFiles + line[1])))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if (Install)
+                {
+                    Framework.strArrayRemove(srd.IgnoreData, line[1]);
+                    if (!Framework.strArrayContains(srd.InstallData, line[1])) srd.InstallData.Add(line[1]);
+                }
+                else
+                {
+                    Framework.strArrayRemove(srd.InstallData, line[1]);
+                    if (!Framework.strArrayContains(srd.IgnoreData, line[1])) srd.IgnoreData.Add(line[1]);
+                }
+            }
+        }
+
+        private static void FunctionModifyInstallFolder(string[] line, bool Install)
+        {
+            string WarnMess;
+            if (Install) WarnMess = "function 'InstallDataFolder'"; else WarnMess = "function 'DontInstallDataFolder'";
+            if (line.Length == 1)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 3) Warn($"Unexpected arguments to {WarnMess}");
+            line[1] = MakeValidFolderPath(line[1]);
+
+            if (!Directory.Exists(Path.Combine(DataFiles, line[1])))
+            {
+                Warn($"Invalid argument to {WarnMess}\nFolder '{line[1]} ' is not part of this plugin");
+                return;
+            }
+
+            if (line.Length >= 3)
+            {
+                switch (line[2])
+                {
+                    case "True":
+                        foreach (string folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
+                        {
+                            FunctionModifyInstallFolder(new string[] { "", folder.Substring(DataFiles.Length), "True" }, Install);
+                        }
+                        break;
+                    case "False":
+                        break;
+                    default:
+                        Warn($"Invalid argument to {WarnMess}\nExpected True or False");
+                        return;
+                }
+            }
+
+            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
+            {
+                string file = line[1] + Path.GetFileName(path);
+                if (Install)
+                {
+                    Framework.strArrayRemove(srd.IgnoreData, file);
+                    if (!Framework.strArrayContains(srd.InstallData, file)) srd.InstallData.Add(file);
+                }
+                else
+                {
+                    Framework.strArrayRemove(srd.InstallData, file);
+                    if (!Framework.strArrayContains(srd.IgnoreData, file)) srd.IgnoreData.Add(file);
+                }
+            }
+        }
+
 
         #endregion
     }
