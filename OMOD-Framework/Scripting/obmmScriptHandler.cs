@@ -1728,6 +1728,94 @@ namespace OMODFramework.Scripting
 
         private static void FunctionSetEspVar(string[] line, bool GMST) { }
 
+        private static void FunctionSetEspData(string[] line, Type type)
+        {
+            string WarnMess = null;
+            if (type == typeof(byte)) WarnMess = "function 'SetPluginByte'";
+            else if (type == typeof(short)) WarnMess = "function 'SetPluginShort'";
+            else if (type == typeof(int)) WarnMess = "function 'SetPluginInt'";
+            else if (type == typeof(long)) WarnMess = "function 'SetPluginLong'";
+            else if (type == typeof(float)) WarnMess = "function 'SetPluginFloat'";
+            if (line.Length < 4)
+            {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if (line.Length > 4) Warn($"Unexpected extra arguments to {WarnMess}");
+            if (!Framework.IsSafeFileName(line[1]))
+            {
+                Warn($"Illegal plugin name supplied to {WarnMess}");
+                return;
+            }
+            if (!File.Exists(Path.Combine(Plugins, line[1])))
+            {
+                Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
+                return;
+            }
+            byte[] data = null;
+            if (!long.TryParse(line[2], out long offset) || offset < 0)
+            {
+                Warn($"Invalid argument to {WarnMess}\nOffset '{line[1]}' is not valid");
+                return;
+            }
+            if (type == typeof(byte))
+            {
+                if (!byte.TryParse(line[3], out byte value))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
+                    return;
+                }
+                data = BitConverter.GetBytes(value);
+            }
+            if (type == typeof(short))
+            {
+                if (!short.TryParse(line[3], out short value))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
+                    return;
+                }
+                data = BitConverter.GetBytes(value);
+            }
+            if (type == typeof(int))
+            {
+                if (!int.TryParse(line[3], out int value))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
+                    return;
+                }
+                data = BitConverter.GetBytes(value);
+            }
+            if (type == typeof(long))
+            {
+                if (!long.TryParse(line[3], out long value))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
+                    return;
+                }
+                data = BitConverter.GetBytes(value);
+            }
+            if (type == typeof(float))
+            {
+                if (!float.TryParse(line[3], out float value))
+                {
+                    Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
+                    return;
+                }
+                data = BitConverter.GetBytes(value);
+            }
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, line[1])))
+            {
+                if (offset + data.Length >= fs.Length)
+                {
+                    Warn($"Invalid argument to {WarnMess}\nOffset '{line[3]}' is out of range");
+                    fs.Close();
+                    return;
+                }
+                fs.Position = offset;
+                fs.Write(data, 0, data.Length);
+            }
+        }
+
         #endregion
     }
 }
