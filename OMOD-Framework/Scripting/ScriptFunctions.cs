@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using OMODFramework;
+using OMODFramework.Classes;
 
 namespace OblivionModManager.Scripting
 {
@@ -18,8 +19,102 @@ namespace OblivionModManager.Scripting
         private readonly string[] dataFolderList;
         private readonly string[] pluginFolderList;
 
-        internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath)
+        private static Framework f;
+
+        /// <summary>
+        /// Creates a popup warn message
+        /// string: message
+        /// </summary>
+        private static Action<string> Warn;
+        /// <summary>
+        /// Creates a yes-no dialog
+        /// string: message
+        /// string: title
+        /// int: return value (0: no, 1: yes)
+        /// </summary>
+        private static Func<string, string, int> IDialogYesNo;
+        /// <summary>
+        /// Checks if a file exists in the main oblivion folder
+        /// string: relative path of the file
+        /// bool: return value (false: doesnt exist, true: exists)
+        /// </summary>
+        private static Func<string, bool> ExistsFile;
+        /// <summary>
+        /// Returns the version of a file
+        /// string: relative path of the file
+        /// FileVersionInfo: return value
+        /// </summary>
+        private static Func<string, System.Diagnostics.FileVersionInfo> GetFileVersion;
+        /// <summary>
+        /// Creates a select dialog
+        /// string[]: list of all items to be displayed
+        /// string: the title of the dialog
+        /// bool: multi or single select
+        /// string[]: paths to preview pictures
+        /// string[]: descriptions of the items
+        /// int[]: return value | the index of the selected items
+        /// </summary>
+        private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
+        /// <summary>
+        /// Displays a message in a window
+        /// string: input value the text
+        /// string: input value the title (can be null if no title given)
+        /// </summary>
+        private static Action<string, string> IMessage;
+        /// <summary>
+        /// Displays an image
+        /// string: absolute path to the image
+        /// </summary>
+        private static Action<string> IDisplayImage;
+        /// <summary>
+        /// Displays text
+        /// string: title
+        /// string: initial contents
+        /// </summary>
+        private static Action<string, string> IDisplayText;
+        /// <summary>
+        /// Opens a text editor to input a string
+        /// string: title
+        /// string: inital contents
+        /// string: return value either the user input or null if operation got aborted
+        /// </summary>
+        private static Func<string, string, string> IInputString;
+        /// <summary>
+        /// Returns all active esp names
+        /// </summary>
+        private static Func<string[]> IGetActiveESPNames;
+        /// <summary>
+        /// Returns the absolute path of a file
+        /// </summary>
+        private static Func<string, string> IGetFile;
+
+        internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath,
+            Framework _f,
+            Action<string> warn,
+            Func<string, string, int> dialogYesNo,
+            Func<string, bool> existsFile,
+            Func<string, FileVersionInfo> getFileVersion,
+            Func<string[], string, bool, string[], string[], int[]> dialogSelect,
+            Action<string, string> message,
+            Action<string> displayImage,
+            Action<string, string> displayText,
+            Func<string, string, string> inputString,
+            Func<string[]> getActiveESPNames,
+            Func<string, string> getFileFromPath)
         {
+            f = _f;
+            Warn = warn;
+            IDialogYesNo = dialogYesNo;
+            ExistsFile = existsFile;
+            GetFileVersion = getFileVersion;
+            DialogSelect = dialogSelect;
+            IMessage = message;
+            IDisplayImage = displayImage;
+            IDisplayText = displayText;
+            IInputString = inputString;
+            IGetActiveESPNames = getActiveESPNames;
+            IGetFile = getFileFromPath;
+
             this.srd = srd;
             DataFiles = dataFilesPath;
             Plugins = pluginsPath;
@@ -67,429 +162,458 @@ namespace OblivionModManager.Scripting
             return paths;
         }
 
+        #region Functions
+
+        
         public void CancelDataFileCopy(string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            string tempFile = Path.Combine(DataFiles, file);
+            string toL = file.ToLower();
+            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+            }
+            File.Delete(tempFile);
         }
-
         public void CancelDataFolderCopy(string folder)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(folder);
+            string toL = folder.ToLower();
+            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo.StartsWith(toL))
+                {
+                    File.Delete(Path.Combine(DataFiles, srd.CopyDataFiles[i].CopyTo));
+                    srd.CopyDataFiles.RemoveAt(i--);
+                }
+            }
         }
-
-        public void ConflictsWith(string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ConflictsWith(string filename, string comment, ConflictLevel level)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void ConflictsWith(string filename) { ConflictsWith(filename, 0, 0, 0, 0, null, ConflictLevel.MajorConflict, false); }
+        public void ConslictsWith(string filename, string comment) { ConflictsWith(filename, 0, 0, 0, 0, comment, ConflictLevel.MajorConflict, false); }
+        public void ConflictsWith(string filename, string comment, ConflictLevel level) { ConflictsWith(filename, 0, 0, 0, 0, comment, level, false); }
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, null, ConflictLevel.MajorConflict, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, ConflictLevel.MajorConflict, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level)
         {
-            throw new NotImplementedException();
+            ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, level, false);
         }
-
         public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex)
         {
-            throw new NotImplementedException();
+            ConflictData cd = new ConflictData
+            {
+                File = name,
+                Comment = comment,
+                level = level,
+                MinMajorVersion = minMajorVersion,
+                MinMinorVersion = minMinorVersion,
+                MaxMajorVersion = maxMajorVersion,
+                MaxMinorVersion = maxMinorVersion,
+                Partial = regex
+            };
+            srd.ConflictsWith.Add(cd);
         }
-
-        public void ConslictsWith(string filename, string comment)
-        {
-            throw new NotImplementedException();
-        }
-
         public void CopyDataFile(string from, string to)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Esm and Esp files are illegal");
+            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            {
+                if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+            }
+            srd.CopyDataFiles.Add(new ScriptCopyDataFile(from, to));
         }
-
         public void CopyDataFolder(string from, string to, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(from);
+            CheckFolderSafety(to);
+            from = Path.GetFullPath(Path.Combine(DataFiles, from));
+            foreach (string path in Directory.GetFiles(from, "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            {
+                string fileFrom = Path.GetFullPath(path).Substring(DataFiles.Length);
+                string fileTo = Path.GetFullPath(path).Substring(from.Length);
+                if (fileTo.StartsWith("" + Path.DirectorySeparatorChar) || fileTo.StartsWith("" + Path.AltDirectorySeparatorChar)) fileTo = fileTo.Substring(1);
+                fileTo = Path.Combine(to, fileTo);
+                string toL = fileTo.ToLower();
+                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(fileFrom, fileTo));
+            }
         }
-
         public void CopyPlugin(string from, string to)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Copied plugins must have a .esp or .esm file extension");
+            if (to.Contains("\\") || to.Contains("/")) throw new Exception("Cannot copy a plugin to a subdirectory of the data folder");
+            for (int i = 0; i < srd.CopyPlugins.Count; i++)
+            {
+                if (srd.CopyPlugins[i].CopyTo == toL) srd.CopyPlugins.RemoveAt(i--);
+            }
+            srd.CopyPlugins.Add(new ScriptCopyDataFile(from, to));
         }
-
-        public System.Windows.Forms.Form CreateCustomDialog()
-        {
-            throw new NotImplementedException();
-        }
-
+        public Form CreateCustomDialog() { return new Form(); }
         public bool DataFileExists(string path)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(path);
+            return ExistsFile(Path.Combine("data", path));
         }
-
-        public void DependsOn(string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DependsOn(string filename, string comment)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void DependsOn(string filename) { DependsOn(filename, 0, 0, 0, 0, null, false); }
+        public void DependsOn(string filename, string comment) { DependsOn(filename, 0, 0, 0, 0, comment, false); }
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion)
         {
-            throw new NotImplementedException();
+            DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, null, false);
         }
-
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment)
         {
-            throw new NotImplementedException();
+            DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, false);
         }
-
         public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex)
         {
-            throw new NotImplementedException();
+            ConflictData cd = new ConflictData();
+            cd.File = name;
+            cd.Comment = comment;
+            cd.MinMajorVersion = minMajorVersion;
+            cd.MinMinorVersion = minMinorVersion;
+            cd.MaxMajorVersion = maxMajorVersion;
+            cd.MaxMinorVersion = maxMinorVersion;
+            cd.Partial = regex;
+            srd.DependsOn.Add(cd);
         }
-
-        public bool DialogYesNo(string msg)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool DialogYesNo(string msg, string title)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DisplayImage(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DisplayImage(string path, string title)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DisplayText(string path)
-        {
-            throw new NotImplementedException();
-        }
-
+        public bool DialogYesNo(string msg) { return DialogYesNo(msg, "Question"); }
+        public bool DialogYesNo(string msg, string title) { return IDialogYesNo(msg, title) == 1; }
+        public void DisplayImage(string path) { DisplayImage(path, null); }
+        public void DisplayImage(string path, string title) { IDisplayImage(Path.Combine(DataFiles, path)); }
+        public void DisplayText(string path) { DisplayText(path, null); }
         public void DisplayText(string path, string title)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(path);
+            string s = File.ReadAllText(Path.Combine(DataFiles, path), System.Text.Encoding.Default);
+            IDisplayText((title != null) ? title : path, s);
         }
-
-        public void DontInstallAnyDataFiles()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DontInstallAnyPlugins()
-        {
-            throw new NotImplementedException();
-        }
-
+        public void DontInstallAnyDataFiles() { srd.InstallAllData = false; }
+        public void DontInstallAnyPlugins() { srd.InstallAllPlugins = false; }
         public void DontInstallDataFile(string name)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(name);
+            Framework.strArrayRemove(srd.InstallData, name);
+            if (!Framework.strArrayContains(srd.IgnoreData, name)) srd.IgnoreData.Add(name);
         }
-
         public void DontInstallDataFolder(string folder, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(folder);
+            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            {
+                string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                Framework.strArrayRemove(srd.InstallData, file);
+                if (!Framework.strArrayContains(srd.IgnoreData, file)) srd.IgnoreData.Add(file);
+            }
         }
-
         public void DontInstallPlugin(string name)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(name);
+            Framework.strArrayRemove(srd.InstallPlugins, name);
+            if (!Framework.strArrayContains(srd.IgnorePlugins, name)) srd.IgnorePlugins.Add(name);
         }
-
-        public void EditINI(string section, string key, string value)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void EditINI(string section, string key, string value) { srd.INIEdits.Add(new INIEditInfo(section, key, value)); }
         public void EditShader(byte package, string name, string path)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(path);
+            srd.SDPEdits.Add(new SDPEditInfo(package, name, DataFiles + path));
         }
-
         public void EditXMLLine(string file, int line, string value)
         {
-            throw new NotImplementedException();
-        }
+            CheckDataSafety(file);
+            string ext = Path.GetExtension(file).ToLower();
+            if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
+            string[] lines = File.ReadAllLines(Path.Combine(DataFiles + file));
+            if (line < 0 || line >= lines.Length) throw new Exception("Invalid line number");
+            lines[line] = value;
+            File.WriteAllLines(Path.Combine(DataFiles + file), lines);
 
+        }
         public void EditXMLReplace(string file, string find, string replace)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(file);
+            string ext = Path.GetExtension(file).ToLower();
+            if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
+            string text = File.ReadAllText(Path.Combine(DataFiles + file));
+            text = text.Replace(find, replace);
+            File.WriteAllText(Path.Combine(DataFiles + file), text);
         }
-
-        public void FatalError()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void FatalError() { srd.CancelInstall = true; }
+        public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel) { }
         public void GenerateNewDataFile(string file, byte[] data)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            string tempFile = Path.Combine(DataFiles, file);
+            if (!File.Exists(tempFile))
+            {
+                string toL = file.ToLower();
+                if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Data files can't be an esp or esm");
+                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                {
+                    if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
+                }
+                srd.CopyDataFiles.Add(new ScriptCopyDataFile(file, tempFile));
+            }
+            if (!Directory.Exists(Path.GetDirectoryName(tempFile))) Directory.CreateDirectory(Path.GetDirectoryName(tempFile));
+            File.WriteAllBytes(tempFile, data);
         }
-
-        public string[] GetActiveEspNames()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string[] GetActiveOmodNames()
-        {
-            throw new NotImplementedException();
-        }
-
+        public string[] GetActiveEspNames() { return IGetActiveESPNames(); }
+        public string[] GetActiveOmodNames() { return new string[] { "" }; }
         public byte[] GetDataFileFromBSA(string file)
         {
-            throw new NotImplementedException();
+            //CheckPathSafety(file);
+            //return BSAArchive.GetFileFromBSA(file);
+            //throw new NotImplementedException();
+            return new byte[] { 0 };
         }
-
         public byte[] GetDataFileFromBSA(string bsa, string file)
         {
-            throw new NotImplementedException();
+            //CheckPathSafety(file);
+            //return BSAArchive.GetFileFromBSA(bsa, file);
+            //throw new NotImplementedException();
+            return new byte[] { 0 };
         }
-
         public string[] GetDataFiles(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(path);
+            return StripPathList(GetFilePaths(Path.Combine(DataFiles, path), pattern, recurse), DataFiles.Length);
         }
-
         public string[] GetDataFolders(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(path);
+            return StripPathList(GetDirectoryPaths(Path.Combine(DataFiles, path), pattern, recurse), DataFiles.Length);
         }
-
-        public bool GetDisplayWarnings()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string[] GetExistingEspNames()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Version GetOBGEVersion()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Version GetOblivionVersion()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Version GetOBMMVersion()
-        {
-            throw new NotImplementedException();
-        }
-
+        public bool GetDisplayWarnings() { return false; }
+        public string[] GetExistingEspNames() { return IGetActiveESPNames(); }
+        public Version GetOBGEVersion() { return new Version(GetFileVersion(Path.Combine("data","obse","plugins","obge.dll")).FileVersion); }
+        public Version GetOblivionVersion() { return new Version(GetFileVersion("oblivion.exe").FileVersion); }
+        public Version GetOBMMVersion() { return new Version(f.OBMMFakeMajorVersion, f.OBMMFakeMinorVersion, f.OBMMFakeBuildNumber, 0); }
         public Version GetOBSEPluginVersion(string plugin)
         {
-            throw new NotImplementedException();
+            plugin = Path.ChangeExtension(Path.Combine("data", "obse", "plugins", plugin), ".dll");
+            CheckPathSafety(plugin);
+            if (!File.Exists(plugin)) return null;
+            else return new Version(GetFileVersion(plugin).FileVersion);
         }
-
-        public Version GetOBSEVersion()
-        {
-            throw new NotImplementedException();
-        }
-
+        public Version GetOBSEVersion() { return new Version(GetFileVersion("obse_loader.exe").FileVersion); }
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckPluginFolderSafety(path);
+            return StripPathList(GetDirectoryPaths(Path.Combine(Plugins, path), pattern, recurse), Plugins.Length);
         }
-
         public string[] GetPlugins(string path, string pattern, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckPluginFolderSafety(path);
+            return StripPathList(GetFilePaths(Path.Combine(Plugins, path), pattern, recurse), Plugins.Length);
         }
-
-        public string InputString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string InputString(string title)
-        {
-            throw new NotImplementedException();
-        }
-
+        public string InputString() { return InputString("", ""); }
+        public string InputString(string title) { return InputString(title, ""); }
         public string InputString(string title, string initial)
         {
-            throw new NotImplementedException();
+            string result = IInputString(title, initial);
+            return result;
         }
-
-        public void InstallAllDataFiles()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void InstallAllPlugins()
-        {
-            throw new NotImplementedException();
-        }
-
+        public void InstallAllDataFiles() { srd.InstallAllData = true; }
+        public void InstallAllPlugins() { srd.InstallAllPlugins = true; }
         public void InstallDataFile(string name)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(name);
+            Framework.strArrayRemove(srd.IgnoreData, name);
+            if (!Framework.strArrayContains(srd.InstallData, name)) srd.InstallData.Add(name);
         }
-
         public void InstallDataFolder(string folder, bool recurse)
         {
-            throw new NotImplementedException();
+            CheckDataFolderSafety(folder);
+            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            {
+                string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                Framework.strArrayRemove(srd.IgnoreData, file);
+                if (!Framework.strArrayContains(srd.InstallData, file)) srd.InstallData.Add(file);
+            }
         }
-
         public void InstallPlugin(string name)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(name);
+            Framework.strArrayRemove(srd.IgnorePlugins, name);
+            if (!Framework.strArrayContains(srd.InstallPlugins, name)) srd.InstallPlugins.Add(name);
         }
-
-        public bool IsSimulation()
+        public bool IsSimulation() { return false; }
+        private enum LoadOrderTypes { AFTER, BEFORE, EARLY };
+        public void LoadAfter(string plugin1, string plugin2) { CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER); }
+        public void LoadBefore(string plugin1, string plugin2) { CreateLoadOrderAdvise(plugin1, plugin2, LoadOrderTypes.AFTER); }
+        public void LoadEarly(string plugin) { CreateLoadOrderAdvise(plugin); }
+        private void CreateLoadOrderAdvise(string plugin) { CreateLoadOrderAdvise(plugin, null, LoadOrderTypes.EARLY); }
+        private void CreateLoadOrderAdvise(string plugin1, string plugin2, LoadOrderTypes type)
         {
-            throw new NotImplementedException();
+            string adviseFile = Path.Combine(Framework.OutputDir, "loadorder_advise.txt");
+            List<string> contents = new List<string>();
+            if (File.Exists(adviseFile))
+            {
+                using (StreamReader sr = new StreamReader(File.OpenRead(adviseFile), System.Text.Encoding.Default))
+                {
+                    while (sr.Peek() != -1)
+                    {
+                        contents.Add(sr.ReadLine());
+                    }
+                }
+                File.Delete(adviseFile);
+            }
+            switch (type)
+            {
+                case LoadOrderTypes.AFTER:
+                    contents.Add($"Place {plugin1} after {plugin2}");
+                    break;
+                case LoadOrderTypes.BEFORE:
+                    contents.Add($"Place {plugin1} before {plugin2}");
+                    break;
+                case LoadOrderTypes.EARLY:
+                    contents.Add($"Place {plugin1} early in your load order");
+                    break;
+            }
+            using (StreamWriter sw = new StreamWriter(File.Create(adviseFile), System.Text.Encoding.Default))
+            {
+                foreach (string s in contents)
+                {
+                    sw.WriteLine(s);
+                }
+            }
         }
-
-        public void LoadAfter(string plugin1, string plugin2)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LoadBefore(string plugin1, string plugin2)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LoadEarly(string plugin)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Message(string msg)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Message(string msg, string title)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void Message(string msg) { IMessage(msg, null); }
+        public void Message(string msg, string title) { IMessage(msg, title); }
         public void PatchDataFile(string from, string to, bool create)
         {
-            throw new NotImplementedException();
-        }
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (toL.EndsWith(".esp") || toL.EndsWith(".esm")) throw new Exception("Cant be esp or esm files");
+            to = IGetFile(to);
 
+            //if (File.Exists(to))
+            //{
+            //    File.Delete(to);
+            //}
+            if (!File.Exists(to) && !create) return;
+            File.Copy(Path.Combine(DataFiles, from), Path.Combine(Framework.OutputDir, to));
+        }
         public void PatchPlugin(string from, string to, bool create)
         {
-            throw new NotImplementedException();
-        }
+            CheckDataSafety(from);
+            CheckPathSafety(to);
+            string toL = to.ToLower();
+            if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Must be esp or esm files");
+            to = IGetFile(to);
 
+            //if (File.Exists(to))
+            //{
+            //File.Delete(to);
+            //}
+            //else if (!create) return;
+            if (!File.Exists(to) && !create) return;
+            File.Copy(Path.Combine(Plugins, from), Path.Combine(Framework.OutputDir, to));
+        }
         public byte[] ReadDataFile(string file)
         {
-            throw new NotImplementedException();
+            CheckDataSafety(file);
+            return File.ReadAllBytes(Path.Combine(DataFiles, file));
         }
-
         public byte[] ReadExistingDataFile(string file)
         {
-            throw new NotImplementedException();
+            CheckPathSafety(file);
+            return File.ReadAllBytes(IGetFile(file));
         }
-
-        public string ReadINI(string section, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ReadRendererInfo(string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterBSA(string path)
-        {
-            throw new NotImplementedException();
-        }
-
+        public string ReadINI(string section, string value) { return OblivionINI.GetINIValue(section, value); }
+        public string ReadRendererInfo(string value) { return ""; }
+        public void RegisterBSA(string path) { }
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)
         {
-            throw new NotImplementedException();
+            if (previews != null)
+            {
+                for (int i = 0; i < previews.Length; i++)
+                {
+                    if (previews[i] != null)
+                    {
+                        CheckDataSafety(previews[i]);
+                        previews[i] = DataFiles + previews[i];
+                    }
+                }
+            }
+            int[] r = DialogSelect(items, title, many, previews, descs);
+            string[] result = new string[r.Length];
+            for (int i = 0; i < r.Length; i++){
+                result[i] = items[r[i]];
+            }
+            return result;
         }
-
-        public void SetDeactivationWarning(string plugin, DeactiveStatus warning)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetGlobal(string file, string edid, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetGMST(string file, string edid, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetNewLoadOrder(string[] plugins)
-        {
-            throw new NotImplementedException();
-        }
-
+        public void SetDeactivationWarning(string plugin, DeactiveStatus warning) { }
+        public void SetGlobal(string file, string edid, string value) { }
+        public void SetGMST(string file, string edid, string value) { }
+        public void SetNewLoadOrder(string[] plugins) { }
         public void SetPluginByte(string file, long offset, byte value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            {
+                fs.Position = offset;
+                fs.WriteByte(value);
+            }
         }
-
         public void SetPluginFloat(string file, long offset, float value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 2);
+            }
         }
-
         public void SetPluginInt(string file, long offset, int value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 4);
+            }
         }
-
         public void SetPluginLong(string file, long offset, long value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 8);
+            }
         }
-
         public void SetPluginShort(string file, long offset, short value)
         {
-            throw new NotImplementedException();
+            CheckPluginSafety(file);
+            byte[] data = BitConverter.GetBytes(value);
+            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            {
+                fs.Position = offset;
+                fs.Write(data, 0, 4);
+            }
         }
+        public void UncheckEsp(string plugin) { }
+        public void UnregisterBSA(string path) { }
 
-        public void UncheckEsp(string plugin)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnregisterBSA(string path)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

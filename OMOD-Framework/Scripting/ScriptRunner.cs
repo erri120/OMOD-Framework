@@ -60,6 +60,14 @@ namespace OMODFramework.Scripting
         /// Opens a text editor for string input (inputs: string - title, string - initial contents | output:
         /// string - either the user input or null if aborted)
         /// </param>
+        /// <param name="getActiveESPNames">
+        /// Returns all active esp names !without extension!
+        /// (output: string[] - list of all esp names)
+        /// </param>
+        /// <param name="getFileFromPath">
+        /// Returns the absolute path of a file
+        /// (input: path to the file relative of the data folder | output: the absolute path of the file)
+        /// </param>
         public void ExecuteScript(Action<string> warn,
             Func<string, string, int> dialogYesNo,
             Func<string, bool> existsFile,
@@ -68,7 +76,9 @@ namespace OMODFramework.Scripting
             Action<string, string> message,
             Action<string> displayImage,
             Action<string, string> displayText,
-            Func<string, string, string> inputString)
+            Func<string, string, string> inputString,
+            Func<string[]> getActiveESPNames,
+            Func<string, string> getFileFromPath)
         {
             srd = new ScriptReturnData();
 
