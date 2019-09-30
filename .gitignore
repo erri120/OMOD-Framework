@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# relics of a lost age
+DLLTest/*
+OMODExtractor/*
+OMODExtractorDLL/*
+OMODInstaller/*
+
 # User-specific files
 *.rsuser
 *.suo
