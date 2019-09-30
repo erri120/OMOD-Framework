@@ -183,6 +183,7 @@ namespace OMODFramework
         #endregion
 
         #region OBMM-OMOD Functions
+        internal Framework GetFramework() { return framework; }
         internal string GetScript()
         {
             using (Stream Script = ExtractWholeFile("script"))
