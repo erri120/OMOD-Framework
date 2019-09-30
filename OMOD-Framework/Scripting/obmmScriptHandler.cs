@@ -2069,6 +2069,67 @@ namespace OMODFramework.Scripting
             catch (Exception e) { variables[line[1]] = e.Message; }
         }
 
+        private static void FunctionEditXMLLine(string[] line)
+        {
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function 'EditXMLLine'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function 'EditXMLLine'");
+            line[1] = line[1].ToLower();
+            if (!Framework.IsSafeFileName(line[1]) || !File.Exists(Path.Combine(DataFiles, line[1])))
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            string ext = Path.GetExtension(line[1]);
+            if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            if (!int.TryParse(line[2], out int index) || index < 1)
+            {
+                Warn("Invalid line number supplied to function 'EditXMLLine'");
+                return;
+            }
+            index -= 1;
+            string[] lines = File.ReadAllLines(Path.Combine(DataFiles, line[1]));
+            if (lines.Length <= index)
+            {
+                Warn("Invalid line number supplied to function 'EditXMLLine'");
+                return;
+            }
+            lines[index] = line[3];
+            File.WriteAllLines(Path.Combine(DataFiles, line[1]), lines);
+        }
+
+        private static void FunctionEditXMLReplace(string[] line)
+        {
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function 'EditXMLReplace'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function 'EditXMLReplace'");
+            line[1] = line[1].ToLower();
+            if (!Framework.IsSafeFileName(line[1]) || !File.Exists(Path.Combine(DataFiles, line[1])))
+            {
+                Warn("Invalid filename supplied to function 'EditXMLReplace'");
+                return;
+            }
+            string ext = Path.GetExtension(line[1]);
+            if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
+            {
+                Warn("Invalid filename supplied to function 'EditXMLLine'");
+                return;
+            }
+            string text = File.ReadAllText(Path.Combine(DataFiles, line[1]));
+            text = text.Replace(line[2], line[3]);
+            File.WriteAllText(Path.Combine(DataFiles, line[1]), text);
+        }
+
         private static int iSet(List<string> func)
         {
             if (func.Count == 0) throw new Exception("Empty iSet");
