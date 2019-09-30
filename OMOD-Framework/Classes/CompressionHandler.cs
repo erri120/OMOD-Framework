@@ -21,12 +21,10 @@ namespace OMODFramework.Classes
 
         internal SparseFileWriterStream(Stream fileList)
         {
-            using(FileList = new BinaryReader(fileList))
-            {
-                BaseDirectory = Framework.CreateTempDirectory();
-                CreateDirectoryStructure();
-                NextFile();
-            }
+            FileList = new BinaryReader(fileList);
+            BaseDirectory = Framework.CreateTempDirectory();
+            CreateDirectoryStructure();
+            NextFile();
         }
 
         private void CreateDirectoryStructure()
