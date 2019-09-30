@@ -2039,6 +2039,36 @@ namespace OMODFramework.Scripting
             else variables[line[1]] = result;
         }
 
+        private static void FunctionReadINI(string[] line)
+        {
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to function ReadINI");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected extra arguments to function ReadINI");
+            try
+            {
+                variables[line[1]] = OblivionINI.GetINIValue(line[2], line[3]);
+            }
+            catch (Exception e) { variables[line[1]] = e.Message; }
+        }
+
+        private static void FunctionReadRenderer(string[] line)
+        {
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to function 'ReadRendererInfo'");
+                return;
+            }
+            if (line.Length > 3) Warn("Unexpected extra arguments to function 'ReadRendererInfo'");
+            try
+            {
+                variables[line[1]] = "";
+            }
+            catch (Exception e) { variables[line[1]] = e.Message; }
+        }
+
         private static int iSet(List<string> func)
         {
             if (func.Count == 0) throw new Exception("Empty iSet");
