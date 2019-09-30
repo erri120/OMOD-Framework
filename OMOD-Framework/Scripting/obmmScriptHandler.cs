@@ -224,12 +224,19 @@ namespace OMODFramework.Scripting
         /// int[]: return value | the index of the selected items
         /// </summary>
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
+        /// <summary>
+        /// Displays a message in a window
+        /// string: input value the text
+        /// string: input value the title (can be null if no title given)
+        /// </summary>
+        private static Action<string, string> Message;
 
 
         internal static ScriptReturnData Execute(Framework f, string InputScript, string DataPath, string PluginsPath,
             bool showWarnings, Action<string> warn, Func<string, string, int> dialogYesNo,
             Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
-            Func<string[], string, bool, string[], string[], int[]> dialogSelect)
+            Func<string[], string, bool, string[], string[], int[]> dialogSelect,
+            Action<string, string> message)
         {
             ShowWarnings = showWarnings;
             Warn = warn;
@@ -237,6 +244,7 @@ namespace OMODFramework.Scripting
             ExistsFile = existsFile;
             GetFileVersion = getFileVersion;
             DialogSelect = dialogSelect;
+            Message = message;
 
             srd = new ScriptReturnData();
             if (InputScript == null) return srd;
@@ -1199,6 +1207,26 @@ namespace OMODFramework.Scripting
                     }
             }
             return NullLoop;
+        }
+
+        private static void FunctionMessage(string[] line)
+        {
+            switch (line.Length)
+            {
+                case 1:
+                    Warn("Missing arguments to function 'Message'");
+                    break;
+                case 2:
+                    Message(line[1], null);
+                    break;
+                case 3:
+                    Message(line[1], line[2]);
+                    break;
+                default:
+                    Message(line[1], line[2]);
+                    Warn("Unexpected arguments after 'Message'");
+                    break;
+            }
         }
 
         #endregion
