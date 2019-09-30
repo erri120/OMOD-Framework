@@ -1300,6 +1300,88 @@ namespace OMODFramework.Scripting
             }
         }
 
+        private static void FunctionConflicts(string[] line, bool Conflicts, bool Regex)
+        {
+            string WarnMess;
+            if (Conflicts) WarnMess = "function 'ConflictsWith"; else WarnMess = "function 'DependsOn";
+            if (Regex) WarnMess += "Regex'"; else WarnMess += "'";
+            ConflictData cd = new ConflictData
+            {
+                level = ConflictLevel.MajorConflict
+            };
+            switch (line.Length)
+            {
+                case 1:
+                    Warn($"Missing arguments to {WarnMess}");
+                    return;
+                case 2:
+                    cd.File = line[1];
+                    break;
+                case 3:
+                    cd.Comment = line[2];
+                    goto case 2;
+                case 4:
+                    switch (line[3])
+                    {
+                        case "Unusable":
+                            cd.level = ConflictLevel.Unusable;
+                            break;
+                        case "Major":
+                            cd.level = ConflictLevel.MajorConflict;
+                            break;
+                        case "Minor":
+                            cd.level = ConflictLevel.MinorConflict;
+                            break;
+                        default:
+                            Warn($"Unknown conflict level after {WarnMess}");
+                            break;
+                    }
+                    goto case 3;
+                case 5:
+                    Warn($"Unexpected arguments to {WarnMess}");
+                    goto case 4;
+                case 6:
+                    cd.File = line[1];
+                    try
+                    {
+                        cd.MinMajorVersion = Convert.ToInt32(line[2]);
+                        cd.MinMinorVersion = Convert.ToInt32(line[3]);
+                        cd.MaxMajorVersion = Convert.ToInt32(line[4]);
+                        cd.MaxMinorVersion = Convert.ToInt32(line[5]);
+                    }
+                    catch
+                    {
+                        Warn($"Arguments to {WarnMess} in incorrect format");
+                        return;
+                    }
+                    break;
+                case 7:
+                    cd.Comment = line[6];
+                    goto case 6;
+                case 8:
+                    switch (line[7])
+                    {
+                        case "Unusable":
+                            cd.level = ConflictLevel.Unusable;
+                            break;
+                        case "Major":
+                            cd.level = ConflictLevel.MajorConflict;
+                            break;
+                        case "Minor":
+                            cd.level = ConflictLevel.MinorConflict;
+                            break;
+                        default:
+                            Warn($"Unknown conflict level after {WarnMess}");
+                            break;
+                    }
+                    goto case 7;
+                default:
+                    Warn($"Unexpected arguments to {WarnMess}");
+                    goto case 8;
+            }
+            cd.Partial = Regex;
+            if (Conflicts) srd.ConflictsWith.Add(cd); else srd.DependsOn.Add(cd);
+        }
 
         #endregion
     }
