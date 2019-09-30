@@ -183,6 +183,15 @@ namespace OMODFramework
         #endregion
 
         #region OBMM-OMOD Functions
+        internal string GetScript()
+        {
+            using (Stream Script = ExtractWholeFile("script"))
+            using (BinaryReader br = new BinaryReader(Script))
+            {
+                string script = br.ReadString();
+                return script;
+            }
+        }
         internal void Close()
         {
             if(pD.modFile != null)
