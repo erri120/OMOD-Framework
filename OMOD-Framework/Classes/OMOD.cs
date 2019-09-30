@@ -7,7 +7,7 @@ namespace OMODFramework
 {
     public class OMOD
     {
-        private Framework framework;
+        private readonly Framework framework;
 
         protected class PrivateData
         {
@@ -29,11 +29,17 @@ namespace OMODFramework
         internal string Email;
         internal string Website;
         internal string Author;
+        internal string[] AllPlugins;
+        internal DataFileInfo[] AllDataFiles;
+        internal CompressionType CompType;
         private byte FileVersion;
 
         internal bool initConfig;
-
+        internal string Version { get { return "" + MajorVersion + ((MinorVersion != -1) ? ("." + MinorVersion + ((BuildVersion != -1) ? ("." + BuildVersion) : "")) : ""); } }
         internal string FullFilePath { get { return Path.Combine(FilePath, FileName); } }
+
+        internal string[] Plugins;
+        internal DataFileInfo[] DataFiles;
 
         private ZipFile ModFile
         {
@@ -53,25 +59,13 @@ namespace OMODFramework
             LowerFileName = FileName.ToLower();
 
             initConfig = false;
-        }
 
-        #region API Functions
-
-        /// <summary>
-        /// Reads the config and updates all internal variables, needs to be called before doing anything with the omod
-        /// </summary>
-        /// <returns>True if successful and false if failed</returns>
-        public bool ReadConfig()
-        {
             using (Stream Config = ExtractWholeFile("config"))
             using (BinaryReader br = new BinaryReader(Config))
             {
                 byte version = br.ReadByte();
                 FileVersion = version;
-                if (version > framework.OBMMFakeCurrentOmodVersion)
-                {
-                    return false;
-                }
+                if (version > framework.OBMMFakeCurrentOmodVersion) throw new Exception($"The OMOD version is greater than the set fake OMOD version: {version}>{framework.OBMMFakeCurrentOmodVersion}");
 
                 ModName = br.ReadString();
                 MajorVersion = br.ReadInt32();
@@ -89,20 +83,23 @@ namespace OMODFramework
                     string sCreationTime = br.ReadString();
                 }
                 if (Description == "") Description = "No description";
-                //CompType = (CompressionType)br.ReadByte();
+                CompType = (CompressionType)br.ReadByte();
                 if (version >= 1)
                 {
                     BuildVersion = br.ReadInt32();
                 }
                 else BuildVersion = -1;
 
-                //AllPlugins = GetPluginList();
-                //AllDataFiles = GetDataList();
+                AllPlugins = GetPluginList();
+                AllDataFiles = GetDataList();
 
-                //Close();
+                Close();
             }
-            return initConfig = true;
+
+            initConfig = true;
         }
+
+        #region API Functions
         /// <summary>
         /// Checks if the omod contains a readme file
         /// </summary>
@@ -113,6 +110,11 @@ namespace OMODFramework
         /// </summary>
         /// <returns></returns>
         public bool HasScript() { return ModFile.GetEntry("config") != null; }
+        /// <summary>
+        /// Returns the OMOD version
+        /// </summary>
+        /// <returns>Possible returns: 1 | 2 | 3 | 4</returns>
+        public byte GetFileVersion() { return FileVersion; }
         /// <summary>
         /// Returns the name of the mod
         /// </summary>
@@ -147,12 +149,12 @@ namespace OMODFramework
         /// Extracts the all plugins from plugins.crc and returns their path
         /// </summary>
         /// <returns>Path to all plugins from plugins.crc</returns>
-        public string GetPlugins() { return ParseCompressedStream("plugins.crc", "plugins"); }
+        public string ExtractPlugins() { return ParseCompressedStream("plugins.crc", "plugins"); }
         /// <summary>
         /// Extracts the data files from data.crc and returns its path
         /// </summary>
         /// <returns>Path to all data files from data.crc</returns>
-        public string GetDataFiles() { return ParseCompressedStream("data.crc", "data"); }
+        public string ExtractDataFiles() { return ParseCompressedStream("data.crc", "data"); }
         /// <summary>
         /// Returns a list of all plugins found in the plugins.crc file
         /// </summary>
@@ -162,7 +164,7 @@ namespace OMODFramework
         /// Returns a list of all data files found in the data.crc file
         /// </summary>
         /// <returns></returns>
-        public string[] GetDataList() { return GetList("data.crc"); }
+        public string[] GetDataFileList() { return GetList("data.crc"); }
         private string[] GetList(string s)
         {
             using (Stream TempStream = ExtractWholeFile(s))
@@ -181,7 +183,37 @@ namespace OMODFramework
         #endregion
 
         #region OBMM-OMOD Functions
-
+        internal void Close()
+        {
+            if(pD.modFile != null)
+            {
+                pD.modFile.Close();
+                pD.modFile = null;
+            }
+        }
+        private void CreateDirectoryStructure()
+        {
+            for(int x = 0; x < DataFiles.Length; x++)
+            {
+                string s = Path.GetDirectoryName(DataFiles[x].FileName);
+                if (!Directory.Exists(Path.Combine(Framework.OutputDir, s))) Directory.CreateDirectory(Path.Combine(Framework.OutputDir, s));
+            }
+        }
+        private DataFileInfo[] GetDataList()
+        {
+            using (Stream TempStream = ExtractWholeFile("data.crc"))
+            using (BinaryReader br = new BinaryReader(TempStream))
+            {
+                List<DataFileInfo> ar = new List<DataFileInfo>();
+                while(br.PeekChar() != -1)
+                {
+                    string s = br.ReadString();
+                    ar.Add(new DataFileInfo(s, br.ReadUInt32()));
+                    br.ReadInt64();
+                }
+                return ar.ToArray();
+            }
+        }
         private string ParseCompressedStream(string fileList, string compressedStream)
         {
             string path = "";
