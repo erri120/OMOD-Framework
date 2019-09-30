@@ -10,8 +10,16 @@ namespace DLLTest
         static void Main(string[] args)
         {
             Framework f = new Framework();
-            OMOD omod = new OMOD("test",f);
+            f.SetDataDirectory("");
+            f.SetOblivionDirectory("");
+            f.SetOblivionINIPath("");
+            f.SetOBMMVersion(1, 1, 12);
+            f.SetOutputDirectory(@"M:\Projects\omod\testDLL\out");
+            f.SetPluginsListPath("");
+            f.SetTempDirectory(@"M:\Projects\omod\testDLL\temp");
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", f);
             ScriptRunner sr = new ScriptRunner(omod);
+            sr.ExecuteScript(null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 }

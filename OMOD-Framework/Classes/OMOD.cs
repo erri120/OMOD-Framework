@@ -54,12 +54,11 @@ namespace OMODFramework
         public OMOD(string path, Framework f)
         {
             framework = f;
-            FilePath = Path.GetDirectoryName(path);
+            FilePath = Path.GetDirectoryName(Path.GetFullPath(path));
             FileName = Path.GetFileName(path);
             LowerFileName = FileName.ToLower();
 
             initConfig = false;
-
             using (Stream Config = ExtractWholeFile("config"))
             using (BinaryReader br = new BinaryReader(Config))
             {
@@ -167,7 +166,8 @@ namespace OMODFramework
         public string[] GetDataFileList() { return GetList("data.crc"); }
         private string[] GetList(string s)
         {
-            using (Stream TempStream = ExtractWholeFile(s))
+            Stream TempStream = ExtractWholeFile(s);
+            if (TempStream == null) return new string[0];
             using (BinaryReader br = new BinaryReader(TempStream))
             {
                 List<string> ar = new List<string>();
