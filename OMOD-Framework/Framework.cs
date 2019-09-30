@@ -12,6 +12,7 @@ namespace OMODFramework
         internal byte OBMMFakeBuildNumber = 12;
         internal byte OBMMFakeCurrentOmodVersion = 4;
 
+        internal static string DLLPath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "erri120.OMODFramework.dll");
         internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(), "obmm");
         internal static string OblivionDir { get; set; }
         internal static string DataDir { get; set; }
@@ -214,6 +215,12 @@ namespace OMODFramework
             OBMMFakeMinorVersion = minor;
             OBMMFakeBuildNumber = build;
         }
+
+        /// <summary>
+        /// Sets the internal path to the dll, useful when debugging
+        /// </summary>
+        /// <param name="path">Path to the dll</param>
+        public void SetDLLPath(string path) { DLLPath = path; }
 
         #endregion
     }

@@ -17,6 +17,7 @@ namespace DLLTest
             f.SetOutputDirectory(@"M:\Projects\omod\testDLL\out");
             f.SetPluginsListPath("");
             f.SetTempDirectory(@"M:\Projects\omod\testDLL\temp");
+            f.SetDLLPath(@"M:\Projects\OMOD-Extractor\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
             OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", f);
             Console.WriteLine(omod.ExtractDataFiles());
             Console.WriteLine(omod.ExtractPlugins());

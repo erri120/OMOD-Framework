@@ -228,8 +228,9 @@ namespace OMODFramework
         private string ParseCompressedStream(string fileList, string compressedStream)
         {
             string path = "";
-            using(Stream FileList = ExtractWholeFile(fileList))
-            using(Stream CompressedStream = ExtractWholeFile(compressedStream))
+            Stream FileList = ExtractWholeFile(fileList);
+            if (FileList == null) return null;
+            using (Stream CompressedStream = ExtractWholeFile(compressedStream))
             {
                 path = CompressionHandler.DecompressFiles(FileList, CompressedStream, CompType);
             }

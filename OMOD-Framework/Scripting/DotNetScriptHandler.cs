@@ -25,7 +25,7 @@ namespace OMODFramework.Scripting
                 IncludeDebugInformation = false,
                 OutputAssembly = ScriptOutputPath,
             };
-            cParams.ReferencedAssemblies.Add(Path.Combine(Directory.GetCurrentDirectory(), "erri120.OMODFramework.dll"));
+            cParams.ReferencedAssemblies.Add(Framework.DLLPath);
             cParams.ReferencedAssemblies.Add("System.dll");
             cParams.ReferencedAssemblies.Add("System.IO.dll");
             cParams.ReferencedAssemblies.Add("System.Drawing.dll");
