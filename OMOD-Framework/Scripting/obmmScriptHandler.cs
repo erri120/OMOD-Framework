@@ -1229,6 +1229,78 @@ namespace OMODFramework.Scripting
             }
         }
 
+        private enum LoadOrderTypes { AFTER, BEFORE, EARLY };
+
+        private static void FunctionLoadEarly(string[] line)
+        {
+            if (line.Length < 2)
+            {
+                Warn("Missing arguments to LoadEarly");
+                return;
+            }
+            else if (line.Length > 2)
+            {
+                Warn("Unexpected arguments to LoadEarly");
+            }
+            line[1] = line[1].ToLower();
+            //if (!srd.EarlyPlugins.Contains(line[1])) srd.EarlyPlugins.Add(line[1]);
+            CreateLoadOrderAdvise(line[1], null, LoadOrderTypes.EARLY);
+        }
+
+        private static void FunctionLoadOrder(string[] line, bool LoadAfter)
+        {
+            string WarnMess;
+            if (LoadAfter) WarnMess = "function 'LoadAfter'"; else WarnMess = "function 'LoadBefore'";
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to " + WarnMess);
+                return;
+            }
+            else if (line.Length > 3)
+            {
+                Warn("Unexpected arguments to " + WarnMess);
+            }
+            //srd.LoadOrderList.Add(new PluginLoadInfo(line[1], line[2], LoadAfter));
+            CreateLoadOrderAdvise(line[1], line[2], LoadAfter ? LoadOrderTypes.AFTER : LoadOrderTypes.BEFORE);
+        }
+
+        private static void CreateLoadOrderAdvise(string plugin1, string plugin2, LoadOrderTypes type)
+        {
+            string adviseFile = Path.Combine(Framework.OutputDir, "loadorder_advise.txt");
+            List<string> contents = new List<string>();
+            if (File.Exists(adviseFile))
+            {
+                using (StreamReader sr = new StreamReader(File.OpenRead(adviseFile), System.Text.Encoding.Default))
+                {
+                    while (sr.Peek() != -1)
+                    {
+                        contents.Add(sr.ReadLine());
+                    }
+                }
+                File.Delete(adviseFile);
+            }
+            switch (type)
+            {
+                case LoadOrderTypes.AFTER:
+                    contents.Add($"Place {plugin1} after {plugin2}");
+                    break;
+                case LoadOrderTypes.BEFORE:
+                    contents.Add($"Place {plugin1} before {plugin2}");
+                    break;
+                case LoadOrderTypes.EARLY:
+                    contents.Add($"Place {plugin1} early in your load order");
+                    break;
+            }
+            using (StreamWriter sw = new StreamWriter(File.Create(adviseFile), System.Text.Encoding.Default))
+            {
+                foreach (string s in contents)
+                {
+                    sw.WriteLine(s);
+                }
+            }
+        }
+
+
         #endregion
     }
 }
