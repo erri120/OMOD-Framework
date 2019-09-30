@@ -1689,6 +1689,43 @@ namespace OMODFramework.Scripting
             File.Move(copypath, Path.Combine(Framework.OutputDir, line[2]));
         }
 
+        private static void FunctionEditINI(string[] line)
+        {
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to EditINI");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to EditINI");
+            srd.INIEdits.Add(new INIEditInfo(line[1], line[2], line[3]));
+        }
+
+        private static void FunctionEditShader(string[] line)
+        {
+            if (line.Length < 4)
+            {
+                Warn("Missing arguments to 'EditShader'");
+                return;
+            }
+            if (line.Length > 4) Warn("Unexpected arguments to 'EditShader'");
+            if (!Framework.IsSafeFileName(line[3]))
+            {
+                Warn($"Invalid argument to 'EditShader'\n'{ line[3]}' is not a valid file name");
+                return;
+            }
+            if (!File.Exists(Path.Combine(DataFiles, line[3])))
+            {
+                Warn($"Invalid argument to 'EditShader'\nFile '{line[3]}' does not exist");
+                return;
+            }
+            if (!byte.TryParse(line[1], out byte package))
+            {
+                Warn($"Invalid argument to function 'EditShader'\n'{line[1]}' is not a valid shader package ID");
+                return;
+            }
+            srd.SDPEdits.Add(new SDPEditInfo(package, line[2], Path.Combine(DataFiles, line[3])));
+        }
+
         private static void FunctionSetEspVar(string[] line, bool GMST) { }
 
         #endregion
