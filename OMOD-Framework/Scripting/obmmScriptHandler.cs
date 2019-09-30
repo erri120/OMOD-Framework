@@ -214,16 +214,29 @@ namespace OMODFramework.Scripting
         /// FileVersionInfo: return value
         /// </summary>
         private static Func<string, System.Diagnostics.FileVersionInfo> GetFileVersion;
+        /// <summary>
+        /// Creates a select dialog
+        /// string[]: list of all items to be displayed
+        /// string: the title of the dialog
+        /// bool: multi or single select
+        /// string[]: paths to preview pictures
+        /// string[]: descriptions of the items
+        /// int[]: return value | the index of the selected items
+        /// </summary>
+        private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
 
 
         internal static ScriptReturnData Execute(Framework f, string InputScript, string DataPath, string PluginsPath,
             bool showWarnings, Action<string> warn, Func<string, string, int> dialogYesNo,
-            Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion)
+            Func<string, bool> existsFile, Func<string, System.Diagnostics.FileVersionInfo> getFileVersion, 
+            Func<string[], string, bool, string[], string[], int[]> dialogSelect)
         {
             ShowWarnings = showWarnings;
             Warn = warn;
             DialogYesNo = dialogYesNo;
             ExistsFile = existsFile;
+            GetFileVersion = getFileVersion;
+            DialogSelect = dialogSelect;
 
             srd = new ScriptReturnData();
             if (InputScript == null) return srd;
@@ -874,6 +887,76 @@ namespace OMODFramework.Scripting
                     return false;
             }
 
+        }
+
+        private static string[] FunctionSelect(string[] line, bool many, bool previews, bool descriptions)
+        {
+            if (line.Length < 3)
+            {
+                Warn("Missing arguments to function 'Select'");
+                return new string[0];
+            }
+
+            string[] Items, Previews, Descs;
+            int argsPerOption = 1 + (previews ? 1 : 0) + (descriptions ? 1 : 0);
+
+            string title = line[1];
+            Items = new string[line.Length - 2];
+            Array.Copy(line, 2, Items, 0, line.Length - 2);
+            line = Items;
+
+            if (line.Length % argsPerOption != 0)
+            {
+                Warn("Unexpected extra arguments to 'Select'");
+                Array.Resize(ref line, line.Length - line.Length % argsPerOption);
+            }
+
+            Items = new string[line.Length / argsPerOption];
+            Previews = previews ? new string[line.Length / argsPerOption] : null;
+            Descs = descriptions ? new string[line.Length / argsPerOption] : null;
+
+            for (int i = 0; i < line.Length / argsPerOption; i++)
+            {
+                Items[i] = line[i * argsPerOption];
+                if (previews)
+                {
+                    Previews[i] = line[i * argsPerOption + 1];
+                    if (descriptions) Descs[i] = line[i * argsPerOption + 2];
+                }
+                else
+                {
+                    if (descriptions) Descs[i] = line[i * argsPerOption + 1];
+                }
+            }
+
+            if (Previews != null)
+            {
+                for (int i = 0; i < Previews.Length; i++)
+                {
+                    if (Previews[i] == "None") Previews[i] = null;
+                    else if (!Framework.IsSafeFileName(Previews[i]))
+                    {
+                        Warn($"Preview file path '{Previews[i]}' was invalid");
+                        Previews[i] = null;
+                    }
+                    else if (!File.Exists(Path.Combine(DataFiles, Previews[i])))
+                    {
+                        Warn($"Preview file path '{Previews[i]}' does not exist");
+                        Previews[i] = null;
+                    }
+                    else
+                    {
+                        Previews[i] = Path.Combine(DataFiles, Previews[i]);
+                    }
+                }
+            }
+            int[] dialogResult = DialogSelect(Items, title, many, Previews, Descs);
+            string[] result = new string[dialogResult.Length];
+            for(int i = 0; i < dialogResult.Length; i++)
+            {
+                result[i] = $"Case {Items[dialogResult[i]]}";
+            }
+            return result;
         }
 
         #endregion
