@@ -153,6 +153,7 @@ namespace OblivionModManager.Scripting
         private string[] StripPathList(string[] paths, int baseLength)
         {
             for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
+            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(1);
             return paths;
         }
 
