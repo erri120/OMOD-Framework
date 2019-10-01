@@ -75,17 +75,14 @@ namespace OMOD_Framework_Example
             string oblivion = @"S:\SteamLibrary\steamapps\common\Oblivion"; // my install location
             f.SetOblivionDirectory(oblivion);
             f.SetDataDirectory(Path.Combine(oblivion,"data"));  
-            f.SetOblivionINIPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "Oblivion", "Oblivion.ini"));
-            f.SetPluginsListPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Local", "Oblivion", "Plugins.txt"));
             f.SetOBMMVersion(1, 1, 12); // latest official obmm version use this unless you know what you're doing
-            f.SetOutputDirectory(@"M:\Projects\omod\testDLL\out");
             f.SetTempDirectory(@"M:\Projects\omod\testDLL\temp");
             // setting the dll path is mostly used for debugging and if you execute the code from somewhere else
             // better safe than sorry
             f.SetDLLPath(@"M:\Projects\OMOD-Extractor\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", ref f);
 
             // you can now do whatever you want with the omod, do look at the documentation for all available functions
             String data = omod.ExtractDataFiles(); //extracts all data files and returns the path to them
@@ -97,7 +94,7 @@ namespace OMOD_Framework_Example
             ScriptFunctions a = new ScriptFunctions();
 
             // running the script requires the use of the ScriptRunner class:
-            ScriptRunner sr = new ScriptRunner(omod, a);
+            ScriptRunner sr = new ScriptRunner(ref omod, a);
             sr.ExecuteScript(); // the script will run and do its magic
         }
     }

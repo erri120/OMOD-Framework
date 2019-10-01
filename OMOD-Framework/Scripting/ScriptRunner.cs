@@ -101,7 +101,7 @@ namespace OMODFramework.Scripting
         /// </summary>
         /// <param name="omod">The OMOD with the script to be executed</param>
         /// <param name="scriptRunnerFunctions">All callback functions for execution</param>
-        public ScriptRunner(ref OMOD omod, ref IScriptRunnerFunctions scriptRunnerFunctions)
+        public ScriptRunner(ref OMOD omod, IScriptRunnerFunctions scriptRunnerFunctions)
         {
             OMOD = omod;
             ScriptRunnerFunctions = scriptRunnerFunctions;
