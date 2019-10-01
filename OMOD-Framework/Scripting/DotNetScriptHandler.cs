@@ -93,7 +93,7 @@ namespace OMODFramework.Scripting
         }
 
         private static void Execute(
-            string script, OblivionModManager.Scripting.IScriptFunctions functions, 
+            string script, ref OblivionModManager.Scripting.IScriptFunctions functions, 
             ScriptType language)
         {
             byte[] data = Compile(script, language);
@@ -108,12 +108,12 @@ namespace OMODFramework.Scripting
 
         internal static void ExecuteCS(string script, OblivionModManager.Scripting.IScriptFunctions functions)
         {
-            Execute(script, functions, ScriptType.cSharp);
+            Execute(script, ref functions, ScriptType.cSharp);
         }
 
         internal static void ExecuteVB(string script, OblivionModManager.Scripting.IScriptFunctions functions)
         {
-            Execute(script, functions, ScriptType.vb);
+            Execute(script, ref functions, ScriptType.vb);
         }
     }
 }
