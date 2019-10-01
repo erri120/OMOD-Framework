@@ -68,7 +68,9 @@ namespace OMODFramework.Scripting
         private static string MakeValidFolderPath(string s)
         {
             s = s.Replace('/', '\\');
+            if (s.StartsWith("\\")) s = s.Substring(1);
             if (!s.EndsWith("\\")) s += "\\";
+            if (s.Contains("\\\\")) s = s.Replace("\\\\", "\\");
             return s;
         }
 
