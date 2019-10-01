@@ -149,7 +149,7 @@ namespace OMODFramework.Scripting
         /// Returns the name of the script type
         /// </summary>
         /// <returns>Possible types: obmmScript, Python, cSharp, vb</returns>
-        public string GetScriptType() { return Enum.GetName(typeof(ScriptType), type); }
+        public ScriptType GetScriptType() { return type; }
         /// <summary>
         /// Returns the entire script without the first byte
         /// </summary>
