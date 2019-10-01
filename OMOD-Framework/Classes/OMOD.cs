@@ -31,16 +31,12 @@ namespace OMODFramework
         internal string Website;
         internal string Author;
         internal string[] AllPlugins;
-        internal DataFileInfo[] AllDataFiles;
+        internal string[] AllDataFiles;
         internal CompressionType CompType;
         private readonly byte FileVersion;
 
-        internal bool initConfig;
         internal string Version { get { return "" + MajorVersion + ((MinorVersion != -1) ? ("." + MinorVersion + ((BuildVersion != -1) ? ("." + BuildVersion) : "")) : ""); } }
         internal string FullFilePath { get { return Path.Combine(FilePath, FileName); } }
-
-        internal string[] Plugins;
-        internal DataFileInfo[] DataFiles;
 
         private ZipFile ModFile
         {
@@ -52,14 +48,18 @@ namespace OMODFramework
             }
         }
 
-        public OMOD(string path, Framework f)
+        /// <summary>
+        /// OMOD
+        /// </summary>
+        /// <param name="path">Absolute path to the .omod file</param>
+        /// <param name="f">The Framework</param>
+        public OMOD(string path, ref Framework f)
         {
             framework = f;
             FilePath = Path.GetDirectoryName(Path.GetFullPath(path));
             FileName = Path.GetFileName(path);
             LowerFileName = FileName.ToLower();
 
-            initConfig = false;
             using (Stream Config = ExtractWholeFile("config"))
             using (BinaryReader br = new BinaryReader(Config))
             {
@@ -95,8 +95,6 @@ namespace OMODFramework
 
                 Close();
             }
-
-            initConfig = true;
         }
 
         #region API Functions
@@ -119,32 +117,32 @@ namespace OMODFramework
         /// Returns the name of the mod
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetModName() { return initConfig ? ModName : ""; }
+        public string GetModName() { return ModName; }
         /// <summary>
         /// Returns the version of the mod, syntax: Major.Minor.Build
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetVersion() { return initConfig ? $"{MajorVersion}.{MinorVersion}.{BuildVersion}" : ""; }
+        public string GetVersion() { return $"{MajorVersion}.{MinorVersion}.{BuildVersion}"; }
         /// <summary>
         /// Returns the description of the mod
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetDescription() { return initConfig ? Description : ""; }
+        public string GetDescription() { return Description; }
         /// <summary>
         /// Returns the email of the author
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetEmail() { return initConfig ? Email : ""; }
+        public string GetEmail() { return Email; }
         /// <summary>
         /// Returns the website of the mod/author
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetWebsite() { return initConfig ? Website : ""; }
+        public string GetWebsite() { return Website; }
         /// <summary>
         /// Returns the name of the author
         /// </summary>
         /// <returns>Returns an empty string if the you didn't read the config or the field is empty</returns>
-        public string GetAuthor() { return initConfig ? Author : ""; }
+        public string GetAuthor() { return Author; }
         /// <summary>
         /// Extracts the all plugins from plugins.crc and returns their path
         /// </summary>
@@ -202,25 +200,18 @@ namespace OMODFramework
                 pD.modFile = null;
             }
         }
-        private void CreateDirectoryStructure()
-        {
-            for(int x = 0; x < DataFiles.Length; x++)
-            {
-                string s = Path.GetDirectoryName(DataFiles[x].FileName);
-                if (!Directory.Exists(Path.Combine(Framework.OutputDir, s))) Directory.CreateDirectory(Path.Combine(Framework.OutputDir, s));
-            }
-        }
-        private DataFileInfo[] GetDataList()
+        private string[] GetDataList()
         {
             using (Stream TempStream = ExtractWholeFile("data.crc"))
             using (BinaryReader br = new BinaryReader(TempStream))
             {
-                List<DataFileInfo> ar = new List<DataFileInfo>();
+                List<string> ar = new List<string>();
                 while(br.PeekChar() != -1)
                 {
                     string s = br.ReadString();
-                    ar.Add(new DataFileInfo(s, br.ReadUInt32()));
+                    br.ReadUInt32();
                     br.ReadInt64();
+                    ar.Add(s);
                 }
                 return ar.ToArray();
             }
