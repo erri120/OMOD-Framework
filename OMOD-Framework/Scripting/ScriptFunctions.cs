@@ -398,7 +398,7 @@ namespace OblivionModManager.Scripting
             CheckPathSafety(file);
             return File.ReadAllBytes(IGetFile(file));
         }
-        public string ReadINI(string section, string value) { return OblivionINI.GetINIValue(section, value); }
+        public string ReadINI(string section, string value) { return ""; }
         public string ReadRendererInfo(string value) { return ""; }
         public void RegisterBSA(string path) { }
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)

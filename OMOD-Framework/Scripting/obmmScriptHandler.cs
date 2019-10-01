@@ -1798,7 +1798,7 @@ namespace OMODFramework.Scripting
             if (line.Length > 4) Warn("Unexpected extra arguments to function ReadINI");
             try
             {
-                variables[line[1]] = OblivionINI.GetINIValue(line[2], line[3]);
+                variables[line[1]] = "";
             }
             catch (Exception e) { variables[line[1]] = e.Message; }
         }

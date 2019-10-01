@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace OMODFramework
+namespace OMODFramework.Disabled
 {
     internal static class OblivionINI
     {
-        private static readonly string ini = Framework.OblivionINIPath;
+        private static readonly string ini = null;//Framework.OblivionINIPath;
 
         internal static string GetINIValue(string section, string name)
         {
