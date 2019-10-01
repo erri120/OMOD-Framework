@@ -14,8 +14,6 @@ namespace OMODFramework
 
         internal static string DLLPath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "erri120.OMODFramework.dll");
         internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(), "obmm");
-        internal static string OblivionDir { get; set; }
-        internal static string DataDir { get; set; }
         #endregion
 
         #region OBMM Functions
@@ -112,17 +110,6 @@ namespace OMODFramework
                 }
             }
         }
-        /// <summary>
-        /// Sets the internal path to the Oblivion game folder, needs to be an absolute path
-        /// </summary>
-        /// <param name="path">Path to the Oblivion game folder</param>
-        public void SetOblivionDirectory(string path) { OblivionDir = path; }
-
-        /// <summary>
-        /// Sets the internal path to the Oblivion data folder, needs to be an absolute path
-        /// </summary>
-        /// <param name="path">Path to the Oblivion data folder</param>
-        public void SetDataDirectory(string path) { DataDir = path; }
 
         /// <summary>
         /// Sets the internal path to the temp folder, needs to be an absolute path

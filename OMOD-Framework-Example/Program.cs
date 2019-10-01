@@ -89,7 +89,6 @@ namespace OMOD_Framework_Example
 
             Framework f = new Framework(); // basic, do this or go home
 
-            string oblivion = @"S:\SteamLibrary\steamapps\common\Oblivion"; // my install location
             string temp = @"M:\Projects\omod\testDLL\temp";
             string OutputDir = @"M:\Projects\omod\testDLL\output";
 
@@ -99,8 +98,6 @@ namespace OMOD_Framework_Example
             if (Directory.Exists(OutputDir)) DeleteDirectory(OutputDir);
             Directory.CreateDirectory(OutputDir);
 
-            f.SetOblivionDirectory(oblivion);
-            f.SetDataDirectory(Path.Combine(oblivion,"data"));  
             f.SetOBMMVersion(1, 1, 12); // latest official obmm version use this unless you know what you're doing
             f.SetTempDirectory(temp);
             // setting the dll path is mostly used for debugging or if you execute the code from somewhere else
