@@ -17,7 +17,6 @@ namespace OblivionModManager.Scripting
 
         private static Framework f;
 
-        private static Action<string> Warn;
         private static Func<string, string, int> IDialogYesNo;
         private static Func<string, bool> ExistsFile;
         private static Func<string, FileVersionInfo> GetFileVersion;
@@ -34,7 +33,7 @@ namespace OblivionModManager.Scripting
             OMODFramework.Scripting.IScriptRunnerFunctions scriptRunnerFunctions)
         {
             f = _f;
-            Warn = scriptRunnerFunctions.Warn;
+            //Warn = scriptRunnerFunctions.Warn;
             IDialogYesNo = scriptRunnerFunctions.DialogYesNo;
             ExistsFile = scriptRunnerFunctions.ExistsFile;
             GetFileVersion = scriptRunnerFunctions.GetFileVersion;
