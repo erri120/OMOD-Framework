@@ -6,12 +6,12 @@ namespace OMODFramework.Classes
 {
     internal class SparseFileWriterStream : Stream
     {
-        private long position = 0;
+        private readonly long position = 0;
         private long length;
 
-        private BinaryReader FileList;
+        private readonly BinaryReader FileList;
 
-        private string BaseDirectory;
+        private readonly string BaseDirectory;
         private string CurrentFile;
         private long FileLength;
         private long Written;
