@@ -108,7 +108,7 @@ namespace OMOD_Framework_Example
             f.SetDLLPath(@"M:\Projects\OMOD-Extractor\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarkUId DarN 16.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\NoMaaM Breathing Idles V1 OMOD-40462-1-0.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
@@ -198,9 +198,10 @@ namespace OMOD_Framework_Example
                     if(scd.CopyFrom != scd.CopyTo)
                     {
                         // because data files can be in subdirectories we have to check if the folder actually exists
-                        if(!Directory.Exists(Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo)))) Directory.CreateDirectory(Path.Combine(dataPath, scd.CopyTo));
-                        if (File.Exists(dataPath + scd.CopyTo)) File.Delete(dataPath + scd.CopyTo);
-                        File.Copy(dataPath + scd.CopyFrom, dataPath + scd.CopyTo);
+                        string dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
+                        if(!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+                        if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
+                        File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
                     }
                     if (!Framework.strArrayContains(InstallDataFiles, scd.CopyTo)) InstallDataFiles.Add(scd.CopyTo);
                 }
