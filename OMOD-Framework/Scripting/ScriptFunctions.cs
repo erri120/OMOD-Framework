@@ -134,21 +134,7 @@ namespace OblivionModManager.Scripting
         {
             ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, level, false);
         }
-        public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex)
-        {
-            ConflictData cd = new ConflictData
-            {
-                File = name,
-                Comment = comment,
-                level = level,
-                MinMajorVersion = minMajorVersion,
-                MinMinorVersion = minMinorVersion,
-                MaxMajorVersion = maxMajorVersion,
-                MaxMinorVersion = maxMinorVersion,
-                Partial = regex
-            };
-            srd.ConflictsWith.Add(cd);
-        }
+        public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex){ }
         public void CopyDataFile(string from, string to)
         {
             CheckDataSafety(from);
@@ -209,18 +195,7 @@ namespace OblivionModManager.Scripting
         {
             DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, false);
         }
-        public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex)
-        {
-            ConflictData cd = new ConflictData();
-            cd.File = name;
-            cd.Comment = comment;
-            cd.MinMajorVersion = minMajorVersion;
-            cd.MinMinorVersion = minMinorVersion;
-            cd.MaxMajorVersion = maxMajorVersion;
-            cd.MaxMinorVersion = maxMinorVersion;
-            cd.Partial = regex;
-            srd.DependsOn.Add(cd);
-        }
+        public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex){ }
         public bool DialogYesNo(string msg) { return DialogYesNo(msg, "Question"); }
         public bool DialogYesNo(string msg, string title) { return IDialogYesNo(msg, title) == 1; }
         public void DisplayImage(string path) { DisplayImage(path, null); }
