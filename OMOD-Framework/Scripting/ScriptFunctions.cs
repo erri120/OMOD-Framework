@@ -14,10 +14,6 @@ namespace OblivionModManager.Scripting
         private readonly ScriptReturnData srd;
         private readonly string DataFiles;
         private readonly string Plugins;
-        private readonly string[] dataFileList;
-        private readonly string[] pluginList;
-        private readonly string[] dataFolderList;
-        private readonly string[] pluginFolderList;
 
         private static Framework f;
 
