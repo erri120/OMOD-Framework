@@ -1,11 +1,91 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace OMODFramework.Scripting
 {
+    public interface IScriptRunnerFunctions
+    {
+        /// <summary>
+        /// Warns the user about something
+        /// </summary>
+        /// <param name="message">The warning</param>
+        void Warn(string message);
+        /// <summary>
+        /// Creates a Yes-No dialog. If the user pressed No than return 0,
+        /// if the user pressed Yes than return 1
+        /// </summary>
+        /// <param name="text">Text in the dialog</param>
+        /// <param name="title">Title of the dialog</param>
+        /// <returns>No: returns 0, Yes: returns 1</returns>
+        int DialogYesNo(string text, string title);
+        /// <summary>
+        /// Checks if a file relative to the oblivion game folder exists
+        /// </summary>
+        /// <param name="filePath">Relative path based from the oblivion game folder,
+        /// eg: 'data//meshes//something//nice.nif'</param>
+        /// <returns>True if the file exists, false if it doesn't</returns>
+        bool ExistsFile(string filePath);
+        /// <summary>
+        /// Returns the version of a file relative to the oblivion game folder
+        /// </summary>
+        /// <param name="filePath">Relative path based from the oblivion game folder,
+        /// eg: 'Oblivion.exe', 'obse_loader.exe', 'data//obse//plugins//obge//obge.dll'</param>
+        /// <returns>Returns the FileVersionInfo of a file</returns>
+        FileVersionInfo GetFileVersion(string filePath);
+        /// <summary>
+        /// Opens a select Dialog with multiple choices, can either be single or multi select.
+        /// Returns an array containing the indexes of the selected items
+        /// </summary>
+        /// <param name="items">The items to be choosen from</param>
+        /// <param name="title">The title of the Dialog</param>
+        /// <param name="multiSelect">True for selecting multiple items, False for selecting one item</param>
+        /// <param name="previewImagePaths">Absolute paths to the images of the items, when clicking an item 
+        /// load the image and display it somewhere in the dialog. If this is empty than no images are available and 
+        /// you only need to display descriptions</param>
+        /// <param name="descriptions">Descriptions of the items, same as previewImagePaths: when the 
+        /// user selects an items display the description somewhere.</param>
+        /// <returns>Returns an array containing the indexes of the selected items</returns>
+        int[] DialogSelect(string[] items, string title, bool multiSelect, string[] previewImagePaths, string[] descriptions);
+        /// <summary>
+        /// Shows the user a message
+        /// </summary>
+        /// <param name="text">Text of the message</param>
+        /// <param name="title">Title of the message Dialog</param>
+        void Message(string text, string title);
+        /// <summary>
+        /// Displays an image
+        /// </summary>
+        /// <param name="imageFilePath">Absolute path of the image</param>
+        void DisplayImage(string imageFilePath);
+        /// <summary>
+        /// Displays text
+        /// </summary>
+        /// <param name="text">Text to be displayed</param>
+        /// <param name="title">Title of the Dialog</param>
+        void DisplayText(string text, string title);
+        /// <summary>
+        /// Opens a Dialog for inputing text
+        /// </summary>
+        /// <param name="title">Title of the Dialog</param>
+        /// <param name="initialContent">Initial content, can be empty</param>
+        /// <returns>The user input text</returns>
+        string InputString(string title, string initialContent);
+        /// <summary>
+        /// Returns a list of all esp names WITHOUT EXTENSION (active or not, we dont care)
+        /// </summary>
+        /// <returns>Returns a list of all esp names</returns>
+        string[] GetActiveESPNames();
+        /// <summary>
+        /// Returns the absolute path of a file, do note that this is used for getting the paths
+        /// that should be in the oblivion folder but arent (looking at you MO2). The path argument
+        /// will give you a relative path based from the oblivion game folder. The file will not 
+        /// be changed but read
+        /// </summary>
+        /// <param name="path">Relative path of the file based from the oblivion game folder</param>
+        /// <returns>Returns the absolute path of the requested file</returns>
+        string GetFileFromPath(string path);
+    }
+
     public class ScriptRunner
     {
         internal ScriptType type;
@@ -13,11 +93,18 @@ namespace OMODFramework.Scripting
         internal string DataPath;
         internal string PluginsPath;
         internal OMOD OMOD;
+        internal IScriptRunnerFunctions ScriptRunnerFunctions;
         internal ScriptReturnData srd;
 
-        public ScriptRunner(OMOD omod)
+        /// <summary>
+        /// The ScriptRunner is responsible for running a script inside an OMOD
+        /// </summary>
+        /// <param name="omod">The OMOD with the script to be executed</param>
+        /// <param name="scriptRunnerFunctions">All callback functions for execution</param>
+        public ScriptRunner(OMOD omod, IScriptRunnerFunctions scriptRunnerFunctions)
         {
             OMOD = omod;
+            ScriptRunnerFunctions = scriptRunnerFunctions;
             script = omod.GetScript();
             if ((byte)script[0] >= (byte)ScriptType.Count) type = ScriptType.obmmScript;
             else
@@ -31,73 +118,20 @@ namespace OMODFramework.Scripting
         }
 
         /// <summary>
-        /// Executes the install script inside the OMOD
+        /// Executes the script
         /// </summary>
-        /// <param name="warn">
-        /// Displays a warning (inputs: string - the warning)
-        /// </param>
-        /// <param name="dialogYesNo">
-        /// Displays a yes-no dialog (inputs: string - text; string - title | output: int - 0=no,1=yes)
-        /// </param>
-        /// <param name="existsFile">
-        /// Checks if a file exists in the oblivion folder (inputs: string - path to the file | output: bool)
-        /// </param>
-        /// <param name="getFileVersion">
-        /// Gets the version of a file (inputs: string - path to the file | output: FileVersionInfo - the version)
-        /// </param>
-        /// <param name="dialogSelect">
-        /// Displays select dialog (inputs: string[] - items to display; string - title; bool - multi(true) or single(false)
-        /// select; string[] - paths to preview pictures; string[] description of the items | output: int[] - list of  
-        /// indexes of the selected items)
-        /// </param>
-        /// <param name="message">
-        /// Displays a message (inputs: string - text; string - title)
-        /// </param>
-        /// <param name="displayImage">
-        /// Displays and image (inputs: string - path to the image)
-        /// </param>
-        /// <param name="displayText">
-        /// Displays text (inputs: string - title; string - contents)
-        /// </param>
-        /// <param name="inputString">
-        /// Opens a text editor for string input (inputs: string - title, string - initial contents | output:
-        /// string - either the user input or null if aborted)
-        /// </param>
-        /// <param name="getActiveESPNames">
-        /// Returns all active esp names !without extension!
-        /// (output: string[] - list of all esp names)
-        /// </param>
-        /// <param name="getFileFromPath">
-        /// Returns the absolute path of a file
-        /// (input: path to the file relative of the data folder | output: the absolute path of the file)
-        /// </param>
-        public void ExecuteScript(Action<string> warn,
-            Func<string, string, int> dialogYesNo,
-            Func<string, bool> existsFile,
-            Func<string, System.Diagnostics.FileVersionInfo> getFileVersion,
-            Func<string[], string, bool, string[], string[], int[]> dialogSelect,
-            Action<string, string> message,
-            Action<string> displayImage,
-            Action<string, string> displayText,
-            Func<string, string, string> inputString,
-            Func<string[]> getActiveESPNames,
-            Func<string, string> getFileFromPath)
+        public void ExecuteScript()
         {
             srd = new ScriptReturnData();
 
             OblivionModManager.Scripting.ScriptFunctions sf = new OblivionModManager.Scripting.ScriptFunctions(
-                srd, DataPath, PluginsPath,OMOD.GetFramework(), warn,
-                dialogYesNo, existsFile, getFileVersion, dialogSelect,
-                message, displayImage, displayText, inputString,
-                getActiveESPNames, getFileFromPath);
+                srd, DataPath, PluginsPath,OMOD.GetFramework(), ScriptRunnerFunctions);
 
             switch (type)
             {
                 case ScriptType.obmmScript:
                     srd = OBMMScriptHandler.Execute(
-                        OMOD.GetFramework(), script, DataPath, PluginsPath,
-                        warn, dialogYesNo, existsFile, getFileVersion, dialogSelect, message, displayImage,
-                        displayText, inputString);
+                        OMOD.GetFramework(), script, DataPath, PluginsPath, ScriptRunnerFunctions);
                     break;
                 case ScriptType.Python:
                     throw new NotImplementedException();

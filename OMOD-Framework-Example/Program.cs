@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using OMODFramework;
 using OMODFramework.Scripting;
@@ -6,6 +7,64 @@ namespace OMOD_Framework_Example
 {
     class Program
     {
+        internal class ScriptFunctions : IScriptRunnerFunctions
+        {
+            public int[] DialogSelect(string[] items, string title, bool multiSelect, string[] previewImagePaths, string[] descriptions)
+            {
+                return new int[1] { 0 };
+            }
+
+            public int DialogYesNo(string text, string title)
+            {
+                return 1;
+            }
+
+            public void DisplayImage(string imageFilePath)
+            {
+                Console.WriteLine(imageFilePath);
+            }
+
+            public void DisplayText(string text, string title)
+            {
+                Console.WriteLine(text);
+            }
+
+            public bool ExistsFile(string filePath)
+            {
+                return true;
+            }
+
+            public string[] GetActiveESPNames()
+            {
+                return new string[1] { "oblivion.esm" };
+            }
+
+            public string GetFileFromPath(string path)
+            {
+                return "";
+            }
+
+            public FileVersionInfo GetFileVersion(string filePath)
+            {
+                return FileVersionInfo.GetVersionInfo(filePath);
+            }
+
+            public string InputString(string title, string initialContent)
+            {
+                return "Hi!";
+            }
+
+            public void Message(string text, string title)
+            {
+                Console.WriteLine(text);
+            }
+
+            public void Warn(string message)
+            {
+                Console.WriteLine(message);
+            }
+        }
+
         static void Main(string[] args)
         {
             Framework f = new Framework();
@@ -32,26 +91,14 @@ namespace OMOD_Framework_Example
             String data = omod.ExtractDataFiles(); //extracts all data files and returns the path to them
             String plugins = omod.ExtractPlugins(); //extracts all plugins and returns the path to them
 
-            // running the script will require the use of the ScriptRunner class:
-            ScriptRunner sr = new ScriptRunner(omod);
+            // before you can run the script, you have to create a class that implements the interface
+            // IScriptRunnerFunctions. In this example I created a class called ScriptFunctions that 
+            // implements these functions and uses no real data
+            ScriptFunctions a = new ScriptFunctions();
 
-            // executing the script requires a lot of arguments
-            // in this example we don't have any UI and install everything without user input:
-            string[] dummyESPList = new string[1] { "oblivion.esm" };
-            sr.ExecuteScript(
-                (s1) => { Console.WriteLine(s1); },                                     //warning
-                (s1, s2) => { return 1; },                                              //dialogYesNo
-                (s1) => { return true; },                                               //existsFile
-                null,                                                                   // getFileVersion
-                (s1, s2, b1, s3, s4) => { return new int[1] { 1 }; },                   //dialogSelect
-                (s1, s2) => { Console.WriteLine($"Title: {s2}, msg: {s1}"); },          //message
-                null,                                                                   //displayImage
-                (s1,s2) => { Console.WriteLine($"Title: {s2}, msg: {s1}"); },           //displayText
-                (s1, s2) => { return "Hi"; },                                           //inputString
-                () => { return dummyESPList; },                                         //getActiveESPNames
-                (s1) => { return Path.Combine(data, s1); }                              //getFileFromPath
-                );
-            // the script will run and do its magic
+            // running the script requires the use of the ScriptRunner class:
+            ScriptRunner sr = new ScriptRunner(omod, a);
+            sr.ExecuteScript(); // the script will run and do its magic
         }
     }
 }

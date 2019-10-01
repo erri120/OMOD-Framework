@@ -21,99 +21,34 @@ namespace OblivionModManager.Scripting
 
         private static Framework f;
 
-        /// <summary>
-        /// Creates a popup warn message
-        /// string: message
-        /// </summary>
         private static Action<string> Warn;
-        /// <summary>
-        /// Creates a yes-no dialog
-        /// string: message
-        /// string: title
-        /// int: return value (0: no, 1: yes)
-        /// </summary>
         private static Func<string, string, int> IDialogYesNo;
-        /// <summary>
-        /// Checks if a file exists in the main oblivion folder
-        /// string: relative path of the file
-        /// bool: return value (false: doesnt exist, true: exists)
-        /// </summary>
         private static Func<string, bool> ExistsFile;
-        /// <summary>
-        /// Returns the version of a file
-        /// string: relative path of the file
-        /// FileVersionInfo: return value
-        /// </summary>
-        private static Func<string, System.Diagnostics.FileVersionInfo> GetFileVersion;
-        /// <summary>
-        /// Creates a select dialog
-        /// string[]: list of all items to be displayed
-        /// string: the title of the dialog
-        /// bool: multi or single select
-        /// string[]: paths to preview pictures
-        /// string[]: descriptions of the items
-        /// int[]: return value | the index of the selected items
-        /// </summary>
+        private static Func<string, FileVersionInfo> GetFileVersion;
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
-        /// <summary>
-        /// Displays a message in a window
-        /// string: input value the text
-        /// string: input value the title (can be null if no title given)
-        /// </summary>
         private static Action<string, string> IMessage;
-        /// <summary>
-        /// Displays an image
-        /// string: absolute path to the image
-        /// </summary>
         private static Action<string> IDisplayImage;
-        /// <summary>
-        /// Displays text
-        /// string: title
-        /// string: initial contents
-        /// </summary>
         private static Action<string, string> IDisplayText;
-        /// <summary>
-        /// Opens a text editor to input a string
-        /// string: title
-        /// string: inital contents
-        /// string: return value either the user input or null if operation got aborted
-        /// </summary>
         private static Func<string, string, string> IInputString;
-        /// <summary>
-        /// Returns all active esp names
-        /// </summary>
         private static Func<string[]> IGetActiveESPNames;
-        /// <summary>
-        /// Returns the absolute path of a file
-        /// </summary>
         private static Func<string, string> IGetFile;
 
         internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath,
             Framework _f,
-            Action<string> warn,
-            Func<string, string, int> dialogYesNo,
-            Func<string, bool> existsFile,
-            Func<string, FileVersionInfo> getFileVersion,
-            Func<string[], string, bool, string[], string[], int[]> dialogSelect,
-            Action<string, string> message,
-            Action<string> displayImage,
-            Action<string, string> displayText,
-            Func<string, string, string> inputString,
-            Func<string[]> getActiveESPNames,
-            Func<string, string> getFileFromPath)
+            OMODFramework.Scripting.IScriptRunnerFunctions scriptRunnerFunctions)
         {
             f = _f;
-            Warn = warn;
-            IDialogYesNo = dialogYesNo;
-            ExistsFile = existsFile;
-            GetFileVersion = getFileVersion;
-            DialogSelect = dialogSelect;
-            IMessage = message;
-            IDisplayImage = displayImage;
-            IDisplayText = displayText;
-            IInputString = inputString;
-            IGetActiveESPNames = getActiveESPNames;
-            IGetFile = getFileFromPath;
+            Warn = scriptRunnerFunctions.Warn;
+            IDialogYesNo = scriptRunnerFunctions.DialogYesNo;
+            ExistsFile = scriptRunnerFunctions.ExistsFile;
+            GetFileVersion = scriptRunnerFunctions.GetFileVersion;
+            DialogSelect = scriptRunnerFunctions.DialogSelect;
+            IMessage = scriptRunnerFunctions.Message;
+            IDisplayImage = scriptRunnerFunctions.DisplayImage;
+            IDisplayText = scriptRunnerFunctions.DisplayText;
+            IInputString = scriptRunnerFunctions.InputString;
+            IGetActiveESPNames = scriptRunnerFunctions.GetActiveESPNames;
+            IGetFile = scriptRunnerFunctions.GetFileFromPath;
 
             this.srd = srd;
             DataFiles = dataFilesPath;
