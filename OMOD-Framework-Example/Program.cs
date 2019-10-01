@@ -108,7 +108,7 @@ namespace OMOD_Framework_Example
             f.SetDLLPath(@"M:\Projects\OMOD-Extractor\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\NoMaaM Breathing Idles V1 OMOD-40462-1-0.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\Robert Male Body Replacer v52 OMOD-40532-1.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
@@ -162,9 +162,30 @@ namespace OMOD_Framework_Example
             foreach (string s in srd.IgnorePlugins) { Framework.strArrayRemove(InstallPlugins, s); }
             // last is going through the CopyPlugins list
             // in case you ask why there is a CopyPlugins list and what is does:
-            // it's designed to copy stuff before installing it. Its copying files from the temp folder
-            // to another place in the temp folder. Do note that this is rarely used (never seen it)
-            // and a relic of old times (aka old scripts might use this)
+            // (it makes more sense with data files but whatever)
+            // if the omod has eg this folder structure:
+            //
+            // installfiles/
+            //              Option1/
+            //                      Meshes/
+            //                      Textures/
+            //              Option2/
+            //                      Meshes/
+            //                      Textures/
+            // this is nice for writing the installation script as you kan keep track of what option
+            // has what files
+            // Authors than call CopyPlugins/Data and move the files from the options folder to
+            // the root folder:
+            //
+            // meshes/
+            // textures/
+            // installfiles/
+            //              Option1/
+            //                      Meshes/
+            //                      Textures/
+            //              Option2/
+            //                      Meshes/
+            //                      Textures/
             foreach (ScriptCopyDataFile scd in srd.CopyPlugins)
             {
                 // check if the file you want to copy actually exists
