@@ -1,11 +1,8 @@
-﻿using System;
-using System.Windows.Forms;
-using System.IO;
+﻿using OMODFramework;
+using System;
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using OMODFramework;
-using OMODFramework.Classes;
+using System.IO;
+using System.Windows.Forms;
 
 namespace OblivionModManager.Scripting
 {
@@ -76,7 +73,8 @@ namespace OblivionModManager.Scripting
         }
 
         private string[] GetDirectoryPaths(string path, string pattern, bool recurse)
-        {;
+        {
+            ;
             return Directory.GetDirectories(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
@@ -89,7 +87,7 @@ namespace OblivionModManager.Scripting
 
         #region Functions
 
-        
+
         public void CancelDataFileCopy(string file)
         {
             CheckPathSafety(file);
@@ -129,7 +127,7 @@ namespace OblivionModManager.Scripting
         {
             ConflictsWith(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, level, false);
         }
-        public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex){ }
+        public void ConflictsWith(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, ConflictLevel level, bool regex) { }
         public void CopyDataFile(string from, string to)
         {
             CheckDataSafety(from);
@@ -190,7 +188,7 @@ namespace OblivionModManager.Scripting
         {
             DependsOn(name, minMajorVersion, minMinorVersion, maxMajorVersion, maxMinorVersion, comment, false);
         }
-        public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex){ }
+        public void DependsOn(string name, int minMajorVersion, int minMinorVersion, int maxMajorVersion, int maxMinorVersion, string comment, bool regex) { }
         public bool DialogYesNo(string msg) { return DialogYesNo(msg, "Question"); }
         public bool DialogYesNo(string msg, string title) { return IDialogYesNo(msg, title) == 1; }
         public void DisplayImage(string path) { DisplayImage(path, null); }
@@ -299,7 +297,7 @@ namespace OblivionModManager.Scripting
         }
         public bool GetDisplayWarnings() { return false; }
         public string[] GetExistingEspNames() { return IGetActiveESPNames(); }
-        public Version GetOBGEVersion() { return new Version(GetFileVersion(Path.Combine("data","obse","plugins","obge.dll")).FileVersion); }
+        public Version GetOBGEVersion() { return new Version(GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll")).FileVersion); }
         public Version GetOblivionVersion() { return new Version(GetFileVersion("oblivion.exe").FileVersion); }
         public Version GetOBMMVersion() { return new Version(f.OBMMFakeMajorVersion, f.OBMMFakeMinorVersion, f.OBMMFakeBuildNumber, 0); }
         public Version GetOBSEPluginVersion(string plugin)
@@ -352,9 +350,9 @@ namespace OblivionModManager.Scripting
             if (!Framework.strArrayContains(srd.InstallPlugins, name)) srd.InstallPlugins.Add(name);
         }
         public bool IsSimulation() { return false; }
-        public void LoadAfter(string plugin1, string plugin2) {}
-        public void LoadBefore(string plugin1, string plugin2) {}
-        public void LoadEarly(string plugin) {}
+        public void LoadAfter(string plugin1, string plugin2) { }
+        public void LoadBefore(string plugin1, string plugin2) { }
+        public void LoadEarly(string plugin) { }
         public void Message(string msg) { IMessage(msg, null); }
         public void Message(string msg, string title) { IMessage(msg, title); }
         public void PatchDataFile(string from, string to, bool create)
@@ -416,7 +414,8 @@ namespace OblivionModManager.Scripting
             }
             int[] r = DialogSelect(items, title, many, previews, descs);
             string[] result = new string[r.Length];
-            for (int i = 0; i < r.Length; i++){
+            for (int i = 0; i < r.Length; i++)
+            {
                 result[i] = items[r[i]];
             }
             return result;

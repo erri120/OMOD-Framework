@@ -1,5 +1,5 @@
-﻿using System;
-using OMODFramework;
+﻿using OMODFramework;
+using System;
 
 namespace OblivionModManager.Scripting
 {

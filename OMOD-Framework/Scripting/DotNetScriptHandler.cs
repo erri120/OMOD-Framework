@@ -1,8 +1,8 @@
 ﻿using System;
-using System.IO;
-using System.Security.Policy;
 using System.CodeDom.Compiler;
+using System.IO;
 using System.Reflection;
+using System.Security.Policy;
 using sList = System.Collections.Generic.List<string>;
 
 namespace OMODFramework.Scripting
@@ -42,8 +42,8 @@ namespace OMODFramework.Scripting
         }
 
         private static byte[] Compile(
-            string code, out string[] errors, 
-            out string[] warnings, out string stdout, 
+            string code, out string[] errors,
+            out string[] warnings, out string stdout,
             ScriptType language)
         {
             CompilerResults results;
@@ -93,13 +93,13 @@ namespace OMODFramework.Scripting
         }
 
         private static void Execute(
-            string script, ref OblivionModManager.Scripting.IScriptFunctions functions, 
+            string script, ref OblivionModManager.Scripting.IScriptFunctions functions,
             ScriptType language)
         {
             byte[] data = Compile(script, language);
             if (data == null) return;
             Assembly asm = AppDomain.CurrentDomain.Load(data, null);
-            if(!(asm.CreateInstance("Script") is OblivionModManager.Scripting.IScript s))
+            if (!(asm.CreateInstance("Script") is OblivionModManager.Scripting.IScript s))
             {
                 throw new Exception("C# or vb script did not contain a 'Script' class in the root namespace, or IScript was not implemented");
             }

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 namespace OMODFramework
 {
     public class Framework
@@ -43,9 +43,9 @@ namespace OMODFramework
         internal static FileStream CreateTempFile() { return CreateTempFile(out _); }
         internal static FileStream CreateTempFile(out string path)
         {
-            for(int i = 0; i < 32000; i++)
+            for (int i = 0; i < 32000; i++)
             {
-                if (!File.Exists(Path.Combine(TempDir,"tmp_" + i.ToString())))
+                if (!File.Exists(Path.Combine(TempDir, "tmp_" + i.ToString())))
                 {
                     path = Path.Combine(TempDir, "tmp_" + i.ToString());
                     return File.Create(path);
@@ -59,8 +59,8 @@ namespace OMODFramework
             {
                 if (!Directory.Exists(Path.Combine(TempDir + i.ToString())))
                 {
-                    Directory.CreateDirectory(Path.Combine(TempDir,i.ToString()));
-                    return Path.Combine(TempDir,i.ToString());
+                    Directory.CreateDirectory(Path.Combine(TempDir, i.ToString()));
+                    return Path.Combine(TempDir, i.ToString());
                 }
             }
             throw new Exception("Could not create a new temp folder because directory is full!");

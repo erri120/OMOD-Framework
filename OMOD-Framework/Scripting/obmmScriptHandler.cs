@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 namespace OMODFramework.Scripting
 {
     internal static class OBMMScriptHandler
@@ -209,9 +209,9 @@ namespace OMODFramework.Scripting
         private static Func<string, string, string> InputString;
 
 
-        internal static ScriptReturnData Execute(Framework _f, 
-            string InputScript, 
-            string DataPath, 
+        internal static ScriptReturnData Execute(Framework _f,
+            string InputScript,
+            string DataPath,
             string PluginsPath,
             IScriptRunnerFunctions scriptRunnerFunctions)
         {
@@ -726,7 +726,7 @@ namespace OMODFramework.Scripting
                         Warn("Missing arguments to function 'If DataFileExists'");
                         return false;
                     }
-                    return ExistsFile(Path.Combine("data",line[2]));
+                    return ExistsFile(Path.Combine("data", line[2]));
                 case "VersionGreaterThan":
                     if (line.Length == 2)
                     {
@@ -787,7 +787,7 @@ namespace OMODFramework.Scripting
                     }
                 case "GraphicsExtenderPresent":
                     if (line.Length > 2) Warn("Unexpected arguments to 'If GraphicsExtenderPresent'");
-                    return ExistsFile(Path.Combine("data","obse","plugins","obge.dll"));
+                    return ExistsFile(Path.Combine("data", "obse", "plugins", "obge.dll"));
                 case "GraphicsExtenderNewerThan":
                     if (line.Length == 2)
                     {
@@ -942,7 +942,7 @@ namespace OMODFramework.Scripting
             }
             int[] dialogResult = DialogSelect(Items, title, many, Previews, Descs);
             string[] result = new string[dialogResult.Length];
-            for(int i = 0; i < dialogResult.Length; i++)
+            for (int i = 0; i < dialogResult.Length; i++)
             {
                 result[i] = $"Case {Items[dialogResult[i]]}";
             }
@@ -1215,7 +1215,7 @@ namespace OMODFramework.Scripting
 
         private static void FunctionLoadOrder(string[] line, bool LoadAfter) { }
 
-        private static void FunctionConflicts(string[] line, bool Conflicts, bool Regex) {}
+        private static void FunctionConflicts(string[] line, bool Conflicts, bool Regex) { }
 
         private static void FunctionModifyInstall(string[] line, bool plugins, bool Install)
         {

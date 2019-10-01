@@ -125,7 +125,7 @@ namespace OMODFramework.Scripting
             srd = new ScriptReturnData();
 
             OblivionModManager.Scripting.ScriptFunctions sf = new OblivionModManager.Scripting.ScriptFunctions(
-                srd, DataPath, PluginsPath,OMOD.GetFramework(), ScriptRunnerFunctions);
+                srd, DataPath, PluginsPath, OMOD.GetFramework(), ScriptRunnerFunctions);
 
             switch (type)
             {

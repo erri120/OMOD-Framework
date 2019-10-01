@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using ICSharpCode.SharpZipLib.Zip;
+﻿using ICSharpCode.SharpZipLib.Zip;
 using OMODFramework.Classes;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace OMODFramework
 {
@@ -194,7 +194,7 @@ namespace OMODFramework
         }
         internal void Close()
         {
-            if(pD.modFile != null)
+            if (pD.modFile != null)
             {
                 pD.modFile.Close();
                 pD.modFile = null;
@@ -206,7 +206,7 @@ namespace OMODFramework
             using (BinaryReader br = new BinaryReader(TempStream))
             {
                 List<string> ar = new List<string>();
-                while(br.PeekChar() != -1)
+                while (br.PeekChar() != -1)
                 {
                     string s = br.ReadString();
                     br.ReadUInt32();
@@ -250,7 +250,7 @@ namespace OMODFramework
                 else TempStream = new MemoryStream((int)ze.Size);
                 byte[] buffer = new byte[4096];
                 int i;
-                while((i = file.Read(buffer, 0, 4096)) > 0)
+                while ((i = file.Read(buffer, 0, 4096)) > 0)
                 {
                     TempStream.Write(buffer, 0, i);
                 }
