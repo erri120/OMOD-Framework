@@ -16,9 +16,6 @@ namespace OMODFramework
         internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(), "obmm");
         internal static string OblivionDir { get; set; }
         internal static string DataDir { get; set; }
-        internal static string OblivionINIPath { get; set; }
-        internal static string OblivionESPPath { get; set; }
-        internal static string OutputDir { get; set; }
         #endregion
 
         #region OBMM Functions
@@ -52,26 +49,6 @@ namespace OMODFramework
             }
             return false;
         }
-        /*
-        internal static bool strArrayContains(List<DataFileInfo> a, string s)
-        {
-            s = s.ToLower();
-            for (int i = 0; i < a.Count; i++)
-            {
-                if (a[i].LowerFileName == s) return true;
-            }
-            return false;
-        }*/
-        /*
-        internal static DataFileInfo strArrayGet(DataFileInfo[] a, string s)
-        {
-            s = s.ToLower();
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (a[i].LowerFileName == s) return a[i];
-            }
-            return null;
-        }*/
         internal static void strArrayRemove(List<string> a, string s)
         {
             s = s.ToLower();
@@ -84,20 +61,7 @@ namespace OMODFramework
                 }
             }
         }
-        /*
-        internal static void strArrayRemove(List<DataFileInfo> a, string s)
-        {
-            s = s.ToLower();
-            for (int i = 0; i < a.Count; i++)
-            {
-                if (a[i].LowerFileName == s)
-                {
-                    a.RemoveAt(i);
-                    return;
-                }
-            }
-        }*/
-        internal static FileStream CreateTempFile() { return CreateTempFile(out string s); }
+        internal static FileStream CreateTempFile() { return CreateTempFile(out _); }
         internal static FileStream CreateTempFile(out string path)
         {
             for(int i = 0; i < 32000; i++)
@@ -137,52 +101,6 @@ namespace OMODFramework
         #endregion
 
         #region API Functions
-
-        /// <summary>
-        /// Sets all internal variables if you don't want to call each setter separately,
-        /// all paths have to be absolute paths
-        /// </summary>
-        /// <param name="version">Syntax: "Major.Minor.Build"</param>
-        /// <param name="oblivionPath">Path to the Oblivion game folder</param>
-        /// <param name="oblivionDataPath">Path to the Oblivion data folder</param>
-        /// <param name="oblivionINIPath">Path to the Oblivion.ini file</param>
-        /// <param name="oblivionPluginsPath">Path to the plugins.txt file</param>
-        /// <param name="outputPath">Path to the Output folder</param>
-        /// <param name="tempPath">Path to the Temp folder</param>
-        public void Setup(string version, string oblivionPath, string oblivionDataPath, string oblivionINIPath,
-            string oblivionPluginsPath, string outputPath, string tempPath)
-        {
-            Byte.TryParse(version.Split('.')[0], out byte major);
-            Byte.TryParse(version.Split('.')[1], out byte minor);
-            Byte.TryParse(version.Split('.')[2], out byte build);
-            SetOBMMVersion(major, minor, build);
-            SetOblivionDirectory(oblivionPath);
-            SetDataDirectory(oblivionDataPath);
-            SetOblivionINIPath(oblivionINIPath);
-            SetPluginsListPath(oblivionPluginsPath);
-            SetOutputDirectory(outputPath);
-            SetTempDirectory(tempPath);
-        }
-
-        /// <summary>
-        /// Sets the internal path to the output directory of any write action, needs to be an absolute path
-        /// </summary>
-        /// <param name="path">Path to the output folder</param>
-        public void SetOutputDirectory(string path) { OutputDir = path; }
-
-        /// <summary>
-        /// Sets the internal path to the plugins.txt file normally found in the AppData/Oblivion folder,
-        /// needs to be an absolute path
-        /// </summary>
-        /// <param name="path">Path to the plugins.txt file</param>
-        public void SetPluginsListPath(string path) { OblivionESPPath = path; }
-
-        /// <summary>
-        /// Sets the internal path to the Oblivion.ini file normally found in the My Games folder,
-        /// needs to be an absolute path
-        /// </summary>
-        /// <param name="path">Path to the Oblivion.ini file</param>
-        public void SetOblivionINIPath(string path) { OblivionINIPath = path; }
 
         /// <summary>
         /// Sets the internal path to the Oblivion game folder, needs to be an absolute path
