@@ -101,7 +101,7 @@ namespace OMODFramework.Scripting
         /// </summary>
         /// <param name="omod">The OMOD with the script to be executed</param>
         /// <param name="scriptRunnerFunctions">All callback functions for execution</param>
-        public ScriptRunner(OMOD omod, IScriptRunnerFunctions scriptRunnerFunctions)
+        public ScriptRunner(ref OMOD omod, ref IScriptRunnerFunctions scriptRunnerFunctions)
         {
             OMOD = omod;
             ScriptRunnerFunctions = scriptRunnerFunctions;
@@ -120,7 +120,7 @@ namespace OMODFramework.Scripting
         /// <summary>
         /// Executes the script
         /// </summary>
-        public void ExecuteScript()
+        public ScriptReturnData ExecuteScript()
         {
             srd = new ScriptReturnData();
 
@@ -130,9 +130,8 @@ namespace OMODFramework.Scripting
             switch (type)
             {
                 case ScriptType.obmmScript:
-                    srd = OBMMScriptHandler.Execute(
+                    return OBMMScriptHandler.Execute(
                         OMOD.GetFramework(), script, DataPath, PluginsPath, ScriptRunnerFunctions);
-                    break;
                 case ScriptType.Python:
                     throw new NotImplementedException();
                 case ScriptType.cSharp:
@@ -142,6 +141,8 @@ namespace OMODFramework.Scripting
                     DotNetScriptHandler.ExecuteVB(script, sf);
                     break;
             }
+
+            return srd;
         }
 
         /// <summary>
