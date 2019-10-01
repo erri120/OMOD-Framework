@@ -40,27 +40,6 @@ namespace OMODFramework
             if (s.EndsWith(".")) return false;
             return true;
         }
-        internal static bool strArrayContains(List<string> a, string s)
-        {
-            s = s.ToLower();
-            foreach (string s2 in a)
-            {
-                if (s2.ToLower() == s) return true;
-            }
-            return false;
-        }
-        internal static void strArrayRemove(List<string> a, string s)
-        {
-            s = s.ToLower();
-            for (int i = 0; i < a.Count; i++)
-            {
-                if (a[i].ToLower() == s)
-                {
-                    a.RemoveAt(i);
-                    return;
-                }
-            }
-        }
         internal static FileStream CreateTempFile() { return CreateTempFile(out _); }
         internal static FileStream CreateTempFile(out string path)
         {
@@ -101,7 +80,38 @@ namespace OMODFramework
         #endregion
 
         #region API Functions
-
+        /// <summary>
+        /// Checks if a string is inside a string array
+        /// </summary>
+        /// <param name="a">The string array</param>
+        /// <param name="s">The string</param>
+        /// <returns></returns>
+        public static bool strArrayContains(List<string> a, string s)
+        {
+            s = s.ToLower();
+            foreach (string s2 in a)
+            {
+                if (s2.ToLower() == s) return true;
+            }
+            return false;
+        }
+        /// <summary>
+        /// Removes a string from a string array
+        /// </summary>
+        /// <param name="a">The string array</param>
+        /// <param name="s">The string to be removed</param>
+        public static void strArrayRemove(List<string> a, string s)
+        {
+            s = s.ToLower();
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i].ToLower() == s)
+                {
+                    a.RemoveAt(i);
+                    return;
+                }
+            }
+        }
         /// <summary>
         /// Sets the internal path to the Oblivion game folder, needs to be an absolute path
         /// </summary>
