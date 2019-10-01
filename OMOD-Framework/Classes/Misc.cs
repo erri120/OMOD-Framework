@@ -3,46 +3,91 @@ using System.Collections.Generic;
 
 namespace OMODFramework
 {
-    internal enum CompressionType : byte { SevenZip, Zip }
-    internal enum CompressionLevel : byte { VeryHigh, High, Medium, Low, VeryLow, None }
+    /// <summary>
+    /// Type used to compress data.crc and plugins.crc
+    /// </summary>
+    public enum CompressionType : byte { SevenZip, Zip }
+    /// <summary>
+    /// Conflict level between files
+    /// </summary>
     public enum ConflictLevel { Active, NoConflict, MinorConflict, MajorConflict, Unusable }
-    public enum DeactiveStatus { Allow, WarnAgainst, Disallow }
-    internal enum ScriptType { obmmScript, Python, cSharp, vb, Count }
+    /// <summary>
+    /// The script type of the OMOD installation script
+    /// </summary>
+    public enum ScriptType { obmmScript, Python, cSharp, vb, Count }
 
-    internal struct ScriptEspWarnAgainst
+    public class ScriptReturnData
     {
-        internal string Plugin;
-        internal DeactiveStatus Status;
+        /// <summary>
+        /// If the installation is canceled
+        /// </summary>
+        public bool CancelInstall = false;
+        /// <summary>
+        /// If all data files are to be installed
+        /// </summary>
+        public bool InstallAllData = true;
+        /// <summary>
+        /// If all plugins files are to be installed
+        /// </summary>
+        public bool InstallAllPlugins = true;
+        /// <summary>
+        /// List with absolute paths of all data files to be installed
+        /// </summary>
+        public readonly List<string> InstallData = new List<string>();
+        /// <summary>
+        /// List with absolute paths of all plugins to be installed
+        /// </summary>
+        public readonly List<string> InstallPlugins = new List<string>();
+        /// <summary>
+        /// List with absolute paths of all data files not to be installed
+        /// </summary>
+        public readonly List<string> IgnoreData = new List<string>();
+        /// <summary>
+        /// List with absolute paths of all plguins not to be installed
+        /// </summary>
+        public readonly List<string> IgnorePlugins = new List<string>();
+        /// <summary>
+        /// Destination of all data files to be copied
+        /// </summary>
+        public readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
+        /// <summary>
+        /// Destination of all plugins to be copied
+        /// </summary>
+        public readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
+        public readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
+        public readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+        public readonly List<SDPEditInfo> SDPEdits = new List<SDPEditInfo>();
+    }
 
-        internal ScriptEspWarnAgainst(string plugin, DeactiveStatus status)
+    public struct ScriptCopyDataFile
+    {
+        public readonly string CopyFrom;
+        public readonly string CopyTo;
+        /// <summary>
+        /// Struct with information about what data file to copy where to
+        /// </summary>
+        /// <param name="from">The Data file to copy from the temp folder</param>
+        /// <param name="to">The path to the file to copy to</param>
+        public ScriptCopyDataFile(string from, string to)
         {
-            Plugin = plugin;
-            Status = status;
+            CopyFrom = from;
+            CopyTo = to;
         }
     }
 
-    internal struct ScriptCopyDataFile
+    public struct PluginLoadInfo
     {
-        internal readonly string CopyFrom;
-        internal readonly string CopyTo;
-        internal readonly string hCopyFrom;
-        internal readonly string hCopyTo;
-        internal ScriptCopyDataFile(string from, string to)
-        {
-            CopyFrom = from.ToLower();
-            CopyTo = to.ToLower();
-            hCopyFrom = from;
-            hCopyTo = to;
-        }
-    }
+        public string Plugin;
+        public string Target;
+        public bool LoadAfter;
 
-    internal struct PluginLoadInfo
-    {
-        internal string Plugin;
-        internal string Target;
-        internal bool LoadAfter;
-
-        internal PluginLoadInfo(string plugin, string target, bool loadAfter)
+        /// <summary>
+        /// Struct with information about what plugin to load after/early than another
+        /// </summary>
+        /// <param name="plugin">The plugin</param>
+        /// <param name="target">The target that needs to be loaded after/earlier than the plugin</param>
+        /// <param name="loadAfter">Load after or earlier</param>
+        public PluginLoadInfo(string plugin, string target, bool loadAfter)
         {
             Plugin = plugin;
             Target = target;
@@ -50,225 +95,43 @@ namespace OMODFramework
         }
     }
 
-    internal struct ScriptEspEdit
-    {
-        internal readonly bool IsGMST;
-        internal readonly string Plugin;
-        internal readonly string EDID;
-        internal readonly string Value;
-
-        internal ScriptEspEdit(bool gmst, string plugin, string edid, string value)
-        {
-            IsGMST = gmst;
-            Plugin = plugin;
-            EDID = edid;
-            Value = value;
-        }
-    }
-
-    internal class ScriptReturnData
-    {
-        internal readonly List<string> IgnorePlugins = new List<string>();
-        internal readonly List<string> InstallPlugins = new List<string>();
-        internal bool InstallAllPlugins = true;
-        internal readonly List<string> IgnoreData = new List<string>();
-        internal readonly List<string> InstallData = new List<string>();
-        internal bool InstallAllData = true;
-        internal readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
-        internal readonly List<ConflictData> ConflictsWith = new List<ConflictData>();
-        internal readonly List<ConflictData> DependsOn = new List<ConflictData>();
-        internal readonly List<string> RegisterBSAList = new List<string>();
-        internal bool CancelInstall = false;
-        internal readonly List<string> UncheckedPlugins = new List<string>();
-        internal readonly List<ScriptEspWarnAgainst> EspDeactivation = new List<ScriptEspWarnAgainst>();
-        internal readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
-        internal readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
-        internal readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
-        internal readonly List<SDPEditInfo> SDPEdits = new List<SDPEditInfo>();
-    }
-
     [Serializable]
-    internal struct ConflictData
+    public class INIEditInfo
     {
-        internal ConflictLevel level;
-        internal string File;
-        internal int MinMajorVersion;
-        internal int MinMinorVersion;
-        internal int MaxMajorVersion;
-        internal int MaxMinorVersion;
-        internal string Comment;
-        internal bool Partial;
+        public readonly string Section;
+        public readonly string Name;
+        public string OldValue;
+        public readonly string NewValue;
+        public OMOD Plugin;
 
-        public static bool operator ==(ConflictData cd, OMOD o)
-        {
-            if (!cd.Partial && cd.File != o.ModName) return false;
-            if (cd.Partial)
-            {
-                System.Text.RegularExpressions.Regex reg = new System.Text.RegularExpressions.Regex(cd.File, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                if (!reg.IsMatch(o.ModName)) return false;
-            }
-            if (cd.MaxMajorVersion != 0 || cd.MaxMinorVersion != 0)
-            {
-                if (cd.MaxMajorVersion > o.MajorVersion) return false;
-                if (cd.MaxMajorVersion == o.MajorVersion && cd.MaxMinorVersion > o.MinorVersion) return false;
-            }
-            if (cd.MinMajorVersion != 0 || cd.MinMinorVersion != 0)
-            {
-                if (cd.MinMajorVersion < o.MajorVersion) return false;
-                if (cd.MinMajorVersion == o.MajorVersion && cd.MinMinorVersion < o.MinorVersion) return false;
-            }
-            return true;
-        }
-        public static bool operator !=(ConflictData cd, OMOD o)
-        {
-            return !(cd == o);
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is ConflictData)
-            {
-                ConflictData cd = (ConflictData)obj;
-                if (File == cd.File && MinMajorVersion == cd.MinMajorVersion && MinMinorVersion == cd.MinMinorVersion &&
-                    MaxMajorVersion == cd.MaxMajorVersion && MaxMinorVersion == cd.MaxMinorVersion && Comment == cd.Comment)
-                {
-                    return true;
-                }
-            }
-            else if (obj is OMOD)
-            {
-                return (this == (OMOD)obj);
-            }
-            return false;
-        }
-    }
-
-    internal class ScriptExecutationData
-    {
-        internal PluginLoadInfo[] PluginOrder;
-        internal string[] UncheckedPlugins;
-        internal ScriptEspWarnAgainst[] EspDeactivationWarning;
-        internal ScriptEspEdit[] EspEdits;
-        internal string[] EarlyPlugins;
-    }
-
-    [Serializable]
-    internal class DataFileInfo
-    {
-        internal readonly string FileName;
-        internal readonly string LowerFileName;
-        internal uint CRC;
-        private readonly List<string> UsedBy = new List<string>();
-
-        public static bool operator ==(DataFileInfo a, DataFileInfo b)
-        {
-            if (a is null || b is null)
-            {
-                if (a is object || b is object) return false; else return true;
-            }
-            return (a.LowerFileName == b.LowerFileName);
-        }
-        public static bool operator !=(DataFileInfo a, DataFileInfo b)
-        {
-            return !(a == b);
-        }
-        public override bool Equals(object obj)
-        {
-            if (!(obj is DataFileInfo)) return false;
-            return this == (DataFileInfo)obj;
-        }
-        public override int GetHashCode() { return LowerFileName.GetHashCode(); }
-
-        public override string ToString()
-        {
-            return FileName;
-        }
-
-        internal DataFileInfo(string s, uint crc)
-        {
-            FileName = s;
-            LowerFileName = FileName.ToLower();
-            CRC = crc;
-        }
-        internal DataFileInfo(DataFileInfo orig)
-        {
-            FileName = orig.FileName;
-            LowerFileName = orig.LowerFileName;
-            CRC = orig.CRC;
-        }
-
-        internal string Owners { get { return string.Join(", ", UsedBy.ToArray()); } }
-    }
-
-    [Serializable]
-    internal class EspInfo
-    {
-        internal const string UnknownOwner = "Unknown";
-        internal const string BaseOwner = "Base";
-        internal static string[] BaseFiles = { "oblivion.esm" };
-
-        internal readonly string FileName;
-        internal readonly string LowerFileName;
-        internal string BelongsTo;
-        internal bool Active;
-        internal OMOD Parent;
-
-        internal EspInfo(string fileName, OMOD parent)
-        {
-            FileName = fileName;
-            LowerFileName = FileName.ToLower();
-            Parent = parent;
-        }
-
-        internal EspInfo(string fileName)
-        {
-            FileName = fileName;
-            LowerFileName = FileName.ToLower();
-            if (Array.IndexOf(BaseFiles, LowerFileName) != -1)
-            {
-                BelongsTo = BaseOwner;
-            }
-            else
-            {
-                BelongsTo = UnknownOwner;
-            }
-            Parent = null;
-        }
-    }
-
-    [Serializable]
-    internal class INIEditInfo
-    {
-        internal readonly string Section;
-        internal readonly string Name;
-        internal string OldValue;
-        internal readonly string NewValue;
-        internal OMOD Plugin;
-
-        internal INIEditInfo(string section, string name, string newvalue)
+        /// <summary>
+        /// INIEditInfo is used for creating ini tweaks
+        /// </summary>
+        /// <param name="section">The section name with out the []</param>
+        /// <param name="name">The name of the item</param>
+        /// <param name="newvalue">The new value the item should have</param>
+        public INIEditInfo(string section, string name, string newvalue)
         {
             Section = section.ToLower();
             Name = name.ToLower();
             NewValue = newvalue;
         }
-
-        public static bool operator ==(INIEditInfo a, INIEditInfo b) { return (a.Section == b.Section) && (a.Name == b.Name); }
-        public static bool operator !=(INIEditInfo a, INIEditInfo b) { return (a.Section != b.Section) || (a.Name != b.Name); }
-        public override bool Equals(object obj) { return this == (obj as INIEditInfo); }
-        public override int GetHashCode() { return Section.GetHashCode() + Name.GetHashCode(); }
     }
 
     [Serializable]
-    internal class SDPEditInfo
+    public class SDPEditInfo
     {
-        internal readonly byte Package;
-        internal readonly string Shader;
-        internal string BinaryObject;
+        public readonly byte Package;
+        public readonly string Shader;
+        public string BinaryObject;
 
-        internal SDPEditInfo(byte package, string shader, string binaryObject)
+        /// <summary>
+        /// Shader edits
+        /// </summary>
+        /// <param name="package">The package</param>
+        /// <param name="shader">The shader</param>
+        /// <param name="binaryObject">The binary object</param>
+        public SDPEditInfo(byte package, string shader, string binaryObject)
         {
             Package = package;
             Shader = shader.ToLower();
