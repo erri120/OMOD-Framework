@@ -57,32 +57,5 @@ namespace OMODFramework
             if (!InSection) return null;
             return contents.ToArray();
         }
-
-        private static void CreateINITweak(string section, string name, string value)
-        {
-            string sectionName = section.Replace("[", "").Replace("]", "");
-            List<string> contents = new List<string>();
-            string tweakPath = Path.Combine(Framework.OutputDir, sectionName + "_tweak.ini");
-            if (File.Exists(tweakPath))
-            {
-                using (StreamReader sr = new StreamReader(tweakPath, System.Text.Encoding.Default))
-                {
-                    while (sr.Peek() != -1)
-                    {
-                        string s = sr.ReadLine();
-                        contents.Add(s);
-                    }
-                }
-            }
-            using (StreamWriter sw = new StreamWriter(File.Create(tweakPath), System.Text.Encoding.Default))
-            {
-                if (!contents.Contains(section)) contents.Add(section);
-                contents.Add(name + "=" + value);
-                foreach (string s in contents)
-                {
-                    sw.WriteLine(s);
-                }
-            }
-        }
     }
 }
