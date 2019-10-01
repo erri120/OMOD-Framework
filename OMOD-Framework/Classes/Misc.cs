@@ -15,6 +15,10 @@ namespace OMODFramework
     /// The script type of the OMOD installation script
     /// </summary>
     public enum ScriptType { obmmScript, Python, cSharp, vb, Count }
+    /// <summary>
+    /// Disabled in the script but still needed for compiling
+    /// </summary>
+    public enum DeactiveStatus { Allow, WarnAgainst, Disallow }
 
     public class ScriptReturnData
     {
