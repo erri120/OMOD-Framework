@@ -1213,88 +1213,7 @@ namespace OMODFramework.Scripting
 
         private static void FunctionLoadOrder(string[] line, bool LoadAfter) { }
 
-        private static void FunctionConflicts(string[] line, bool Conflicts, bool Regex)
-        {
-            string WarnMess;
-            if (Conflicts) WarnMess = "function 'ConflictsWith"; else WarnMess = "function 'DependsOn";
-            if (Regex) WarnMess += "Regex'"; else WarnMess += "'";
-            ConflictData cd = new ConflictData
-            {
-                level = ConflictLevel.MajorConflict
-            };
-            switch (line.Length)
-            {
-                case 1:
-                    Warn($"Missing arguments to {WarnMess}");
-                    return;
-                case 2:
-                    cd.File = line[1];
-                    break;
-                case 3:
-                    cd.Comment = line[2];
-                    goto case 2;
-                case 4:
-                    switch (line[3])
-                    {
-                        case "Unusable":
-                            cd.level = ConflictLevel.Unusable;
-                            break;
-                        case "Major":
-                            cd.level = ConflictLevel.MajorConflict;
-                            break;
-                        case "Minor":
-                            cd.level = ConflictLevel.MinorConflict;
-                            break;
-                        default:
-                            Warn($"Unknown conflict level after {WarnMess}");
-                            break;
-                    }
-                    goto case 3;
-                case 5:
-                    Warn($"Unexpected arguments to {WarnMess}");
-                    goto case 4;
-                case 6:
-                    cd.File = line[1];
-                    try
-                    {
-                        cd.MinMajorVersion = Convert.ToInt32(line[2]);
-                        cd.MinMinorVersion = Convert.ToInt32(line[3]);
-                        cd.MaxMajorVersion = Convert.ToInt32(line[4]);
-                        cd.MaxMinorVersion = Convert.ToInt32(line[5]);
-                    }
-                    catch
-                    {
-                        Warn($"Arguments to {WarnMess} in incorrect format");
-                        return;
-                    }
-                    break;
-                case 7:
-                    cd.Comment = line[6];
-                    goto case 6;
-                case 8:
-                    switch (line[7])
-                    {
-                        case "Unusable":
-                            cd.level = ConflictLevel.Unusable;
-                            break;
-                        case "Major":
-                            cd.level = ConflictLevel.MajorConflict;
-                            break;
-                        case "Minor":
-                            cd.level = ConflictLevel.MinorConflict;
-                            break;
-                        default:
-                            Warn($"Unknown conflict level after {WarnMess}");
-                            break;
-                    }
-                    goto case 7;
-                default:
-                    Warn($"Unexpected arguments to {WarnMess}");
-                    goto case 8;
-            }
-            cd.Partial = Regex;
-            if (Conflicts) srd.ConflictsWith.Add(cd); else srd.DependsOn.Add(cd);
-        }
+        private static void FunctionConflicts(string[] line, bool Conflicts, bool Regex) {}
 
         private static void FunctionModifyInstall(string[] line, bool plugins, bool Install)
         {
@@ -1539,61 +1458,7 @@ namespace OMODFramework.Scripting
             }
         }
 
-        private static void FunctionPatch(string[] line, bool Plugin)
-        {
-            string WarnMess;
-            if (Plugin) WarnMess = "function 'PatchPlugin'"; else WarnMess = "function 'PatchDataFile'";
-            if (line.Length < 3)
-            {
-                Warn($"Missing arguments to {WarnMess}");
-                return;
-            }
-            if (line.Length > 4) Warn($"Unexpected arguments to {WarnMess}");
-            string lowerTo = line[2].ToLower();
-            if (!Framework.IsSafeFileName(line[1]) || !Framework.IsSafeFileName(line[2]))
-            {
-                Warn($"Invalid argument to {WarnMess}");
-                return;
-            }
-            string copypath;
-            if (Plugin)
-            {
-                copypath = Path.Combine(Plugins, line[1]);
-                if (!File.Exists(copypath))
-                {
-                    Warn($"Invalid argument to PatchPlugin\nFile '{line[1]}' is not part of this plugin");
-                    return;
-                }
-                if (line[2].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
-                {
-                    Warn("Plugins cannot be copied to subdirectories of the data folder");
-                    return;
-                }
-                if (!(lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm")))
-                {
-                    Warn("Plugins must have a .esp or .esm extension");
-                    return;
-                }
-
-            }
-            else
-            {
-                copypath = Path.Combine(DataFiles, line[1]);
-                if (!File.Exists(copypath))
-                {
-                    Warn($"Invalid argument to PatchDataFile\nFile '{line[1]}' is not part of this plugin");
-                    return;
-                }
-                if (lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm"))
-                {
-                    Warn("Data files cannot have a .esp or .esm extension");
-                    return;
-                }
-            }
-            if (line.Length < 4 || line[3] != "True") return;
-            //TODO: check if this actually works
-            File.Move(copypath, Path.Combine(Framework.OutputDir, line[2]));
-        }
+        private static void FunctionPatch(string[] line, bool Plugin) { }
 
         private static void FunctionEditINI(string[] line)
         {
