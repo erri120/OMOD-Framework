@@ -1,20 +1,11 @@
-.. OMOD-Framework documentation master file, created by
-   sphinx-quickstart on Wed Oct  2 13:02:48 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to OMOD-Framework's documentation!
+OMOD-Framework Docs
 ==========================================
 
+Welcome to the official documentation of the OMOD-Framework.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Getting started
+   :name: sec-start
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   solo-sections/getting_started.rst
