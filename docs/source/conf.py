@@ -24,6 +24,8 @@ copyright = '2019, erri120'
 author = 'erri120'
 version = 'latest'
 
+master_doc = 'index'
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
