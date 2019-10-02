@@ -1,8 +1,8 @@
 ---
 name: Feature/Edit request
 about: Suggest a feature/edit for this project
-title: "[REQUEST]"
-labels: ''
+title: ''
+labels: Request
 assignees: erri120
 
 ---
