@@ -45,9 +45,9 @@ namespace OMOD_Framework_Example
                 return "";
             }
 
-            public FileVersionInfo GetFileVersion(string filePath)
+            public Version GetFileVersion(string filePath)
             {
-                return FileVersionInfo.GetVersionInfo(filePath);
+                return new Version(FileVersionInfo.GetVersionInfo(filePath).FileVersion);
             }
 
             public string InputString(string title, string initialContent)
