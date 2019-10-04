@@ -201,7 +201,7 @@ namespace OMODFramework.Scripting
         private static Action<string> Warn;
         private static Func<string, string, int> DialogYesNo;
         private static Func<string, bool> ExistsFile;
-        private static Func<string, System.Diagnostics.FileVersionInfo> GetFileVersion;
+        private static Func<string, Version> GetFileVersion;
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
         private static Action<string, string> Message;
         private static Action<string> DisplayImage;
@@ -774,10 +774,9 @@ namespace OMODFramework.Scripting
                     if (ExistsFile("obse_loader.exe")) return false;
                     try
                     {
-                        System.Diagnostics.FileVersionInfo fvi = GetFileVersion("obse_loader.exe");
-                        if (fvi.FileVersion == null) return false;
-                        Version v = new Version(line[2]); ;
-                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
+                        Version v2 = GetFileVersion("obse_loader.exe");
+                        if (v2 == null) return false;
+                        Version v = new Version(line[2]);
                         return (v2 >= v);
                     }
                     catch
@@ -798,10 +797,9 @@ namespace OMODFramework.Scripting
                     if (ExistsFile(Path.Combine("data", "obse", "plugins", "obge.dll"))) return false;
                     try
                     {
-                        System.Diagnostics.FileVersionInfo fvi = GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll"));
-                        if (fvi.FileVersion == null) return false;
+                        Version v2 = GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll"));
+                        if (v2 == null) return false;
                         Version v = new Version(line[2]); ;
-                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
                         return (v2 >= v);
                     }
                     catch
@@ -818,10 +816,9 @@ namespace OMODFramework.Scripting
                     if (line.Length > 3) Warn("Unexpected arguments to 'If OblivionNewerThan'");
                     try
                     {
-                        System.Diagnostics.FileVersionInfo fvi = GetFileVersion("oblivion.exe");
-                        if (fvi.FileVersion == null) return false;
+                        Version v2 = GetFileVersion("oblivion.exe");
+                        if (v2 == null) return false;
                         Version v = new Version(line[2]); ;
-                        Version v2 = new Version(fvi.FileVersion.Replace(", ", "."));
                         bool b = v2 >= v;
                         return (v2 >= v);
                     }

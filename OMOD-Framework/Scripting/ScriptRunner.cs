@@ -30,8 +30,8 @@ namespace OMODFramework.Scripting
         /// </summary>
         /// <param name="filePath">Relative path based from the oblivion game folder,
         /// eg: 'Oblivion.exe', 'obse_loader.exe', 'data//obse//plugins//obge//obge.dll'</param>
-        /// <returns>Returns the FileVersionInfo of a file</returns>
-        FileVersionInfo GetFileVersion(string filePath);
+        /// <returns>Returns the Version of a file</returns>
+        Version GetFileVersion(string filePath);
         /// <summary>
         /// Opens a select Dialog with multiple choices, can either be single or multi select.
         /// Returns an array containing the indexes of the selected items

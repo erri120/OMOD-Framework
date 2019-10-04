@@ -16,7 +16,7 @@ namespace OblivionModManager.Scripting
 
         private static Func<string, string, int> IDialogYesNo;
         private static Func<string, bool> ExistsFile;
-        private static Func<string, FileVersionInfo> GetFileVersion;
+        private static Func<string, Version> GetFileVersion;
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
         private static Action<string, string> IMessage;
         private static Action<string> IDisplayImage;
@@ -297,17 +297,17 @@ namespace OblivionModManager.Scripting
         }
         public bool GetDisplayWarnings() { return false; }
         public string[] GetExistingEspNames() { return IGetActiveESPNames(); }
-        public Version GetOBGEVersion() { return new Version(GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll")).FileVersion); }
-        public Version GetOblivionVersion() { return new Version(GetFileVersion("oblivion.exe").FileVersion); }
+        public Version GetOBGEVersion() { return GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll")); }
+        public Version GetOblivionVersion() { return GetFileVersion("oblivion.exe"); }
         public Version GetOBMMVersion() { return new Version(f.OBMMFakeMajorVersion, f.OBMMFakeMinorVersion, f.OBMMFakeBuildNumber, 0); }
         public Version GetOBSEPluginVersion(string plugin)
         {
             plugin = Path.ChangeExtension(Path.Combine("data", "obse", "plugins", plugin), ".dll");
             CheckPathSafety(plugin);
             if (!File.Exists(plugin)) return null;
-            else return new Version(GetFileVersion(plugin).FileVersion);
+            else return GetFileVersion(plugin);
         }
-        public Version GetOBSEVersion() { return new Version(GetFileVersion("obse_loader.exe").FileVersion); }
+        public Version GetOBSEVersion() { return GetFileVersion("obse_loader.exe"); }
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
         {
             CheckPluginFolderSafety(path);
