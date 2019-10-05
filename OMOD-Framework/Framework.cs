@@ -135,7 +135,16 @@ namespace OMODFramework
         /// Sets the internal path to the dll, useful when debugging
         /// </summary>
         /// <param name="path">Path to the dll</param>
-        public void SetDLLPath(string path) { DLLPath = path; }
+        public void SetDLLPath(string path) 
+        {
+            if (File.Exists(path))
+            {
+                if (path.EndsWith(".dll")) DLLPath = path;
+                else throw new ArgumentException("The provided path is not a dll file!");
+            }
+            else throw new ArgumentException("The provided path does not exists!");
+            
+        }
 
         #endregion
     }
