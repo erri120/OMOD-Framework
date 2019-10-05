@@ -102,10 +102,10 @@ namespace OMOD_Framework_Example
             f.SetTempDirectory(temp);
             // setting the dll path is mostly used for debugging or if you execute the code from somewhere else
             // better safe than sorry just do this if
-            f.SetDLLPath(@"M:\Projects\OMOD-Extractor\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
+            f.SetDLLPath(@"M:\Projects\OMOD-Framework\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\Robert Male Body Replacer v52 OMOD-40532-1.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarNified UI 1.3.2.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
@@ -134,125 +134,145 @@ namespace OMOD_Framework_Example
             // be sure to check if the installation is canceled or you will run into issues
             if (srd.CancelInstall) Console.WriteLine("Installation canceled");
 
-            // in the following example I will create two lists, one for all data files and one for all
-            // plugins that need to be installed
-            // this may seem non-intuitive since the ScriptReturnData should return this list
-            // the thing is that you have InstallAll, Install, Ignore and Copy operations
-            // the install script in the omod decideds what is best for itself
+            // just for testing
+            bool doPretty = true;
 
-            List<string> InstallPlugins = new List<string>();
-            List<string> InstallDataFiles = new List<string>();
+            if (doPretty)
+            {
+                // if you do not want the raw output but a more 'prettier' version, use this method
+                // it will change the ScriptReturnData and will populate the InstallFiles list
+                srd.Pretty(false, ref omod, ref pluginsPath, ref dataPath);
 
-            // start by checking if you can install all plugins
-            if (srd.InstallAllPlugins)
-            {
-                // simply get all plugin files from the omod and loop through them
-                // the s.Contains is just a safety check
-                foreach (string s in omod.GetPluginList()) if (!s.Contains("\\")) InstallPlugins.Add(s);
-            }
-            // if you can't install everything go and check the list called InstallPlugins
-            // this list gets populated when InstallAllPlugins is false
-            // the Framework comes with two utility functions that helps in creating the temp list:
-            // strArrayContains and strArrayRemove
-            foreach(string s in srd.InstallPlugins) { if (!Framework.strArrayContains(InstallPlugins, s)) InstallPlugins.Add(s); }
-            // next up is removing all plugins that are set to be ignored:
-            foreach (string s in srd.IgnorePlugins) { Framework.strArrayRemove(InstallPlugins, s); }
-            // last is going through the CopyPlugins list
-            // in case you ask why there is a CopyPlugins list and what is does:
-            // (it makes more sense with data files but whatever)
-            // if the omod has eg this folder structure:
-            //
-            // installfiles/
-            //              Option1/
-            //                      Meshes/
-            //                      Textures/
-            //              Option2/
-            //                      Meshes/
-            //                      Textures/
-            // this is nice for writing the installation script as you kan keep track of what option
-            // has what files
-            // Authors than call CopyPlugins/Data and move the files from the options folder to
-            // the root folder:
-            //
-            // meshes/
-            // textures/
-            // installfiles/
-            //              Option1/
-            //                      Meshes/
-            //                      Textures/
-            //              Option2/
-            //                      Meshes/
-            //                      Textures/
-            foreach (ScriptCopyDataFile scd in srd.CopyPlugins)
-            {
-                // check if the file you want to copy actually exists
-                if (!File.Exists(Path.Combine(pluginsPath, scd.CopyFrom))) return;
-                else
+                // loop through the whole thing, do note the custom struct
+                foreach(InstallFile file in srd.InstallFiles)
                 {
-                    // check if the mod author didnt make a mistake
-                    if(scd.CopyFrom != scd.CopyTo)
-                    {
-                        // unlikely but you never know
-                        if (File.Exists(Path.Combine(pluginsPath, scd.CopyTo))) File.Delete(Path.Combine(pluginsPath, scd.CopyTo));
-                        File.Copy(Path.Combine(pluginsPath, scd.CopyFrom), Path.Combine(pluginsPath, scd.CopyTo));
-                    }
-                    // important to add the file to the temp list or else it will not be installed
-                    if (!Framework.strArrayContains(InstallPlugins, scd.CopyTo)) InstallPlugins.Add(scd.CopyTo);
+                    string s = Path.GetDirectoryName(file.InstallTo);
+                    if (!Directory.Exists(Path.Combine(OutputDir, s))) Directory.CreateDirectory(Path.Combine(OutputDir, s));
+                    File.Move(file.InstallFrom, Path.Combine(OutputDir, file.InstallTo));
                 }
             }
+            else
+            {
+                // in the following example I will create two lists, one for all data files and one for all
+                // plugins that need to be installed
+                // this may seem non-intuitive since the ScriptReturnData should return this list
+                // the thing is that you have InstallAll, Install, Ignore and Copy operations
+                // the install script in the omod decideds what is best for itself
 
-            // now do the same for the data files :)
-            if (srd.InstallAllData)
-            {
-                foreach(string s in omod.GetDataFileList()) { InstallDataFiles.Add(s); }
-            }
-            foreach (string s in srd.InstallData) { if (!Framework.strArrayContains(InstallDataFiles, s)) InstallDataFiles.Add(s); }
-            foreach (string s in srd.IgnoreData) { Framework.strArrayRemove(InstallDataFiles, s); }
-            foreach (ScriptCopyDataFile scd in srd.CopyDataFiles)
-            {
-                if (!File.Exists(Path.Combine(dataPath, scd.CopyFrom))) return;
-                else
+                List<string> InstallPlugins = new List<string>();
+                List<string> InstallDataFiles = new List<string>();
+
+                // start by checking if you can install all plugins
+                if (srd.InstallAllPlugins)
                 {
-                    if(scd.CopyFrom != scd.CopyTo)
-                    {
-                        // because data files can be in subdirectories we have to check if the folder actually exists
-                        string dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
-                        if(!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
-                        if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
-                        File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
-                    }
-                    if (!Framework.strArrayContains(InstallDataFiles, scd.CopyTo)) InstallDataFiles.Add(scd.CopyTo);
+                    // simply get all plugin files from the omod and loop through them
+                    // the s.Contains is just a safety check
+                    foreach (string s in omod.GetPluginList()) if (!s.Contains("\\")) InstallPlugins.Add(s);
                 }
-            }
+                // if you can't install everything go and check the list called InstallPlugins
+                // this list gets populated when InstallAllPlugins is false
+                // the Framework comes with two utility functions that helps in creating the temp list:
+                // strArrayContains and strArrayRemove
+                foreach(string s in srd.InstallPlugins) { if (!Framework.strArrayContains(InstallPlugins, s)) InstallPlugins.Add(s); }
+                // next up is removing all plugins that are set to be ignored:
+                foreach (string s in srd.IgnorePlugins) { Framework.strArrayRemove(InstallPlugins, s); }
+                // last is going through the CopyPlugins list
+                // in case you ask why there is a CopyPlugins list and what is does:
+                // (it makes more sense with data files but whatever)
+                // if the omod has eg this folder structure:
+                //
+                // installfiles/
+                //              Option1/
+                //                      Meshes/
+                //                      Textures/
+                //              Option2/
+                //                      Meshes/
+                //                      Textures/
+                // this is nice for writing the installation script as you kan keep track of what option
+                // has what files
+                // Authors than call CopyPlugins/Data and move the files from the options folder to
+                // the root folder:
+                //
+                // meshes/
+                // textures/
+                // installfiles/
+                //              Option1/
+                //                      Meshes/
+                //                      Textures/
+                //              Option2/
+                //                      Meshes/
+                //                      Textures/
+                foreach (ScriptCopyDataFile scd in srd.CopyPlugins)
+                {
+                    // check if the file you want to copy actually exists
+                    if (!File.Exists(Path.Combine(pluginsPath, scd.CopyFrom))) return;
+                    else
+                    {
+                        // check if the mod author didnt make a mistake
+                        if(scd.CopyFrom != scd.CopyTo)
+                        {
+                            // unlikely but you never know
+                            if (File.Exists(Path.Combine(pluginsPath, scd.CopyTo))) File.Delete(Path.Combine(pluginsPath, scd.CopyTo));
+                            File.Copy(Path.Combine(pluginsPath, scd.CopyFrom), Path.Combine(pluginsPath, scd.CopyTo));
+                        }
+                        // important to add the file to the temp list or else it will not be installed
+                        if (!Framework.strArrayContains(InstallPlugins, scd.CopyTo)) InstallPlugins.Add(scd.CopyTo);
+                    }
+                }
 
-            // after everything is done some final checks
-            for(int i = 0; i < InstallDataFiles.Count; i++)
-            {
-                // if the files have \\ at the start than Path.Combine wont work :(
-                if (InstallDataFiles[i].StartsWith("\\")) InstallDataFiles[i] = InstallDataFiles[i].Substring(1);
-                string currentFile = Path.Combine(dataPath, InstallDataFiles[i]);
-                // also check if the file we want to install exists and is not in the 5th dimension eating lunch
-                if (!File.Exists(currentFile)) InstallDataFiles.RemoveAt(i--);
-            }
+                // now do the same for the data files :)
+                if (srd.InstallAllData)
+                {
+                    foreach(string s in omod.GetDataFileList()) { InstallDataFiles.Add(s); }
+                }
+                foreach (string s in srd.InstallData) { if (!Framework.strArrayContains(InstallDataFiles, s)) InstallDataFiles.Add(s); }
+                foreach (string s in srd.IgnoreData) { Framework.strArrayRemove(InstallDataFiles, s); }
+                foreach (ScriptCopyDataFile scd in srd.CopyDataFiles)
+                {
+                    if (!File.Exists(Path.Combine(dataPath, scd.CopyFrom))) return;
+                    else
+                    {
+                        if(scd.CopyFrom != scd.CopyTo)
+                        {
+                            // because data files can be in subdirectories we have to check if the folder actually exists
+                            string dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
+                            if(!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+                            if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
+                            File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
+                        }
+                        if (!Framework.strArrayContains(InstallDataFiles, scd.CopyTo)) InstallDataFiles.Add(scd.CopyTo);
+                    }
+                }
 
-            for(int i = 0; i < InstallPlugins.Count; i++)
-            {
-                if (InstallPlugins[i].StartsWith("\\")) InstallPlugins[i] = InstallPlugins[i].Substring(1);
-                string currentFile = Path.Combine(pluginsPath, InstallPlugins[i]);
-                if (!File.Exists(currentFile)) InstallPlugins.RemoveAt(i--);
-            }
+                // after everything is done some final checks
+                for(int i = 0; i < InstallDataFiles.Count; i++)
+                {
+                    // if the files have \\ at the start than Path.Combine wont work :(
+                    if (InstallDataFiles[i].StartsWith("\\")) InstallDataFiles[i] = InstallDataFiles[i].Substring(1);
+                    string currentFile = Path.Combine(dataPath, InstallDataFiles[i]);
+                    // also check if the file we want to install exists and is not in the 5th dimension eating lunch
+                    if (!File.Exists(currentFile)) InstallDataFiles.RemoveAt(i--);
+                }
 
-            // now install
-            for (int i = 0; i < InstallDataFiles.Count; i++)
-            {
-                // check if the folder exists before copying
-                string s = Path.GetDirectoryName(InstallDataFiles[i]);
-                if (!Directory.Exists(Path.Combine(OutputDir, s))) Directory.CreateDirectory(Path.Combine(OutputDir, s));
-                File.Move(Path.Combine(dataPath, InstallDataFiles[i]), Path.Combine(OutputDir, InstallDataFiles[i]));
-            }
-            for(int i = 0; i < InstallPlugins.Count; i++)
-            {
-                File.Move(Path.Combine(pluginsPath, InstallPlugins[i]), Path.Combine(OutputDir, InstallPlugins[i]));
+                for(int i = 0; i < InstallPlugins.Count; i++)
+                {
+                    if (InstallPlugins[i].StartsWith("\\")) InstallPlugins[i] = InstallPlugins[i].Substring(1);
+                    string currentFile = Path.Combine(pluginsPath, InstallPlugins[i]);
+                    if (!File.Exists(currentFile)) InstallPlugins.RemoveAt(i--);
+                }
+
+                // now install
+                for (int i = 0; i < InstallDataFiles.Count; i++)
+                {
+                    // check if the folder exists before copying
+                    string s = Path.GetDirectoryName(InstallDataFiles[i]);
+                    if (!Directory.Exists(Path.Combine(OutputDir, s))) Directory.CreateDirectory(Path.Combine(OutputDir, s));
+                    File.Move(Path.Combine(dataPath, InstallDataFiles[i]), Path.Combine(OutputDir, InstallDataFiles[i]));
+                }
+                for(int i = 0; i < InstallPlugins.Count; i++)
+                {
+                    File.Move(Path.Combine(pluginsPath, InstallPlugins[i]), Path.Combine(OutputDir, InstallPlugins[i]));
+                }
             }
         }
     }
