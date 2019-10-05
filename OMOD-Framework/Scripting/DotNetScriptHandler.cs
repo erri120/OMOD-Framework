@@ -82,7 +82,13 @@ namespace OMODFramework.Scripting
             else warnings = null;
             if (results.Errors.HasErrors)
             {
-                return null;
+                string e = "", w = "";
+                if(warnings != null)
+                {
+                    foreach (string s in warnings) w += s;
+                }
+                foreach (string s in errors) e += s;
+                throw new Exception($"Problems during script compilation: \n{e} \n{w}");
             }
             else
             {
@@ -97,7 +103,7 @@ namespace OMODFramework.Scripting
             ScriptType language)
         {
             byte[] data = Compile(script, language);
-            if (data == null) return;
+            if (data == null) throw new Exception("There was an error during script compilation!");
             Assembly asm = AppDomain.CurrentDomain.Load(data, null);
             if (!(asm.CreateInstance("Script") is OblivionModManager.Scripting.IScript s))
             {
