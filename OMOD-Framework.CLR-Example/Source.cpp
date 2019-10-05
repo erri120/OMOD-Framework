@@ -131,140 +131,158 @@ int main() {
 			- copy the items from the Copy list
 	*/
 
-	//--------------------------------------------------------------------------
+	bool doPretty = true;
+
+	if (doPretty) {
+		// if you do not want the raw output but a more 'prettier' version, use this method
+		// it will change the ScriptReturnData and will populate the InstallFiles list
+		String OutputDir = ""; // final destination
+		srd->Pretty(true, omod, pluginsPath, dataPath);
+
+		// loop through the whole thing, do note the custom struct
+		for each (InstallFile ^ file in srd->InstallFiles) {
+			String s = Path::GetDirectoryName(file->InstallTo);
+			if (!Directory::Exists(Path::Combine(OutputDir, s))) Directory::CreateDirectory(Path::Combine(OutputDir, s));
+			File::Move(file->InstallFrom, Path::Combine(OutputDir, file->InstallTo));
+		}
+
+	}
+	else {
+		//--------------------------------------------------------------------------
 	//============= the following example is the C# example in C++ =============
 	//--------------------------------------------------------------------------
 
 	/*
 	Two .NET List<string> which will be populated with all plugins/datafiles to be installed
 	*/
-	sList InstallPlugins = gcnew System::Collections::Generic::List<String>();
-	sList InstallDataFiles = gcnew System::Collections::Generic::List<String>();
+		sList InstallPlugins = gcnew System::Collections::Generic::List<String>();
+		sList InstallDataFiles = gcnew System::Collections::Generic::List<String>();
 
-	// if we can install all plugins, add all plugins from the GetPluginList to the InstallPlugins list
-	if (srd->InstallAllPlugins) {
-		for each (String s in omod->GetPluginList())
-		{
-			// safety check from C#
-			if (!s->Contains("\\")) InstallPlugins->Add(s);
-		}
-	}
-
-	/*
-	if you can't install everything go and check the list called InstallPlugins
-	this list gets populated when InstallAllPlugins is false
-	the Framework comes with two utility functions that helps in creating the temp list:
-	strArrayContains and strArrayRemove
-	*/
-	for each (String s in srd->InstallPlugins)
-	{
-		if (!Framework::strArrayContains(InstallPlugins, s)) InstallPlugins->Add(s);
-	}
-
-	// next up is removing all plugins that are set to be ignored:
-	for each (String s in srd->IgnorePlugins)
-	{
-		Framework::strArrayRemove(InstallPlugins, s);
-	}
-
-	/*
-	last is going through the CopyPlugins list
-	in case you ask why there is a CopyPlugins list and what is does:
-	(it makes more sense with data files but whatever)
-	if the omod has eg this folder structure:
-
-	installfiles/
-				Option1/
-						Meshes/
-						Textures/
-				Option2/
-						Meshes/
-						Textures/
-	this is nice for writing the installation script as you kan keep track of what option
-	has what files
-	Authors than call CopyPlugins/Data and move the files from the options folder to
-	the root folder:
-
-	meshes/
-	textures/
-	installfiles/
-				Option1/
-						Meshes/
-						Textures/
-				Option2/
-						Meshes/
-						Textures/
-	*/
-	for each (ScriptCopyDataFile scd in srd->CopyPlugins)
-	{
-		// check if the file you want to copy actually exists
-		if (!File::Exists(Path::Combine(pluginsPath, scd.CopyFrom)));
-		else {
-			if (scd.CopyFrom != scd.CopyTo)
+		// if we can install all plugins, add all plugins from the GetPluginList to the InstallPlugins list
+		if (srd->InstallAllPlugins) {
+			for each (String s in omod->GetPluginList())
 			{
-				// unlikely but you never know
-				if (File::Exists(Path::Combine(pluginsPath, scd.CopyTo))) File::Delete(Path::Combine(pluginsPath, scd.CopyTo));
-				File::Copy(Path::Combine(pluginsPath, scd.CopyFrom), Path::Combine(pluginsPath, scd.CopyTo));
+				// safety check from C#
+				if (!s->Contains("\\")) InstallPlugins->Add(s);
 			}
-			// important to add the file to the temp list or else it will not be installed
-			if (!Framework::strArrayContains(InstallPlugins, scd.CopyTo)) InstallPlugins->Add(scd.CopyTo);
 		}
-	}
 
-	// now do the same for the data files :)
-	if (srd->InstallAllData)
-	{
-		for each (String s in omod->GetDataFileList()) { InstallDataFiles->Add(s); }
-	}
-	for each (String s in srd->InstallData) { if (!Framework::strArrayContains(InstallDataFiles, s)) InstallDataFiles->Add(s); }
-	for each (String s in srd->IgnoreData) { Framework::strArrayRemove(InstallDataFiles, s); }
-	for each (ScriptCopyDataFile scd in srd->CopyDataFiles)
-	{
-		if (!File::Exists(Path::Combine(dataPath, scd.CopyFrom)));
-		else
+		/*
+		if you can't install everything go and check the list called InstallPlugins
+		this list gets populated when InstallAllPlugins is false
+		the Framework comes with two utility functions that helps in creating the temp list:
+		strArrayContains and strArrayRemove
+		*/
+		for each (String s in srd->InstallPlugins)
 		{
-			if (scd.CopyFrom != scd.CopyTo)
-			{
-				// because data files can be in subdirectories we have to check if the folder actually exists
-				String dirName = Path::GetDirectoryName(Path::Combine(dataPath, scd.CopyTo));
-				if (!Directory::Exists(dirName)) Directory::CreateDirectory(dirName);
-				if (File::Exists(Path::Combine(dataPath, scd.CopyTo))) File::Delete(Path::Combine(dataPath, scd.CopyTo));
-				File::Copy(Path::Combine(dataPath, scd.CopyFrom), Path::Combine(dataPath, scd.CopyTo));
-			}
-			if (!Framework::strArrayContains(InstallDataFiles, scd.CopyTo)) InstallDataFiles->Add(scd.CopyTo);
+			if (!Framework::strArrayContains(InstallPlugins, s)) InstallPlugins->Add(s);
 		}
-	}
 
-	// after everything is done some final checks
-	for (int i = 0; i < InstallDataFiles->Count; i++)
-	{
-		// if the files have \\ at the start than Path.Combine wont work :(
-		if (InstallDataFiles[i]->StartsWith("\\")) InstallDataFiles[i] = InstallDataFiles[i]->Substring(1);
-		String currentFile = Path::Combine(dataPath, InstallDataFiles[i]);
-		// also check if the file we want to install exists and is not in the 5th dimension eating lunch
-		if (!File::Exists(currentFile)) InstallDataFiles->RemoveAt(i--);
-	}
+		// next up is removing all plugins that are set to be ignored:
+		for each (String s in srd->IgnorePlugins)
+		{
+			Framework::strArrayRemove(InstallPlugins, s);
+		}
 
-	for (int i = 0; i < InstallPlugins->Count; i++)
-	{
-		if (InstallPlugins[i]->StartsWith("\\")) InstallPlugins[i] = InstallPlugins[i]->Substring(1);
-		String currentFile = Path::Combine(pluginsPath, InstallPlugins[i]);
-		if (!File::Exists(currentFile)) InstallPlugins->RemoveAt(i--);
-	}
+		/*
+		last is going through the CopyPlugins list
+		in case you ask why there is a CopyPlugins list and what is does:
+		(it makes more sense with data files but whatever)
+		if the omod has eg this folder structure:
 
-	String OutputDir = ""; // final destination
+		installfiles/
+					Option1/
+							Meshes/
+							Textures/
+					Option2/
+							Meshes/
+							Textures/
+		this is nice for writing the installation script as you kan keep track of what option
+		has what files
+		Authors than call CopyPlugins/Data and move the files from the options folder to
+		the root folder:
 
-	// now install
-	for (int i = 0; i < InstallDataFiles->Count; i++)
-	{
-		// check if the folder exists before copying
-		String s = Path::GetDirectoryName(InstallDataFiles[i]);
-		if (!Directory::Exists(Path::Combine(OutputDir, s))) Directory::CreateDirectory(Path::Combine(OutputDir, s));
-		File::Move(Path::Combine(dataPath, InstallDataFiles[i]), Path::Combine(OutputDir, InstallDataFiles[i]));
-	}
-	for (int i = 0; i < InstallPlugins->Count; i++)
-	{
-		File::Move(Path::Combine(pluginsPath, InstallPlugins[i]), Path::Combine(OutputDir, InstallPlugins[i]));
+		meshes/
+		textures/
+		installfiles/
+					Option1/
+							Meshes/
+							Textures/
+					Option2/
+							Meshes/
+							Textures/
+		*/
+		for each (ScriptCopyDataFile scd in srd->CopyPlugins)
+		{
+			// check if the file you want to copy actually exists
+			if (!File::Exists(Path::Combine(pluginsPath, scd.CopyFrom)));
+			else {
+				if (scd.CopyFrom != scd.CopyTo)
+				{
+					// unlikely but you never know
+					if (File::Exists(Path::Combine(pluginsPath, scd.CopyTo))) File::Delete(Path::Combine(pluginsPath, scd.CopyTo));
+					File::Copy(Path::Combine(pluginsPath, scd.CopyFrom), Path::Combine(pluginsPath, scd.CopyTo));
+				}
+				// important to add the file to the temp list or else it will not be installed
+				if (!Framework::strArrayContains(InstallPlugins, scd.CopyTo)) InstallPlugins->Add(scd.CopyTo);
+			}
+		}
+
+		// now do the same for the data files :)
+		if (srd->InstallAllData)
+		{
+			for each (String s in omod->GetDataFileList()) { InstallDataFiles->Add(s); }
+		}
+		for each (String s in srd->InstallData) { if (!Framework::strArrayContains(InstallDataFiles, s)) InstallDataFiles->Add(s); }
+		for each (String s in srd->IgnoreData) { Framework::strArrayRemove(InstallDataFiles, s); }
+		for each (ScriptCopyDataFile scd in srd->CopyDataFiles)
+		{
+			if (!File::Exists(Path::Combine(dataPath, scd.CopyFrom)));
+			else
+			{
+				if (scd.CopyFrom != scd.CopyTo)
+				{
+					// because data files can be in subdirectories we have to check if the folder actually exists
+					String dirName = Path::GetDirectoryName(Path::Combine(dataPath, scd.CopyTo));
+					if (!Directory::Exists(dirName)) Directory::CreateDirectory(dirName);
+					if (File::Exists(Path::Combine(dataPath, scd.CopyTo))) File::Delete(Path::Combine(dataPath, scd.CopyTo));
+					File::Copy(Path::Combine(dataPath, scd.CopyFrom), Path::Combine(dataPath, scd.CopyTo));
+				}
+				if (!Framework::strArrayContains(InstallDataFiles, scd.CopyTo)) InstallDataFiles->Add(scd.CopyTo);
+			}
+		}
+
+		// after everything is done some final checks
+		for (int i = 0; i < InstallDataFiles->Count; i++)
+		{
+			// if the files have \\ at the start than Path.Combine wont work :(
+			if (InstallDataFiles[i]->StartsWith("\\")) InstallDataFiles[i] = InstallDataFiles[i]->Substring(1);
+			String currentFile = Path::Combine(dataPath, InstallDataFiles[i]);
+			// also check if the file we want to install exists and is not in the 5th dimension eating lunch
+			if (!File::Exists(currentFile)) InstallDataFiles->RemoveAt(i--);
+		}
+
+		for (int i = 0; i < InstallPlugins->Count; i++)
+		{
+			if (InstallPlugins[i]->StartsWith("\\")) InstallPlugins[i] = InstallPlugins[i]->Substring(1);
+			String currentFile = Path::Combine(pluginsPath, InstallPlugins[i]);
+			if (!File::Exists(currentFile)) InstallPlugins->RemoveAt(i--);
+		}
+
+		String OutputDir = ""; // final destination
+
+		// now install
+		for (int i = 0; i < InstallDataFiles->Count; i++)
+		{
+			// check if the folder exists before copying
+			String s = Path::GetDirectoryName(InstallDataFiles[i]);
+			if (!Directory::Exists(Path::Combine(OutputDir, s))) Directory::CreateDirectory(Path::Combine(OutputDir, s));
+			File::Move(Path::Combine(dataPath, InstallDataFiles[i]), Path::Combine(OutputDir, InstallDataFiles[i]));
+		}
+		for (int i = 0; i < InstallPlugins->Count; i++)
+		{
+			File::Move(Path::Combine(pluginsPath, InstallPlugins[i]), Path::Combine(OutputDir, InstallPlugins[i]));
+		}
 	}
 
 	return 0;
