@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 namespace OMODFramework
@@ -23,6 +24,10 @@ namespace OMODFramework
     public class ScriptReturnData
     {
         /// <summary>
+        /// Populated after calling srd = Framework.Pretty
+        /// </summary>
+        public List<InstallFile> InstallFiles = new List<InstallFile>();
+        /// <summary>
         /// If the installation is canceled
         /// </summary>
         public bool CancelInstall = false;
@@ -37,30 +42,138 @@ namespace OMODFramework
         /// <summary>
         /// List with absolute paths of all data files to be installed
         /// </summary>
-        public readonly List<string> InstallData = new List<string>();
+        public List<string> InstallData = new List<string>();
         /// <summary>
         /// List with absolute paths of all plugins to be installed
         /// </summary>
-        public readonly List<string> InstallPlugins = new List<string>();
+        public List<string> InstallPlugins = new List<string>();
         /// <summary>
         /// List with absolute paths of all data files not to be installed
         /// </summary>
-        public readonly List<string> IgnoreData = new List<string>();
+        public List<string> IgnoreData = new List<string>();
         /// <summary>
         /// List with absolute paths of all plguins not to be installed
         /// </summary>
-        public readonly List<string> IgnorePlugins = new List<string>();
+        public List<string> IgnorePlugins = new List<string>();
         /// <summary>
         /// Destination of all data files to be copied
         /// </summary>
-        public readonly List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
+        public List<ScriptCopyDataFile> CopyDataFiles = new List<ScriptCopyDataFile>();
         /// <summary>
         /// Destination of all plugins to be copied
         /// </summary>
-        public readonly List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
+        public List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         public readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
         public readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
         public readonly List<SDPEditInfo> SDPEdits = new List<SDPEditInfo>();
+
+        /// <summary>
+        /// Makes a pretty output of the ScriptReturnData. Populates the InstallFiles list
+        /// and does a lot of background sorting and matching for you. Will return null
+        /// if CancelInstall is true
+        /// </summary>
+        /// <param name="copy">Wether or not to also do the CopyData/Plugins methods</param>
+        /// <param name="omod">The OMOD file</param>
+        /// <param name="dataPath">The dataPath with extracted data files</param>
+        /// <param name="pluginsPath">The pluginsPath with extracted plugins files</param>
+        /// <returns></returns>
+        public ScriptReturnData Pretty(bool copy, ref OMOD omod, ref string pluginsPath, ref string dataPath)
+        {
+            if (CancelInstall) return null;
+
+            List<string> filesPlugins = new List<string>();
+            List<string> filesData = new List<string>();
+
+            if (InstallAllPlugins) foreach (string s in omod.GetPluginList()) if (!s.Contains("\\")) filesPlugins.Add(s);
+            foreach (string s in InstallPlugins) { if (!Framework.strArrayContains(filesPlugins, s)) filesPlugins.Add(s); }
+            foreach (string s in IgnorePlugins) { Framework.strArrayRemove(filesPlugins, s); }
+
+            if (copy)
+            {
+                foreach (ScriptCopyDataFile scd in CopyPlugins)
+                {
+                    if (!File.Exists(Path.Combine(pluginsPath, scd.CopyFrom))) break;
+                    else
+                    {
+                        if (scd.CopyFrom != scd.CopyTo)
+                        {
+                            if (File.Exists(Path.Combine(pluginsPath, scd.CopyTo))) File.Delete(Path.Combine(pluginsPath, scd.CopyTo));
+                            File.Copy(Path.Combine(pluginsPath, scd.CopyFrom), Path.Combine(pluginsPath, scd.CopyTo));
+                        }
+                        if (!Framework.strArrayContains(filesPlugins, scd.CopyTo)) filesPlugins.Add(scd.CopyTo);
+                    }
+                }
+            }
+
+            if (InstallAllData)
+            {
+                foreach (string s in omod.GetDataFileList()) { filesData.Add(s); }
+            }
+            foreach (string s in InstallData) { if (!Framework.strArrayContains(filesData, s)) filesData.Add(s); }
+            foreach (string s in IgnoreData) { Framework.strArrayRemove(filesData, s); }
+
+            if (copy)
+            {
+                foreach (ScriptCopyDataFile scd in CopyDataFiles)
+                {
+                    if (!File.Exists(Path.Combine(dataPath, scd.CopyFrom))) break;
+                    else
+                    {
+                        if (scd.CopyFrom != scd.CopyTo)
+                        {
+                            string dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
+                            if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+                            if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
+                            File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
+                        }
+                        if (!Framework.strArrayContains(filesData, scd.CopyTo)) filesData.Add(scd.CopyTo);
+                    }
+                }
+            }
+
+            for (int i = 0; i < filesData.Count; i++)
+            {
+                if (filesData[i].StartsWith("\\")) filesData[i] = filesData[i].Substring(1);
+                string currentFile = Path.Combine(dataPath, filesData[i]);
+                if (!File.Exists(currentFile)) filesData.RemoveAt(i--);
+            }
+
+            for (int i = 0; i < filesPlugins.Count; i++)
+            {
+                if (InstallPlugins[i].StartsWith("\\")) filesPlugins[i] = filesPlugins[i].Substring(1);
+                string currentFile = Path.Combine(pluginsPath, filesPlugins[i]);
+                if (!File.Exists(currentFile)) filesPlugins.RemoveAt(i--);
+            }
+
+            foreach (string s in filesData) InstallFiles.Add(new InstallFile(Path.Combine(dataPath, s), s));
+            foreach (string s in filesPlugins) InstallFiles.Add(new InstallFile(Path.Combine(pluginsPath, s),s));
+
+            InstallAllData = false;
+            InstallAllPlugins = false;
+            InstallData = null;
+            InstallPlugins = null;
+            IgnoreData = null;
+            IgnorePlugins = null;
+            if (copy)
+            {
+                CopyDataFiles = null;
+                CopyPlugins = null;
+            }
+
+
+            return this;
+        }
+    }
+
+    public struct InstallFile
+    {
+        public readonly string InstallFrom;
+        public readonly string InstallTo;
+        public InstallFile(string from, string to)
+        {
+            InstallFrom = from;
+            InstallTo = to;
+        }
     }
 
     public struct ScriptCopyDataFile
