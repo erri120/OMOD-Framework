@@ -2,6 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/omod-framework/badge/?version=latest)](https://omod-framework.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://dev.azure.com/erri120/OMOD-Framework/_apis/build/status/erri120.OMOD-Framework?branchName=master)](https://dev.azure.com/erri120/OMOD-Framework/_build/latest?definitionId=1&branchName=master)
+![Nuget](https://img.shields.io/nuget/v/erri120.OMODFramework)
 
 This framework contains code of the original Oblivion Mod Manager aka [OBMM](https://www.nexusmods.com/oblivion/mods/2097).
 
