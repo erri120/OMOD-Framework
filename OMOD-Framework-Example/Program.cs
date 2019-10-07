@@ -10,6 +10,7 @@ namespace OMOD_Framework_Example
     {
         internal class ScriptFunctions : IScriptRunnerFunctions
         {
+            private string gameDir = @"S:\SteamLibrary\steamapps\common\Oblivion";
             public int[] DialogSelect(string[] items, string title, bool multiSelect, string[] previewImagePaths, string[] descriptions)
             {
                 return new int[1] { 0 };
@@ -47,7 +48,7 @@ namespace OMOD_Framework_Example
 
             public Version GetFileVersion(string filePath)
             {
-                return new Version(FileVersionInfo.GetVersionInfo(filePath).FileVersion);
+                return new Version(FileVersionInfo.GetVersionInfo(Path.Combine(gameDir,filePath)).FileVersion);
             }
 
             public string InputString(string title, string initialContent)
