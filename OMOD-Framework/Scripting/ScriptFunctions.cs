@@ -352,9 +352,40 @@ namespace OblivionModManager.Scripting
             if (!Framework.strArrayContains(srd.InstallPlugins, name)) srd.InstallPlugins.Add(name);
         }
         public bool IsSimulation() { return false; }
-        public void LoadAfter(string plugin1, string plugin2) { }
-        public void LoadBefore(string plugin1, string plugin2) { }
-        public void LoadEarly(string plugin) { }
+        public void LoadAfter(string plugin1, string plugin2) { LoadOrder(plugin1, plugin2, true, false); }
+        public void LoadBefore(string plugin1, string plugin2) { LoadOrder(plugin1, plugin2, false, false); }
+        public void LoadEarly(string plugin)  { LoadOrder(plugin, null, false, true); }
+        private void LoadOrder(string plugin1, string plugin2, bool after, bool early)
+        {
+            CheckPathSafety(plugin1);
+            string path1 = plugin1.ToLower();
+            bool found = false;
+            for (int i = 0; i < srd.CopyPlugins.Count; i++)
+            {
+                if (srd.CopyPlugins[i].CopyTo == path1)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) CheckPluginSafety(plugin1);
+            if (early)
+            {
+                srd.LoadOrderList.Add(new PluginLoadInfo(plugin1, null, false, true));
+            }
+            else
+            {
+                CheckPathSafety(plugin2);
+                plugin1 = plugin1.ToLower();
+                plugin2 = plugin2.ToLower();
+                for (int i = 0; i < srd.LoadOrderList.Count; i++)
+                {
+                    if (plugin1 == srd.LoadOrderList[i].Plugin && plugin2 == srd.LoadOrderList[i].Target) srd.LoadOrderList.RemoveAt(i--);
+                }
+                srd.LoadOrderList.Add(new PluginLoadInfo(plugin1, plugin2, after, false));
+            }
+        }
+
         public void Message(string msg) { IMessage(msg, null); }
         public void Message(string msg, string title) { IMessage(msg, title); }
         public void PatchDataFile(string from, string to, bool create)

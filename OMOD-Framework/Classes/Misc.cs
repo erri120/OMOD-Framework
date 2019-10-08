@@ -63,6 +63,9 @@ namespace OMODFramework
         /// Destination of all plugins to be copied
         /// </summary>
         public List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
+        /// <summary>
+        /// Lists with all Loader Order Information
+        /// </summary>
         public readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
         /// <summary>
         /// Lists with all INIEdits
@@ -203,6 +206,7 @@ namespace OMODFramework
         public string Plugin;
         public string Target;
         public bool LoadAfter;
+        public bool Early;
 
         /// <summary>
         /// Struct with information about what plugin to load after/early than another
@@ -210,11 +214,12 @@ namespace OMODFramework
         /// <param name="plugin">The plugin</param>
         /// <param name="target">The target that needs to be loaded after/earlier than the plugin</param>
         /// <param name="loadAfter">Load after or earlier</param>
-        public PluginLoadInfo(string plugin, string target, bool loadAfter)
+        public PluginLoadInfo(string plugin, string target, bool loadAfter, bool early)
         {
             Plugin = plugin;
             Target = target;
             LoadAfter = loadAfter;
+            Early = early;
         }
     }
 
