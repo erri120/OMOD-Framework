@@ -71,10 +71,15 @@ namespace OMODFramework.Scripting
         /// <returns>The user input text</returns>
         string InputString(string title, string initialContent);
         /// <summary>
-        /// Returns a list of all esp names WITHOUT EXTENSION (active or not, we dont care)
+        /// Returns a list with the names of all active esps (names mean no extension like esp or esm)
         /// </summary>
-        /// <returns>Returns a list of all esp names</returns>
+        /// <returns>Returns a list with the names of all active esps</returns>
         string[] GetActiveESPNames();
+        /// <summary>
+        /// Returns a list with names of all existing esps (names mean no extension)
+        /// </summary>
+        /// <returns>Returns a list with names of all existing esps</returns>
+        string[] GetExistingESPNames();
         /// <summary>
         /// Returns the absolute path of a file, do note that this is used for getting the paths
         /// that should be in the oblivion folder but arent (looking at you MO2). The path argument

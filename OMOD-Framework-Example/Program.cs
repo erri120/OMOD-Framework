@@ -38,7 +38,12 @@ namespace OMOD_Framework_Example
 
             public string[] GetActiveESPNames()
             {
-                return new string[1] { "oblivion.esm" };
+                return new string[1] { "oblivion" };
+            }
+
+            public string[] GetExistingESPNames()
+            {
+                return new string[1] { "oblivion" };
             }
 
             public string GetFileFromPath(string path)

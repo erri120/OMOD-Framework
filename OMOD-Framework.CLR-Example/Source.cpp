@@ -50,8 +50,10 @@ public:
 	virtual void DisplayText(String text, String title) {}
 	// creates an input dialog, initialContent can be empty
 	virtual String InputString(String title, String initialContent) { return ""; }
-	// returns a String[] array with the NAMES of all esps, dont care if active or not just return all esp NAMES WITHOUT EXTENSIONS (no .esp or .esm)
+	// returns a String[] array with the NAMES of all active esps	NAMES WITHOUT EXTENSIONS (no .esp or .esm)
 	virtual sArray GetActiveESPNames() { return gcnew array<String>(1); }
+	// returns a String[] array with the NAMES of all esps
+	virtual sArray GetExistingESPNames() { return gcnew array<String>(1); }
 	/*
 	returns the absolute path of a file, the path input argument is relative to the oblivion game folder
 	aka: if the scripts wants to get a file that SHOULD be in the oblivion game folder but it's not there

@@ -23,6 +23,7 @@ namespace OblivionModManager.Scripting
         private static Action<string, string> IDisplayText;
         private static Func<string, string, string> IInputString;
         private static Func<string[]> IGetActiveESPNames;
+        private static Func<string[]> IGetExistingESPNames;
         private static Func<string, string> IGetFile;
 
         internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath,
@@ -41,6 +42,7 @@ namespace OblivionModManager.Scripting
             IInputString = scriptRunnerFunctions.InputString;
             IGetActiveESPNames = scriptRunnerFunctions.GetActiveESPNames;
             IGetFile = scriptRunnerFunctions.GetFileFromPath;
+            IGetExistingESPNames = scriptRunnerFunctions.GetExistingESPNames;
 
             this.srd = srd;
             DataFiles = dataFilesPath;
@@ -296,7 +298,7 @@ namespace OblivionModManager.Scripting
             return StripPathList(GetDirectoryPaths(Path.Combine(DataFiles, path), pattern, recurse), DataFiles.Length);
         }
         public bool GetDisplayWarnings() { return false; }
-        public string[] GetExistingEspNames() { return IGetActiveESPNames(); }
+        public string[] GetExistingEspNames() { return IGetExistingESPNames(); }
         public Version GetOBGEVersion() { return GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll")); }
         public Version GetOblivionVersion() { return GetFileVersion("oblivion.exe"); }
         public Version GetOBMMVersion() { return new Version(f.OBMMFakeMajorVersion, f.OBMMFakeMinorVersion, f.OBMMFakeBuildNumber, 0); }
