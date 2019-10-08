@@ -64,7 +64,13 @@ namespace OMODFramework
         /// </summary>
         public List<ScriptCopyDataFile> CopyPlugins = new List<ScriptCopyDataFile>();
         public readonly List<PluginLoadInfo> LoadOrderList = new List<PluginLoadInfo>();
+        /// <summary>
+        /// Lists with all INIEdits
+        /// </summary>
         public readonly List<INIEditInfo> INIEdits = new List<INIEditInfo>();
+        /// <summary>
+        /// Lists with all Shader Edits
+        /// </summary>
         public readonly List<SDPEditInfo> SDPEdits = new List<SDPEditInfo>();
 
         /// <summary>
@@ -217,9 +223,7 @@ namespace OMODFramework
     {
         public readonly string Section;
         public readonly string Name;
-        public string OldValue;
         public readonly string NewValue;
-        public OMOD Plugin;
 
         /// <summary>
         /// INIEditInfo is used for creating ini tweaks
