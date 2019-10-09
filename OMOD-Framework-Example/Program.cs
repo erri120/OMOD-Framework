@@ -111,7 +111,7 @@ namespace OMOD_Framework_Example
             f.SetDLLPath(@"M:\Projects\OMOD-Framework\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\DarNified UI 1.3.2.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\Robert Male Body Replacer v52 OMOD-40532-1.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
@@ -147,7 +147,7 @@ namespace OMOD_Framework_Example
             {
                 // if you do not want the raw output but a more 'prettier' version, use this method
                 // it will change the ScriptReturnData and will populate the InstallFiles list
-                srd.Pretty(false, ref omod, ref pluginsPath, ref dataPath);
+                srd.Pretty(true, ref omod, ref pluginsPath, ref dataPath);
 
                 // loop through the whole thing, do note the custom struct
                 foreach(InstallFile file in srd.InstallFiles)

@@ -1,8 +1,9 @@
-﻿using OMODFramework;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
+using OMODFramework;
+using OMODFramework.Scripting;
 
 namespace OblivionModManager.Scripting
 {
@@ -28,7 +29,7 @@ namespace OblivionModManager.Scripting
 
         internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath,
             Framework _f,
-            OMODFramework.Scripting.IScriptRunnerFunctions scriptRunnerFunctions)
+            IScriptRunnerFunctions scriptRunnerFunctions)
         {
             f = _f;
             //Warn = scriptRunnerFunctions.Warn;
@@ -71,19 +72,18 @@ namespace OblivionModManager.Scripting
 
         private string[] GetFilePaths(string path, string pattern, bool recurse)
         {
-            return Directory.GetFiles(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            return Directory.GetFiles(path, !string.IsNullOrEmpty(pattern) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
         private string[] GetDirectoryPaths(string path, string pattern, bool recurse)
         {
-            ;
-            return Directory.GetDirectories(path, (pattern != "" && pattern != null) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            return Directory.GetDirectories(path, !string.IsNullOrEmpty(pattern) ? pattern : "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
         private string[] StripPathList(string[] paths, int baseLength)
         {
-            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
-            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(1);
+            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(baseLength);
+            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(1);
             return paths;
         }
 
@@ -93,9 +93,9 @@ namespace OblivionModManager.Scripting
         public void CancelDataFileCopy(string file)
         {
             CheckPathSafety(file);
-            string tempFile = Path.Combine(DataFiles, file);
-            string toL = file.ToLower();
-            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            var tempFile = Path.Combine(DataFiles, file);
+            var toL = file.ToLower();
+            for (var i = 0; i < srd.CopyDataFiles.Count; i++)
             {
                 if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
             }
@@ -104,8 +104,8 @@ namespace OblivionModManager.Scripting
         public void CancelDataFolderCopy(string folder)
         {
             CheckPathSafety(folder);
-            string toL = folder.ToLower();
-            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            var toL = folder.ToLower();
+            for (var i = 0; i < srd.CopyDataFiles.Count; i++)
             {
                 if (srd.CopyDataFiles[i].CopyTo.StartsWith(toL))
                 {
@@ -134,9 +134,9 @@ namespace OblivionModManager.Scripting
         {
             CheckDataSafety(from);
             CheckPathSafety(to);
-            string toL = to.ToLower();
+            var toL = to.ToLower();
             if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Esm and Esp files are illegal");
-            for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+            for (var i = 0; i < srd.CopyDataFiles.Count; i++)
             {
                 if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
             }
@@ -147,14 +147,14 @@ namespace OblivionModManager.Scripting
             CheckDataFolderSafety(from);
             CheckFolderSafety(to);
             from = Path.GetFullPath(Path.Combine(DataFiles, from));
-            foreach (string path in Directory.GetFiles(from, "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            foreach (var path in Directory.GetFiles(from, "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
             {
-                string fileFrom = Path.GetFullPath(path).Substring(DataFiles.Length);
-                string fileTo = Path.GetFullPath(path).Substring(from.Length);
+                var fileFrom = Path.GetFullPath(path).Substring(DataFiles.Length);
+                var fileTo = Path.GetFullPath(path).Substring(from.Length);
                 if (fileTo.StartsWith("" + Path.DirectorySeparatorChar) || fileTo.StartsWith("" + Path.AltDirectorySeparatorChar)) fileTo = fileTo.Substring(1);
                 fileTo = Path.Combine(to, fileTo);
-                string toL = fileTo.ToLower();
-                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                var toL = fileTo.ToLower();
+                for (var i = 0; i < srd.CopyDataFiles.Count; i++)
                 {
                     if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
                 }
@@ -165,10 +165,10 @@ namespace OblivionModManager.Scripting
         {
             CheckPluginSafety(from);
             CheckPathSafety(to);
-            string toL = to.ToLower();
+            var toL = to.ToLower();
             if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Copied plugins must have a .esp or .esm file extension");
             if (to.Contains("\\") || to.Contains("/")) throw new Exception("Cannot copy a plugin to a subdirectory of the data folder");
-            for (int i = 0; i < srd.CopyPlugins.Count; i++)
+            for (var i = 0; i < srd.CopyPlugins.Count; i++)
             {
                 if (srd.CopyPlugins[i].CopyTo == toL) srd.CopyPlugins.RemoveAt(i--);
             }
@@ -199,7 +199,7 @@ namespace OblivionModManager.Scripting
         public void DisplayText(string path, string title)
         {
             CheckDataSafety(path);
-            string s = File.ReadAllText(Path.Combine(DataFiles, path), System.Text.Encoding.Default);
+            var s = File.ReadAllText(Path.Combine(DataFiles, path), Encoding.Default);
             IDisplayText(title ?? path, s, true);
         }
         public void DontInstallAnyDataFiles() { srd.InstallAllData = false; }
@@ -213,9 +213,9 @@ namespace OblivionModManager.Scripting
         public void DontInstallDataFolder(string folder, bool recurse)
         {
             CheckDataFolderSafety(folder);
-            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            foreach (var path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
             {
-                string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                var file = Path.GetFullPath(path).Substring(DataFiles.Length);
                 Framework.strArrayRemove(srd.InstallData, file);
                 if (!Framework.strArrayContains(srd.IgnoreData, file)) srd.IgnoreData.Add(file);
             }
@@ -235,7 +235,7 @@ namespace OblivionModManager.Scripting
         public void EditXMLLine(string file, int line, string value)
         {
             CheckDataSafety(file);
-            string ext = Path.GetExtension(file).ToLower();
+            var ext = Path.GetExtension(file)?.ToLower();
             if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
             string[] lines = File.ReadAllLines(Path.Combine(DataFiles + file));
             if (line < 0 || line >= lines.Length) throw new Exception("Invalid line number");
@@ -246,9 +246,9 @@ namespace OblivionModManager.Scripting
         public void EditXMLReplace(string file, string find, string replace)
         {
             CheckDataSafety(file);
-            string ext = Path.GetExtension(file).ToLower();
+            var ext = Path.GetExtension(file)?.ToLower();
             if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
-            string text = File.ReadAllText(Path.Combine(DataFiles + file));
+            var text = File.ReadAllText(Path.Combine(DataFiles + file));
             text = text.Replace(find, replace);
             File.WriteAllText(Path.Combine(DataFiles + file), text);
         }
@@ -257,12 +257,12 @@ namespace OblivionModManager.Scripting
         public void GenerateNewDataFile(string file, byte[] data)
         {
             CheckPathSafety(file);
-            string tempFile = Path.Combine(DataFiles, file);
+            var tempFile = Path.Combine(DataFiles, file);
             if (!File.Exists(tempFile))
             {
-                string toL = file.ToLower();
+                var toL = file.ToLower();
                 if (toL.EndsWith(".esm") || toL.EndsWith(".esp")) throw new Exception("Data files can't be an esp or esm");
-                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                for (var i = 0; i < srd.CopyDataFiles.Count; i++)
                 {
                     if (srd.CopyDataFiles[i].CopyTo == toL) srd.CopyDataFiles.RemoveAt(i--);
                 }
@@ -272,7 +272,7 @@ namespace OblivionModManager.Scripting
             File.WriteAllBytes(tempFile, data);
         }
         public string[] GetActiveEspNames() { return IGetActiveESPNames(); }
-        public string[] GetActiveOmodNames() { return new string[] { "" }; }
+        public string[] GetActiveOmodNames() { return new[] { "" }; }
         public byte[] GetDataFileFromBSA(string file)
         {
             //CheckPathSafety(file);
@@ -307,7 +307,7 @@ namespace OblivionModManager.Scripting
             plugin = Path.ChangeExtension(Path.Combine("data", "obse", "plugins", plugin), ".dll");
             CheckPathSafety(plugin);
             if (!File.Exists(plugin)) return null;
-            else return GetFileVersion(plugin);
+            return GetFileVersion(plugin);
         }
         public Version GetOBSEVersion() { return GetFileVersion("obse_loader.exe"); }
         public string[] GetPluginFolders(string path, string pattern, bool recurse)
@@ -324,7 +324,7 @@ namespace OblivionModManager.Scripting
         public string InputString(string title) { return InputString(title, ""); }
         public string InputString(string title, string initial)
         {
-            string result = IInputString(title, initial);
+            var result = IInputString(title, initial);
             return result;
         }
         public void InstallAllDataFiles() { srd.InstallAllData = true; }
@@ -338,9 +338,9 @@ namespace OblivionModManager.Scripting
         public void InstallDataFolder(string folder, bool recurse)
         {
             CheckDataFolderSafety(folder);
-            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            foreach (var path in Directory.GetFiles(Path.Combine(DataFiles, folder), "*", recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
             {
-                string file = Path.GetFullPath(path).Substring(DataFiles.Length);
+                var file = Path.GetFullPath(path).Substring(DataFiles.Length);
                 Framework.strArrayRemove(srd.IgnoreData, file);
                 if (!Framework.strArrayContains(srd.InstallData, file)) srd.InstallData.Add(file);
             }
@@ -358,9 +358,9 @@ namespace OblivionModManager.Scripting
         private void LoadOrder(string plugin1, string plugin2, bool after, bool early)
         {
             CheckPathSafety(plugin1);
-            string path1 = plugin1.ToLower();
-            bool found = false;
-            for (int i = 0; i < srd.CopyPlugins.Count; i++)
+            var path1 = plugin1.ToLower();
+            var found = false;
+            for (var i = 0; i < srd.CopyPlugins.Count; i++)
             {
                 if (srd.CopyPlugins[i].CopyTo == path1)
                 {
@@ -378,7 +378,7 @@ namespace OblivionModManager.Scripting
                 CheckPathSafety(plugin2);
                 plugin1 = plugin1.ToLower();
                 plugin2 = plugin2.ToLower();
-                for (int i = 0; i < srd.LoadOrderList.Count; i++)
+                for (var i = 0; i < srd.LoadOrderList.Count; i++)
                 {
                     if (plugin1 == srd.LoadOrderList[i].Plugin && plugin2 == srd.LoadOrderList[i].Target) srd.LoadOrderList.RemoveAt(i--);
                 }
@@ -436,7 +436,7 @@ namespace OblivionModManager.Scripting
         {
             if (previews != null)
             {
-                for (int i = 0; i < previews.Length; i++)
+                for (var i = 0; i < previews.Length; i++)
                 {
                     if (previews[i] != null)
                     {
@@ -446,8 +446,8 @@ namespace OblivionModManager.Scripting
                 }
             }
             int[] r = DialogSelect(items, title, many, previews, descs);
-            string[] result = new string[r.Length];
-            for (int i = 0; i < r.Length; i++)
+            var result = new string[r.Length];
+            for (var i = 0; i < r.Length; i++)
             {
                 result[i] = items[r[i]];
             }
@@ -460,7 +460,7 @@ namespace OblivionModManager.Scripting
         public void SetPluginByte(string file, long offset, byte value)
         {
             CheckPluginSafety(file);
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, file)))
             {
                 fs.Position = offset;
                 fs.WriteByte(value);
@@ -470,7 +470,7 @@ namespace OblivionModManager.Scripting
         {
             CheckPluginSafety(file);
             byte[] data = BitConverter.GetBytes(value);
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, file)))
             {
                 fs.Position = offset;
                 fs.Write(data, 0, 2);
@@ -480,7 +480,7 @@ namespace OblivionModManager.Scripting
         {
             CheckPluginSafety(file);
             byte[] data = BitConverter.GetBytes(value);
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, file)))
             {
                 fs.Position = offset;
                 fs.Write(data, 0, 4);
@@ -490,7 +490,7 @@ namespace OblivionModManager.Scripting
         {
             CheckPluginSafety(file);
             byte[] data = BitConverter.GetBytes(value);
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, file)))
             {
                 fs.Position = offset;
                 fs.Write(data, 0, 8);
@@ -500,7 +500,7 @@ namespace OblivionModManager.Scripting
         {
             CheckPluginSafety(file);
             byte[] data = BitConverter.GetBytes(value);
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, file)))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, file)))
             {
                 fs.Position = offset;
                 fs.Write(data, 0, 4);

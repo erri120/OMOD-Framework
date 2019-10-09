@@ -1,6 +1,6 @@
-﻿using SevenZip.Compression.LZMA;
-using System;
+﻿using System;
 using System.IO;
+using SevenZip.Compression.LZMA;
 
 namespace OMODFramework.Classes
 {
@@ -15,7 +15,7 @@ namespace OMODFramework.Classes
         private string CurrentFile;
         private long FileLength;
         private long Written;
-        private FileStream CurrentOutputStream = null;
+        private FileStream CurrentOutputStream;
 
         internal string GetBaseDirectory() { return BaseDirectory; }
 
@@ -32,15 +32,15 @@ namespace OMODFramework.Classes
             long TotalLength = 0;
             while (FileList.PeekChar() != -1)
             {
-                string path = FileList.ReadString();
+                var path = FileList.ReadString();
                 FileList.ReadInt32();
                 TotalLength += FileList.ReadInt64();
-                int upto = 0;
+                var upto = 0;
                 while (true)
                 {
-                    int i = path.IndexOf('\\', upto);
+                    var i = path.IndexOf('\\', upto);
                     if (i == -1) break;
-                    string directory = path.Substring(0, i);
+                    var directory = path.Substring(0, i);
                     if (!Directory.Exists(Path.Combine(BaseDirectory, directory))) Directory.CreateDirectory(Path.Combine(BaseDirectory, directory));
                     upto = i + 1;
                 }
@@ -54,28 +54,25 @@ namespace OMODFramework.Classes
             CurrentFile = FileList.ReadString();
             FileList.ReadUInt32();
             FileLength = FileList.ReadInt64();
-            if (CurrentOutputStream != null) CurrentOutputStream.Close();
-            if (!Framework.IsSafeFileName(CurrentFile))
-            {
-                CurrentOutputStream = File.Create(Path.Combine(Framework.TempDir, "IllegalFile"));
-            }
-            else
-            {
-                CurrentOutputStream = File.Create(Path.Combine(BaseDirectory, CurrentFile));
-            }
+            CurrentOutputStream?.Close();
+            CurrentOutputStream = File.Create(!Framework.IsSafeFileName(CurrentFile) ? Path.Combine(Framework.TempDir, "IllegalFile") : Path.Combine(BaseDirectory, CurrentFile));
             Written = 0;
         }
 
-        public override long Length { get { return length; } }
-        public override bool CanRead { get { return false; } }
-        public override bool CanSeek { get { return false; } }
-        public override bool CanWrite { get { return true; } }
+        public override long Length => length;
+        public override bool CanRead => false;
+        public override bool CanSeek => false;
+        public override bool CanWrite => true;
+
         public override long Position
         {
-            get { return position; }
-            set { throw new NotImplementedException("The SparseFileStream does not support seeking"); }
+            get => position;
+            set => throw new NotImplementedException("The SparseFileStream does not support seeking");
         }
-        public override void Flush() { if (CurrentOutputStream != null) CurrentOutputStream.Flush(); }
+        public override void Flush()
+        {
+            CurrentOutputStream?.Flush();
+        }
         public override int Read(byte[] buffer, int offset, int count) { throw new NotImplementedException("The SparseFileStream does not support reading"); }
 
         public override long Seek(long offset, SeekOrigin origin) { throw new NotImplementedException("The SparseFileStream does not support seeking"); }
@@ -107,15 +104,8 @@ namespace OMODFramework.Classes
                 FileList.ReadUInt32();
                 FileLength = FileList.ReadInt64();
                 if (FileLength > 0) throw new Exception("Compressed data file stream didn't contain enough information to fill all files");
-                if (CurrentOutputStream != null) CurrentOutputStream.Close();
-                if (!Framework.IsSafeFileName(CurrentFile))
-                {
-                    CurrentOutputStream = File.Create(Path.Combine(Framework.TempDir, "IllegalFile"));
-                }
-                else
-                {
-                    CurrentOutputStream = File.Create(Path.Combine(BaseDirectory, CurrentFile));
-                }
+                CurrentOutputStream?.Close();
+                CurrentOutputStream = File.Create(!Framework.IsSafeFileName(CurrentFile) ? Path.Combine(Framework.TempDir, "IllegalFile") : Path.Combine(BaseDirectory, CurrentFile));
             }
             if (CurrentOutputStream != null)
             {
@@ -125,23 +115,24 @@ namespace OMODFramework.Classes
         }
     }
 
+/*
     internal class SparseFileReaderStream : Stream
     {
-        private long position = 0;
-        private long length;
+        private long position;
+        private readonly long length;
 
-        private string[] FilePaths;
-        private int FileCount = 0;
-        private FileStream CurrentInputStream = null;
-        private long CurrentFileEnd = 0;
-        private bool Finished = false;
+        private readonly string[] FilePaths;
+        private int FileCount;
+        private FileStream CurrentInputStream;
+        private long CurrentFileEnd;
+        private bool Finished;
 
-        internal string CurrentFile { get { return FilePaths[FileCount - 1]; } }
+        internal string CurrentFile => FilePaths[FileCount - 1];
 
         internal SparseFileReaderStream(string[] filePaths)
         {
             length = 0;
-            foreach (string s in filePaths)
+            foreach (var s in filePaths)
             {
                 length += (new FileInfo(s)).Length;
             }
@@ -151,7 +142,7 @@ namespace OMODFramework.Classes
 
         private bool NextFile()
         {
-            if (CurrentInputStream != null) CurrentInputStream.Close();
+            CurrentInputStream?.Close();
             if (FileCount >= FilePaths.Length)
             {
                 CurrentInputStream = null;
@@ -164,18 +155,22 @@ namespace OMODFramework.Classes
         }
         public override long Position
         {
-            get { return position; }
-            set { throw new NotImplementedException("The SparseFileReaderStream does not support seeking"); }
+            get => position;
+            set => throw new NotImplementedException("The SparseFileReaderStream does not support seeking");
         }
-        public override long Length { get { return length; } }
-        public override bool CanRead { get { return true; } }
-        public override bool CanSeek { get { return false; } }
-        public override bool CanWrite { get { return false; } }
-        public override void Flush() { if (CurrentInputStream != null) CurrentInputStream.Flush(); }
+        public override long Length => length;
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+
+        public override void Flush()
+        {
+            CurrentInputStream?.Flush();
+        }
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (Finished) return 0;
-            int read = 0;
+            var read = 0;
             while (count > CurrentFileEnd - position)
             {
                 CurrentInputStream.Read(buffer, offset, (int)(CurrentFileEnd - position));
@@ -206,10 +201,11 @@ namespace OMODFramework.Classes
             }
         }
     }
+*/
 
     internal abstract class CompressionHandler
     {
-        private readonly static SevenZipHandler SevenZip = new SevenZipHandler();
+        private static readonly SevenZipHandler SevenZip = new SevenZipHandler();
         //private static ICSharpCode.SharpZipLib.Checksum.Crc32 CRC32 = new ICSharpCode.SharpZipLib.Checksum.Crc32();
 
         internal static string DecompressFiles(Stream FileList, Stream CompressedStream, CompressionType type)
@@ -229,15 +225,14 @@ namespace OMODFramework.Classes
     {
         protected override string DecompressAll(Stream FileList, Stream CompressedStream)
         {
-            SparseFileWriterStream sfs = new SparseFileWriterStream(FileList);
-            byte[] buffer = new byte[5];
-            Decoder decoder = new Decoder();
+            var sfs = new SparseFileWriterStream(FileList);
+            var buffer = new byte[5];
+            var decoder = new Decoder();
             CompressedStream.Read(buffer, 0, 5);
             decoder.SetDecoderProperties(buffer);
-            SevenZip.ICodeProgress pb = null;
             try
             {
-                decoder.Code(CompressedStream, sfs, CompressedStream.Length - CompressedStream.Position, sfs.Length, pb);
+                decoder.Code(CompressedStream, sfs, CompressedStream.Length - CompressedStream.Position, sfs.Length, null);
             }
             finally
             {

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using OblivionModManager.Scripting;
 
 namespace OMODFramework.Scripting
 {
@@ -130,7 +130,7 @@ namespace OMODFramework.Scripting
         {
             srd = new ScriptReturnData();
 
-            OblivionModManager.Scripting.ScriptFunctions sf = new OblivionModManager.Scripting.ScriptFunctions(
+            var sf = new ScriptFunctions(
                 srd, DataPath, PluginsPath, OMOD.GetFramework(), ScriptRunnerFunctions);
 
             switch (type)

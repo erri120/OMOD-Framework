@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace OMODFramework
 {
@@ -90,72 +90,66 @@ namespace OMODFramework
         {
             if (CancelInstall) return null;
 
-            List<string> filesPlugins = new List<string>();
-            List<string> filesData = new List<string>();
+            var filesPlugins = new List<string>();
+            var filesData = new List<string>();
 
-            if (InstallAllPlugins) foreach (string s in omod.GetPluginList()) if (!s.Contains("\\")) filesPlugins.Add(s);
-            foreach (string s in InstallPlugins) { if (!Framework.strArrayContains(filesPlugins, s)) filesPlugins.Add(s); }
-            foreach (string s in IgnorePlugins) { Framework.strArrayRemove(filesPlugins, s); }
+            if (InstallAllPlugins) foreach (var s in omod.GetPluginList()) if (!s.Contains("\\")) filesPlugins.Add(s);
+            foreach (var s in InstallPlugins) { if (!Framework.strArrayContains(filesPlugins, s)) filesPlugins.Add(s); }
+            foreach (var s in IgnorePlugins) { Framework.strArrayRemove(filesPlugins, s); }
 
             if (copy)
             {
-                foreach (ScriptCopyDataFile scd in CopyPlugins)
+                foreach (var scd in CopyPlugins)
                 {
                     if (!File.Exists(Path.Combine(pluginsPath, scd.CopyFrom))) break;
-                    else
+                    if (scd.CopyFrom != scd.CopyTo)
                     {
-                        if (scd.CopyFrom != scd.CopyTo)
-                        {
-                            if (File.Exists(Path.Combine(pluginsPath, scd.CopyTo))) File.Delete(Path.Combine(pluginsPath, scd.CopyTo));
-                            File.Copy(Path.Combine(pluginsPath, scd.CopyFrom), Path.Combine(pluginsPath, scd.CopyTo));
-                        }
-                        if (!Framework.strArrayContains(filesPlugins, scd.CopyTo)) filesPlugins.Add(scd.CopyTo);
+                        if (File.Exists(Path.Combine(pluginsPath, scd.CopyTo))) File.Delete(Path.Combine(pluginsPath, scd.CopyTo));
+                        File.Copy(Path.Combine(pluginsPath, scd.CopyFrom), Path.Combine(pluginsPath, scd.CopyTo));
                     }
+                    if (!Framework.strArrayContains(filesPlugins, scd.CopyTo)) filesPlugins.Add(scd.CopyTo);
                 }
             }
 
             if (InstallAllData)
             {
-                foreach (string s in omod.GetDataFileList()) { filesData.Add(s); }
+                foreach (var s in omod.GetDataFileList()) { filesData.Add(s); }
             }
-            foreach (string s in InstallData) { if (!Framework.strArrayContains(filesData, s)) filesData.Add(s); }
-            foreach (string s in IgnoreData) { Framework.strArrayRemove(filesData, s); }
+            foreach (var s in InstallData) { if (!Framework.strArrayContains(filesData, s)) filesData.Add(s); }
+            foreach (var s in IgnoreData) { Framework.strArrayRemove(filesData, s); }
 
             if (copy)
             {
-                foreach (ScriptCopyDataFile scd in CopyDataFiles)
+                foreach (var scd in CopyDataFiles)
                 {
                     if (!File.Exists(Path.Combine(dataPath, scd.CopyFrom))) break;
-                    else
+                    if (scd.CopyFrom != scd.CopyTo)
                     {
-                        if (scd.CopyFrom != scd.CopyTo)
-                        {
-                            string dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
-                            if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
-                            if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
-                            File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
-                        }
-                        if (!Framework.strArrayContains(filesData, scd.CopyTo)) filesData.Add(scd.CopyTo);
+                        var dirName = Path.GetDirectoryName(Path.Combine(dataPath, scd.CopyTo));
+                        if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+                        if (File.Exists(Path.Combine(dataPath, scd.CopyTo))) File.Delete(Path.Combine(dataPath, scd.CopyTo));
+                        File.Copy(Path.Combine(dataPath, scd.CopyFrom), Path.Combine(dataPath, scd.CopyTo));
                     }
+                    if (!Framework.strArrayContains(filesData, scd.CopyTo)) filesData.Add(scd.CopyTo);
                 }
             }
 
-            for (int i = 0; i < filesData.Count; i++)
+            for (var i = 0; i < filesData.Count; i++)
             {
                 if (filesData[i].StartsWith("\\")) filesData[i] = filesData[i].Substring(1);
-                string currentFile = Path.Combine(dataPath, filesData[i]);
+                var currentFile = Path.Combine(dataPath, filesData[i]);
                 if (!File.Exists(currentFile)) filesData.RemoveAt(i--);
             }
 
-            for (int i = 0; i < filesPlugins.Count; i++)
+            for (var i = 0; i < filesPlugins.Count; i++)
             {
                 if (InstallPlugins[i].StartsWith("\\")) filesPlugins[i] = filesPlugins[i].Substring(1);
-                string currentFile = Path.Combine(pluginsPath, filesPlugins[i]);
+                var currentFile = Path.Combine(pluginsPath, filesPlugins[i]);
                 if (!File.Exists(currentFile)) filesPlugins.RemoveAt(i--);
             }
 
-            foreach (string s in filesData) InstallFiles.Add(new InstallFile(Path.Combine(dataPath, s), s));
-            foreach (string s in filesPlugins) InstallFiles.Add(new InstallFile(Path.Combine(pluginsPath, s),s));
+            foreach (var s in filesData) InstallFiles.Add(new InstallFile(Path.Combine(dataPath, s), s));
+            foreach (var s in filesPlugins) InstallFiles.Add(new InstallFile(Path.Combine(pluginsPath, s),s));
 
             InstallAllData = false;
             InstallAllPlugins = false;
@@ -214,6 +208,7 @@ namespace OMODFramework
         /// <param name="plugin">The plugin</param>
         /// <param name="target">The target that needs to be loaded after/earlier than the plugin</param>
         /// <param name="loadAfter">Load after or earlier</param>
+        /// <param name="early">Whether to load early</param>
         public PluginLoadInfo(string plugin, string target, bool loadAfter, bool early)
         {
             Plugin = plugin;

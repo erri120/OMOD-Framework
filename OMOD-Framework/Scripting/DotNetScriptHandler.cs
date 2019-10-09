@@ -1,29 +1,31 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.IO;
-using System.Reflection;
+using System.Security;
 using System.Security.Policy;
+using Microsoft.CSharp;
+using Microsoft.VisualBasic;
+using OblivionModManager.Scripting;
 using sList = System.Collections.Generic.List<string>;
 
 namespace OMODFramework.Scripting
 {
     internal static class DotNetScriptHandler
     {
-        private static readonly Microsoft.CSharp.CSharpCodeProvider csCompiler = new Microsoft.CSharp.CSharpCodeProvider();
-        private static readonly Microsoft.VisualBasic.VBCodeProvider vbCompiler = new Microsoft.VisualBasic.VBCodeProvider();
+        private static readonly CSharpCodeProvider csCompiler = new CSharpCodeProvider();
+        private static readonly VBCodeProvider vbCompiler = new VBCodeProvider();
         private static readonly CompilerParameters cParams;
-        private static readonly Evidence evidence;
 
         private static readonly string ScriptOutputPath = Path.Combine(Framework.TempDir, "erri120.OMODFramework.dotnetscript.dll");
 
         static DotNetScriptHandler()
         {
-            cParams = new CompilerParameters()
+            cParams = new CompilerParameters
             {
                 GenerateExecutable = false,
                 GenerateInMemory = false,
                 IncludeDebugInformation = false,
-                OutputAssembly = ScriptOutputPath,
+                OutputAssembly = ScriptOutputPath
             };
             cParams.ReferencedAssemblies.Add(Framework.DLLPath);
             cParams.ReferencedAssemblies.Add("System.dll");
@@ -32,8 +34,8 @@ namespace OMODFramework.Scripting
             cParams.ReferencedAssemblies.Add("System.Windows.Forms.dll");
             cParams.ReferencedAssemblies.Add("System.Xml.dll");
 
-            evidence = new Evidence();
-            evidence.AddHostEvidence(new Zone(System.Security.SecurityZone.Internet));
+            var evidence = new Evidence();
+            evidence.AddHostEvidence(new Zone(SecurityZone.Internet));
         }
 
         private static byte[] Compile(string code, ScriptType language)
@@ -59,10 +61,12 @@ namespace OMODFramework.Scripting
                     throw new NotImplementedException();
             }
             stdout = "";
-            for (int i = 0; i < results.Output.Count; i++) stdout += results.Output[i] + "\n";
+            foreach (var t in results.Output)
+                stdout += t + "\n";
+
             if (results.Errors.HasErrors)
             {
-                sList msgs = new sList();
+                var msgs = new sList();
                 foreach (CompilerError ce in results.Errors)
                 {
                     if (!ce.IsWarning) msgs.Add($"Error on Line {ce.Line}: {ce.ErrorText}");
@@ -72,7 +76,7 @@ namespace OMODFramework.Scripting
             else errors = null;
             if (results.Errors.HasWarnings)
             {
-                sList msgs = new sList();
+                var msgs = new sList();
                 foreach (CompilerError ce in results.Errors)
                 {
                     if (ce.IsWarning) msgs.Add($"Warning on Line {ce.Line}: {ce.ErrorText}");
@@ -85,39 +89,40 @@ namespace OMODFramework.Scripting
                 string e = "", w = "";
                 if(warnings != null)
                 {
-                    foreach (string s in warnings) w += s;
+                    foreach (var s in warnings) w += s;
                 }
-                foreach (string s in errors) e += s;
+
+                if (errors != null)
+                    foreach (var s in errors)
+                        e += s;
                 throw new Exception($"Problems during script compilation: \n{e} \n{w}");
             }
-            else
-            {
-                byte[] data = File.ReadAllBytes(results.PathToAssembly);
-                //System.IO.File.Delete(results.PathToAssembly);
-                return data;
-            }
+
+            byte[] data = File.ReadAllBytes(results.PathToAssembly);
+            //System.IO.File.Delete(results.PathToAssembly);
+            return data;
         }
 
         private static void Execute(
-            string script, ref OblivionModManager.Scripting.IScriptFunctions functions,
+            string script, ref IScriptFunctions functions,
             ScriptType language)
         {
             byte[] data = Compile(script, language);
             if (data == null) throw new Exception("There was an error during script compilation!");
-            Assembly asm = AppDomain.CurrentDomain.Load(data, null);
-            if (!(asm.CreateInstance("Script") is OblivionModManager.Scripting.IScript s))
+            var asm = AppDomain.CurrentDomain.Load(data, null);
+            if (!(asm.CreateInstance("Script") is IScript s))
             {
                 throw new Exception("C# or vb script did not contain a 'Script' class in the root namespace, or IScript was not implemented");
             }
             s.Execute(functions);
         }
 
-        internal static void ExecuteCS(string script, OblivionModManager.Scripting.IScriptFunctions functions)
+        internal static void ExecuteCS(string script, IScriptFunctions functions)
         {
             Execute(script, ref functions, ScriptType.cSharp);
         }
 
-        internal static void ExecuteVB(string script, OblivionModManager.Scripting.IScriptFunctions functions)
+        internal static void ExecuteVB(string script, IScriptFunctions functions)
         {
             Execute(script, ref functions, ScriptType.vb);
         }

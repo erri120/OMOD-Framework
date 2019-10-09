@@ -1,8 +1,8 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using OMODFramework.Classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
+using OMODFramework.Classes;
 
 namespace OMODFramework
 {
@@ -12,12 +12,14 @@ namespace OMODFramework
 
         protected class PrivateData
         {
-            internal ZipFile modFile = null;
+            internal ZipFile modFile;
         }
 
         [NonSerialized]
         private PrivateData pD = new PrivateData();
+/*
         internal void RecreatePrivateData() { if (pD == null) pD = new PrivateData(); }
+*/
 
         internal string FilePath;
         internal string FileName;
@@ -35,8 +37,8 @@ namespace OMODFramework
         internal CompressionType CompType;
         private readonly byte FileVersion;
 
-        internal string Version { get { return "" + MajorVersion + ((MinorVersion != -1) ? ("." + MinorVersion + ((BuildVersion != -1) ? ("." + BuildVersion) : "")) : ""); } }
-        internal string FullFilePath { get { return Path.Combine(FilePath, FileName); } }
+        internal string Version => "" + MajorVersion + ((MinorVersion != -1) ? ("." + MinorVersion + ((BuildVersion != -1) ? ("." + BuildVersion) : "")) : "");
+        internal string FullFilePath => Path.Combine(FilePath, FileName);
 
         private ZipFile ModFile
         {
@@ -60,10 +62,10 @@ namespace OMODFramework
             FileName = Path.GetFileName(path);
             LowerFileName = FileName.ToLower();
 
-            using (Stream Config = ExtractWholeFile("config"))
-            using (BinaryReader br = new BinaryReader(Config))
+            using (var Config = ExtractWholeFile("config"))
+            using (var br = new BinaryReader(Config))
             {
-                byte version = br.ReadByte();
+                var version = br.ReadByte();
                 FileVersion = version;
                 if (version > framework.OBMMFakeCurrentOmodVersion) throw new Exception($"The OMOD version is greater than the set fake OMOD version: {version}>{framework.OBMMFakeCurrentOmodVersion}");
 
@@ -80,7 +82,7 @@ namespace OMODFramework
                 }
                 else
                 {
-                    string sCreationTime = br.ReadString();
+                    br.ReadString();
                 }
                 if (Description == "") Description = "No description";
                 CompType = (CompressionType)br.ReadByte();
@@ -165,11 +167,11 @@ namespace OMODFramework
         public string[] GetDataFileList() { return GetList("data.crc"); }
         private string[] GetList(string s)
         {
-            Stream TempStream = ExtractWholeFile(s);
+            var TempStream = ExtractWholeFile(s);
             if (TempStream == null) return new string[0];
-            using (BinaryReader br = new BinaryReader(TempStream))
+            using (var br = new BinaryReader(TempStream))
             {
-                List<string> ar = new List<string>();
+                var ar = new List<string>();
                 while (br.PeekChar() != -1)
                 {
                     ar.Add(br.ReadString());
@@ -185,10 +187,10 @@ namespace OMODFramework
         internal Framework GetFramework() { return framework; }
         internal string GetScript()
         {
-            using (Stream Script = ExtractWholeFile("script"))
-            using (BinaryReader br = new BinaryReader(Script))
+            using (var Script = ExtractWholeFile("script"))
+            using (var br = new BinaryReader(Script))
             {
-                string script = br.ReadString();
+                var script = br.ReadString();
                 return script;
             }
         }
@@ -202,13 +204,13 @@ namespace OMODFramework
         }
         private string[] GetDataList()
         {
-            using (Stream TempStream = ExtractWholeFile("data.crc"))
-            using (BinaryReader br = new BinaryReader(TempStream))
+            using (var TempStream = ExtractWholeFile("data.crc"))
+            using (var br = new BinaryReader(TempStream))
             {
-                List<string> ar = new List<string>();
+                var ar = new List<string>();
                 while (br.PeekChar() != -1)
                 {
-                    string s = br.ReadString();
+                    var s = br.ReadString();
                     br.ReadUInt32();
                     br.ReadInt64();
                     ar.Add(s);
@@ -218,10 +220,10 @@ namespace OMODFramework
         }
         private string ParseCompressedStream(string fileList, string compressedStream)
         {
-            string path = "";
-            Stream FileList = ExtractWholeFile(fileList);
+            string path;
+            var FileList = ExtractWholeFile(fileList);
             if (FileList == null) return null;
-            using (Stream CompressedStream = ExtractWholeFile(compressedStream))
+            using (var CompressedStream = ExtractWholeFile(compressedStream))
             {
                 path = CompressionHandler.DecompressFiles(FileList, CompressedStream, CompType);
             }
@@ -236,19 +238,19 @@ namespace OMODFramework
 
         private Stream ExtractWholeFile(string s, ref string path)
         {
-            ZipEntry ze = ModFile.GetEntry(s);
+            var ze = ModFile.GetEntry(s);
             if (ze == null) return null;
             return ExtractWholeFile(ze, ref path);
         }
 
         private Stream ExtractWholeFile(ZipEntry ze, ref string path)
         {
-            using (Stream file = ModFile.GetInputStream(ze))
+            using (var file = ModFile.GetInputStream(ze))
             {
                 Stream TempStream;
                 if (path != null || ze.Size > 67108864) TempStream = Framework.CreateTempFile(out path);
                 else TempStream = new MemoryStream((int)ze.Size);
-                byte[] buffer = new byte[4096];
+                var buffer = new byte[4096];
                 int i;
                 while ((i = file.Read(buffer, 0, 4096)) > 0)
                 {

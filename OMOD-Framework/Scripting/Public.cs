@@ -1,5 +1,6 @@
-﻿using OMODFramework;
-using System;
+﻿using System;
+using System.Windows.Forms;
+using OMODFramework;
 
 namespace OblivionModManager.Scripting
 {
@@ -114,7 +115,7 @@ namespace OblivionModManager.Scripting
         void EditXMLLine(string file, int line, string value);
         void EditXMLReplace(string file, string find, string replace);
 
-        System.Windows.Forms.Form CreateCustomDialog();
+        Form CreateCustomDialog();
 
         byte[] ReadDataFile(string file);
         byte[] ReadExistingDataFile(string file);

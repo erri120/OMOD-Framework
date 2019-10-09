@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Text;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 using BSAList = System.Collections.Generic.List<OMODFramework.Classes.BSAArchive>;
 using HashTable = System.Collections.Generic.Dictionary<ulong, OMODFramework.Classes.BSAArchive.BSAFileInfo>;
 
@@ -9,7 +11,8 @@ namespace OMODFramework.Classes
     class BSAArchive
     {
         [Flags]
-        private enum FileFlags : int { Meshes = 1, Textures = 2 }
+        private enum FileFlags
+        { Meshes = 1, Textures = 2 }
 
         internal struct BSAFileInfo
         {
@@ -37,27 +40,25 @@ namespace OMODFramework.Classes
                 bsa.br.BaseStream.Seek(offset, SeekOrigin.Begin);
                 if (compressed)
                 {
-                    byte[] b = new byte[size - 4];
-                    byte[] output = new byte[bsa.br.ReadUInt32()];
+                    var b = new byte[size - 4];
+                    var output = new byte[bsa.br.ReadUInt32()];
                     bsa.br.Read(b, 0, size - 4);
 
-                    ICSharpCode.SharpZipLib.Zip.Compression.Inflater inf = new ICSharpCode.SharpZipLib.Zip.Compression.Inflater();
+                    var inf = new Inflater();
                     inf.SetInput(b, 0, b.Length);
                     inf.Inflate(output);
 
                     return output;
                 }
-                else
-                {
-                    return bsa.br.ReadBytes(size);
-                }
+
+                return bsa.br.ReadBytes(size);
             }
         }
 
         private struct BSAFileInfo4
         {
             internal string path;
-            internal readonly ulong hash;
+            private readonly ulong hash;
             internal readonly int size;
             internal readonly uint offset;
 
@@ -76,7 +77,7 @@ namespace OMODFramework.Classes
         private struct BSAFolderInfo4
         {
             internal string path;
-            internal readonly ulong hash;
+            private readonly ulong hash;
             internal readonly int count;
             internal int offset;
 
@@ -94,13 +95,13 @@ namespace OMODFramework.Classes
         private struct BSAHeader4
         {
             internal readonly uint bsaVersion;
-            internal readonly int directorySize;
+            private readonly int directorySize;
             internal readonly int archiveFlags;
             internal readonly int folderCount;
             internal readonly int fileCount;
-            internal readonly int totalFolderNameLength;
-            internal readonly int totalFileNameLength;
-            internal readonly FileFlags fileFlags;
+            private readonly int totalFolderNameLength;
+            private readonly int totalFileNameLength;
+            private readonly FileFlags fileFlags;
 
             internal BSAHeader4(BinaryReader br)
             {
@@ -115,21 +116,20 @@ namespace OMODFramework.Classes
                 fileFlags = (FileFlags)br.ReadInt32();
             }
 
-            internal bool ContainsMeshes { get { return (fileFlags & FileFlags.Meshes) != 0; } }
-            internal bool ContainsTextures { get { return (fileFlags & FileFlags.Textures) != 0; } }
+            internal bool ContainsMeshes => (fileFlags & FileFlags.Meshes) != 0;
+            internal bool ContainsTextures => (fileFlags & FileFlags.Textures) != 0;
         }
 
         private readonly BinaryReader br;
         private readonly string name;
         private readonly bool defaultCompressed;
-        private static bool Loaded = false;
+        private static bool Loaded;
 
         private BSAArchive(string path, bool populateAll)
         {
             name = Path.GetFileNameWithoutExtension(path).ToLower();
-            BSAHeader4 header;
-            br = new BinaryReader(File.OpenRead(path), System.Text.Encoding.Default);
-            header = new BSAHeader4(br);
+            br = new BinaryReader(File.OpenRead(path), Encoding.Default);
+            var header = new BSAHeader4(br);
             if (header.bsaVersion != 0x67 || (!populateAll && !header.ContainsMeshes && !header.ContainsTextures))
             {
                 br.Close();
@@ -138,16 +138,16 @@ namespace OMODFramework.Classes
             defaultCompressed = (header.archiveFlags & 0x100) > 0;
 
             //Read folder info
-            BSAFolderInfo4[] folderInfo = new BSAFolderInfo4[header.folderCount];
-            BSAFileInfo4[] fileInfo = new BSAFileInfo4[header.fileCount];
-            for (int i = 0; i < header.folderCount; i++) folderInfo[i] = new BSAFolderInfo4(br);
-            int count = 0;
+            var folderInfo = new BSAFolderInfo4[header.folderCount];
+            var fileInfo = new BSAFileInfo4[header.fileCount];
+            for (var i = 0; i < header.folderCount; i++) folderInfo[i] = new BSAFolderInfo4(br);
+            var count = 0;
             for (uint i = 0; i < header.folderCount; i++)
             {
                 folderInfo[i].path = new string(br.ReadChars(br.ReadByte() - 1));
                 br.BaseStream.Position++;
                 folderInfo[i].offset = count;
-                for (int j = 0; j < folderInfo[i].count; j++) fileInfo[count + j] = new BSAFileInfo4(br, defaultCompressed);
+                for (var j = 0; j < folderInfo[i].count; j++) fileInfo[count + j] = new BSAFileInfo4(br, defaultCompressed);
                 count += folderInfo[i].count;
             }
             for (uint i = 0; i < header.fileCount; i++)
@@ -157,15 +157,15 @@ namespace OMODFramework.Classes
                 while ((c = br.ReadChar()) != '\0') fileInfo[i].path += c;
             }
 
-            for (int i = 0; i < header.folderCount; i++)
+            for (var i = 0; i < header.folderCount; i++)
             {
-                for (int j = 0; j < folderInfo[i].count; j++)
+                for (var j = 0; j < folderInfo[i].count; j++)
                 {
-                    BSAFileInfo4 fi4 = fileInfo[folderInfo[i].offset + j];
-                    string ext = Path.GetExtension(fi4.path);
-                    BSAFileInfo fi = new BSAFileInfo(this, (int)fi4.offset, fi4.size);
-                    string fpath = Path.Combine(folderInfo[i].path, Path.GetFileNameWithoutExtension(fi4.path));
-                    ulong hash = GenHash(fpath, ext);
+                    var fi4 = fileInfo[folderInfo[i].offset + j];
+                    var ext = Path.GetExtension(fi4.path);
+                    var fi = new BSAFileInfo(this, (int)fi4.offset, fi4.size);
+                    var fpath = Path.Combine(folderInfo[i].path, Path.GetFileNameWithoutExtension(fi4.path));
+                    var hash = GenHash(fpath, ext);
                     if (ext == ".nif")
                     {
                         Meshes[hash] = fi;
@@ -199,7 +199,7 @@ namespace OMODFramework.Classes
             {
                 hash = (ulong)(
                    (((byte)file[file.Length - 1]) * 0x1) +
-                    ((file.Length > 2 ? (byte)file[file.Length - 2] : (byte)0) * 0x100) +
+                    ((file.Length > 2 ? (byte)file[file.Length - 2] : 0) * 0x100) +
                      (file.Length * 0x10000) +
                     (((byte)file[0]) * 0x1000000)
                 );
@@ -221,9 +221,9 @@ namespace OMODFramework.Classes
                 }
                 if (i != 0)
                 {
-                    byte a = (byte)(((i & 0xfc) << 5) + (byte)((hash & 0xff000000) >> 24));
-                    byte b = (byte)(((i & 0xfe) << 6) + (byte)(hash & 0xff));
-                    byte c = (byte)((i << 7) + (byte)((hash & 0xff00) >> 8));
+                    var a = (byte)(((i & 0xfc) << 5) + (byte)((hash & 0xff000000) >> 24));
+                    var b = (byte)(((i & 0xfe) << 6) + (byte)(hash & 0xff));
+                    var c = (byte)((i << 7) + (byte)((hash & 0xff00) >> 8));
                     hash -= hash & 0xFF00FFFF;
                     hash += (uint)((a << 24) + b + (c << 8));
                 }
@@ -234,17 +234,17 @@ namespace OMODFramework.Classes
         private static uint GenHash2(string s)
         {
             uint hash = 0;
-            for (int i = 0; i < s.Length; i++)
+            foreach (var t in s)
             {
                 hash *= 0x1003f;
-                hash += (byte)s[i];
+                hash += (byte)t;
             }
             return hash;
         }
 
         private static void Load(bool populateAll)
         {
-            foreach (string s in Directory.GetFiles("data", "*.bsa")) new BSAArchive(s, populateAll);
+            foreach (var s in Directory.GetFiles("data", "*.bsa")) new BSAArchive(s, populateAll);
             Loaded = true;
         }
 
@@ -252,10 +252,10 @@ namespace OMODFramework.Classes
         {
             if (!Loaded) Load(true);
 
-            ulong hash = GenHash(path);
+            var hash = GenHash(path);
             if (!All.ContainsKey(hash)) return null;
             bsa = bsa.ToLower();
-            BSAFileInfo fi = All[hash];
+            var fi = All[hash];
             if (fi.bsa.name != bsa) return null;
             return fi.GetRawData();
         }
@@ -264,7 +264,7 @@ namespace OMODFramework.Classes
         {
             if (!Loaded) Load(true);
 
-            ulong hash = GenHash(path);
+            var hash = GenHash(path);
             if (!All.ContainsKey(hash)) return null;
             return All[hash].GetRawData();
         }

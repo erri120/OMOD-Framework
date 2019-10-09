@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+
 namespace OMODFramework
 {
     public class Framework
@@ -41,11 +42,11 @@ namespace OMODFramework
         internal static FileStream CreateTempFile() { return CreateTempFile(out _); }
         internal static FileStream CreateTempFile(out string path)
         {
-            for (int i = 0; i < 32000; i++)
+            for (var i = 0; i < 32000; i++)
             {
-                if (!File.Exists(Path.Combine(TempDir, "tmp_" + i.ToString())))
+                if (!File.Exists(Path.Combine(TempDir, "tmp_" + i)))
                 {
-                    path = Path.Combine(TempDir, "tmp_" + i.ToString());
+                    path = Path.Combine(TempDir, "tmp_" + i);
                     return File.Create(path);
                 }
             }
@@ -53,9 +54,9 @@ namespace OMODFramework
         }
         internal static string CreateTempDirectory()
         {
-            for (int i = 0; i < 32000; i++)
+            for (var i = 0; i < 32000; i++)
             {
-                if (!Directory.Exists(Path.Combine(TempDir + i.ToString())))
+                if (!Directory.Exists(Path.Combine(TempDir + i)))
                 {
                     Directory.CreateDirectory(Path.Combine(TempDir, i.ToString()));
                     return Path.Combine(TempDir, i.ToString());
@@ -63,16 +64,27 @@ namespace OMODFramework
             }
             throw new Exception("Could not create a new temp folder because directory is full!");
         }
+/*
         internal static void ClearTempFiles() { ClearTempFiles(""); }
+*/
         internal static void ClearTempFiles(string subfolder)
         {
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
             if (!Directory.Exists(Path.Combine(TempDir, subfolder))) return;
-            foreach (string file in Directory.GetFiles(Path.Combine(TempDir, subfolder)))
+            foreach (var file in Directory.GetFiles(Path.Combine(TempDir, subfolder)))
             {
-                try { File.Delete(file); } catch { }
+                try { File.Delete(file); }
+                catch
+                {
+                    // ignored
+                }
             }
-            try { Directory.Delete(Path.Combine(TempDir, subfolder), true); } catch { }
+            try { Directory.Delete(Path.Combine(TempDir, subfolder), true); }
+            catch
+            {
+                // ignored
+            }
+
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
         }
         #endregion
@@ -87,7 +99,7 @@ namespace OMODFramework
         public static bool strArrayContains(List<string> a, string s)
         {
             s = s.ToLower();
-            foreach (string s2 in a)
+            foreach (var s2 in a)
             {
                 if (s2.ToLower() == s) return true;
             }
@@ -101,7 +113,7 @@ namespace OMODFramework
         public static void strArrayRemove(List<string> a, string s)
         {
             s = s.ToLower();
-            for (int i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Count; i++)
             {
                 if (a[i].ToLower() == s)
                 {

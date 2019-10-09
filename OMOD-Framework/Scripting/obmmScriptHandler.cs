@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+
 namespace OMODFramework.Scripting
 {
     internal static class OBMMScriptHandler
@@ -12,8 +14,8 @@ namespace OMODFramework.Scripting
             public readonly string[] values;
             public readonly string var;
             public bool active;
-            public bool hitCase = false;
-            public int forCount = 0;
+            public bool hitCase;
+            public int forCount;
 
             //Inactive
             public FlowControlStruct(byte type)
@@ -61,7 +63,6 @@ namespace OMODFramework.Scripting
 
         private static string DataFiles;
         private static string Plugins;
-        private static string cLine = "0";
 
         private static Framework f;
 
@@ -76,20 +77,20 @@ namespace OMODFramework.Scripting
 
         private static string[] SplitLine(string s)
         {
-            List<string> temp = new List<string>();
-            bool WasLastSpace = false;
-            bool InQuotes = false;
-            bool WasLastEscape = false;
-            bool DoubleBreak = false;
-            bool InVar = false;
-            string CurrentWord = "";
-            string CurrentVar = "";
+            var temp = new List<string>();
+            var WasLastSpace = false;
+            var InQuotes = false;
+            var WasLastEscape = false;
+            var DoubleBreak = false;
+            var InVar = false;
+            var CurrentWord = "";
+            var CurrentVar = "";
 
             if (s == "") return new string[0];
             s += " ";
-            for (int i = 0; i < s.Length; i++)
+            foreach (var t in s)
             {
-                switch (s[i])
+                switch (t)
                 {
                     case '%':
                         WasLastSpace = false;
@@ -126,17 +127,11 @@ namespace OMODFramework.Scripting
                         }
                         if (InQuotes)
                         {
-                            CurrentWord += s[i];
+                            CurrentWord += t;
                         }
                         else if (!WasLastSpace)
                         {
-                            if (InVar)
-                            {
-                                if (!variables.ContainsKey(CurrentWord)) temp.Add("");
-                                else temp.Add(variables[CurrentWord]);
-                                InVar = false;
-                            }
-                            else temp.Add(CurrentWord);
+                            temp.Add(CurrentWord);
                             CurrentWord = "";
                             WasLastSpace = true;
                         }
@@ -147,24 +142,17 @@ namespace OMODFramework.Scripting
                         {
                             DoubleBreak = true;
                         }
-                        else CurrentWord += s[i];
+                        else CurrentWord += t;
                         break;
                     case '"':
                         if (InQuotes && WasLastEscape)
                         {
-                            CurrentWord += s[i];
+                            CurrentWord += t;
                         }
                         else
                         {
                             if (InVar) Warn("String marker found in the middle of a variable name");
-                            if (InQuotes)
-                            {
-                                InQuotes = false;
-                            }
-                            else
-                            {
-                                InQuotes = true;
-                            }
+                            InQuotes = !InQuotes;
                         }
                         WasLastSpace = false;
                         WasLastEscape = false;
@@ -172,7 +160,7 @@ namespace OMODFramework.Scripting
                     case '\\':
                         if (InQuotes && WasLastEscape)
                         {
-                            CurrentWord += s[i];
+                            CurrentWord += t;
                             WasLastEscape = false;
                         }
                         else if (InQuotes)
@@ -181,14 +169,14 @@ namespace OMODFramework.Scripting
                         }
                         else
                         {
-                            CurrentWord += s[i];
+                            CurrentWord += t;
                         }
                         WasLastSpace = false;
                         break;
                     default:
                         WasLastEscape = false;
                         WasLastSpace = false;
-                        CurrentWord += s[i];
+                        CurrentWord += t;
                         break;
                 }
                 if (DoubleBreak) break;
@@ -236,20 +224,19 @@ namespace OMODFramework.Scripting
             Plugins = PluginsPath;
             variables = new Dictionary<string, string>();
 
-            Stack<FlowControlStruct> FlowControl = new Stack<FlowControlStruct>();
-            Queue<string> ExtraLines = new Queue<string>();
+            var FlowControl = new Stack<FlowControlStruct>();
+            var ExtraLines = new Queue<string>();
 
             variables["NewLine"] = Environment.NewLine;
             variables["Tab"] = "\t";
 
             string[] script = InputScript.Replace("\r", "").Split('\n');
-            string[] line;
-            string s;
-            bool AllowRunOnLines = false;
+            var AllowRunOnLines = false;
             string SkipTo = null;
 
-            for (int i = 0; i < script.Length || ExtraLines.Count > 0; i++)
+            for (var i = 0; i < script.Length || ExtraLines.Count > 0; i++)
             {
+                string s;
                 if (ExtraLines.Count > 0)
                 {
                     i--;
@@ -259,7 +246,7 @@ namespace OMODFramework.Scripting
                 {
                     s = script[i].Replace('\t', ' ').Trim();
                 }
-                cLine = i.ToString();
+
                 if (AllowRunOnLines)
                 {
                     while (s.EndsWith("\\"))
@@ -278,7 +265,7 @@ namespace OMODFramework.Scripting
                     if (s == SkipTo) SkipTo = null;
                     else continue;
                 }
-                line = SplitLine(s);
+                string[] line = SplitLine(s);
                 if (line.Length == 0) continue;
 
                 if (FlowControl.Count != 0 && !FlowControl.Peek().active)
@@ -417,13 +404,13 @@ namespace OMODFramework.Scripting
                             break;
                         case "Break":
                             {
-                                bool found = false;
+                                var found = false;
                                 FlowControlStruct[] fcs = FlowControl.ToArray();
-                                for (int k = 0; k < fcs.Length; k++)
+                                for (var k = 0; k < fcs.Length; k++)
                                 {
                                     if (fcs[k].type == 1)
                                     {
-                                        for (int j = 0; j <= k; j++) fcs[j].active = false;
+                                        for (var j = 0; j <= k; j++) fcs[j].active = false;
                                         found = true;
                                         break;
                                     }
@@ -443,7 +430,7 @@ namespace OMODFramework.Scripting
                             break;
                         case "For":
                             {
-                                FlowControlStruct fc = FunctionFor(line, i);
+                                var fc = FunctionFor(line, i);
                                 FlowControl.Push(fc);
                                 if (fc.line != -1 && fc.values.Length > 0)
                                 {
@@ -454,22 +441,22 @@ namespace OMODFramework.Scripting
                             }
                         case "Continue":
                             {
-                                bool found = false;
+                                var found = false;
                                 FlowControlStruct[] fcs = FlowControl.ToArray();
-                                for (int k = 0; k < fcs.Length; k++)
+                                for (var k = 0; k < fcs.Length; k++)
                                 {
                                     if (fcs[k].type == 2)
                                     {
                                         fcs[k].forCount++;
                                         if (fcs[k].forCount == fcs[k].values.Length)
                                         {
-                                            for (int j = 0; j <= k; j++) fcs[j].active = false;
+                                            for (var j = 0; j <= k; j++) fcs[j].active = false;
                                         }
                                         else
                                         {
                                             i = fcs[k].line;
                                             variables[fcs[k].var] = fcs[k].values[fcs[k].forCount];
-                                            for (int j = 0; j < k; j++) FlowControl.Pop();
+                                            for (var j = 0; j < k; j++) FlowControl.Pop();
                                         }
                                         found = true;
                                         break;
@@ -480,13 +467,13 @@ namespace OMODFramework.Scripting
                             }
                         case "Exit":
                             {
-                                bool found = false;
+                                var found = false;
                                 FlowControlStruct[] fcs = FlowControl.ToArray();
-                                for (int k = 0; k < fcs.Length; k++)
+                                for (var k = 0; k < fcs.Length; k++)
                                 {
                                     if (fcs[k].type == 2)
                                     {
-                                        for (int j = 0; j <= k; j++) FlowControl.Peek().active = false;
+                                        for (var j = 0; j <= k; j++) FlowControl.Peek().active = false;
                                         found = true;
                                         break;
                                     }
@@ -497,7 +484,7 @@ namespace OMODFramework.Scripting
                         case "EndFor":
                             if (FlowControl.Count != 0 && FlowControl.Peek().type == 2)
                             {
-                                FlowControlStruct fc = FlowControl.Peek();
+                                var fc = FlowControl.Peek();
                                 fc.forCount++;
                                 if (fc.forCount == fc.values.Length) FlowControl.Pop();
                                 else
@@ -688,7 +675,7 @@ namespace OMODFramework.Scripting
                 }
             }
             if (SkipTo != null) Warn($"Expected {SkipTo}!");
-            ScriptReturnData TempResult = srd;
+            var TempResult = srd;
             srd = null;
             variables = null;
 
@@ -735,8 +722,8 @@ namespace OMODFramework.Scripting
                     }
                     try
                     {
-                        Version v = new Version(line[2] + ".0");
-                        Version v2 = new Version($"{f.OBMMFakeMajorVersion.ToString()}.{f.OBMMFakeMinorVersion.ToString()}.{f.OBMMFakeBuildNumber.ToString()}.0");
+                        var v = new Version(line[2] + ".0");
+                        var v2 = new Version($"{f.OBMMFakeMajorVersion.ToString()}.{f.OBMMFakeMinorVersion.ToString()}.{f.OBMMFakeBuildNumber.ToString()}.0");
                         return (v2 > v);
                     }
                     catch
@@ -752,8 +739,8 @@ namespace OMODFramework.Scripting
                     }
                     try
                     {
-                        Version v = new Version(line[2] + ".0");
-                        Version v2 = new Version($"{f.OBMMFakeMajorVersion.ToString()}.{f.OBMMFakeMinorVersion.ToString()}.{f.OBMMFakeBuildNumber.ToString()}.0");
+                        var v = new Version(line[2] + ".0");
+                        var v2 = new Version($"{f.OBMMFakeMajorVersion.ToString()}.{f.OBMMFakeMinorVersion.ToString()}.{f.OBMMFakeBuildNumber.ToString()}.0");
                         return (v2 < v);
                     }
                     catch
@@ -774,9 +761,9 @@ namespace OMODFramework.Scripting
                     if (ExistsFile("obse_loader.exe")) return false;
                     try
                     {
-                        Version v2 = GetFileVersion("obse_loader.exe");
+                        var v2 = GetFileVersion("obse_loader.exe");
                         if (v2 == null) return false;
-                        Version v = new Version(line[2]);
+                        var v = new Version(line[2]);
                         return (v2 >= v);
                     }
                     catch
@@ -797,9 +784,9 @@ namespace OMODFramework.Scripting
                     if (ExistsFile(Path.Combine("data", "obse", "plugins", "obge.dll"))) return false;
                     try
                     {
-                        Version v2 = GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll"));
+                        var v2 = GetFileVersion(Path.Combine("data", "obse", "plugins", "obge.dll"));
                         if (v2 == null) return false;
-                        Version v = new Version(line[2]); ;
+                        var v = new Version(line[2]);
                         return (v2 >= v);
                     }
                     catch
@@ -816,10 +803,9 @@ namespace OMODFramework.Scripting
                     if (line.Length > 3) Warn("Unexpected arguments to 'If OblivionNewerThan'");
                     try
                     {
-                        Version v2 = GetFileVersion("oblivion.exe");
+                        var v2 = GetFileVersion("oblivion.exe");
                         if (v2 == null) return false;
-                        Version v = new Version(line[2]); ;
-                        bool b = v2 >= v;
+                        var v = new Version(line[2]);
                         return (v2 >= v);
                     }
                     catch
@@ -844,13 +830,13 @@ namespace OMODFramework.Scripting
                             return false;
                         }
                         if (line.Length > 4) Warn("Unexpected arguments to 'If Greater'");
-                        if (!int.TryParse(line[2], out int arg1) || !int.TryParse(line[3], out int arg2))
+                        if (!int.TryParse(line[2], out var arg1) || !int.TryParse(line[3], out var arg2))
                         {
                             Warn("Invalid argument upplied to function 'If Greater'");
                             return false;
                         }
                         if (line[1] == "GreaterEqual") return arg1 >= arg2;
-                        else return arg1 > arg2;
+                        return arg1 > arg2;
                     }
                 case "fGreaterEqual":
                 case "fGreaterThan":
@@ -861,13 +847,13 @@ namespace OMODFramework.Scripting
                             return false;
                         }
                         if (line.Length > 4) Warn("Unexpected arguments to 'If fGreater'");
-                        if (!double.TryParse(line[2], out double arg1) || !double.TryParse(line[3], out double arg2))
+                        if (!double.TryParse(line[2], out var arg1) || !double.TryParse(line[3], out var arg2))
                         {
                             Warn("Invalid argument upplied to function 'If fGreater'");
                             return false;
                         }
                         if (line[1] == "fGreaterEqual") return arg1 >= arg2;
-                        else return arg1 > arg2;
+                        return arg1 > arg2;
                     }
                 default:
                     Warn("Unknown argument '" + line[1] + "' supplied to 'If'");
@@ -884,11 +870,10 @@ namespace OMODFramework.Scripting
                 return new string[0];
             }
 
-            string[] Items, Previews, Descs;
-            int argsPerOption = 1 + (previews ? 1 : 0) + (descriptions ? 1 : 0);
+            var argsPerOption = 1 + (previews ? 1 : 0) + (descriptions ? 1 : 0);
 
-            string title = line[1];
-            Items = new string[line.Length - 2];
+            var title = line[1];
+            var Items = new string[line.Length - 2];
             Array.Copy(line, 2, Items, 0, line.Length - 2);
             line = Items;
 
@@ -899,10 +884,10 @@ namespace OMODFramework.Scripting
             }
 
             Items = new string[line.Length / argsPerOption];
-            Previews = previews ? new string[line.Length / argsPerOption] : null;
-            Descs = descriptions ? new string[line.Length / argsPerOption] : null;
+            string[] Previews = previews ? new string[line.Length / argsPerOption] : null;
+            string[] Descs = descriptions ? new string[line.Length / argsPerOption] : null;
 
-            for (int i = 0; i < line.Length / argsPerOption; i++)
+            for (var i = 0; i < line.Length / argsPerOption; i++)
             {
                 Items[i] = line[i * argsPerOption];
                 if (previews)
@@ -918,7 +903,7 @@ namespace OMODFramework.Scripting
 
             if (Previews != null)
             {
-                for (int i = 0; i < Previews.Length; i++)
+                for (var i = 0; i < Previews.Length; i++)
                 {
                     if (Previews[i] == "None") Previews[i] = null;
                     else if (!Framework.IsSafeFileName(Previews[i]))
@@ -938,8 +923,8 @@ namespace OMODFramework.Scripting
                 }
             }
             int[] dialogResult = DialogSelect(Items, title, many, Previews, Descs);
-            string[] result = new string[dialogResult.Length];
-            for (int i = 0; i < dialogResult.Length; i++)
+            var result = new string[dialogResult.Length];
+            for (var i = 0; i < dialogResult.Length; i++)
             {
                 result[i] = $"Case {Items[dialogResult[i]]}";
             }
@@ -948,8 +933,7 @@ namespace OMODFramework.Scripting
 
         private static string[] FunctionSelectVar(string[] line, bool IsVariable)
         {
-            string Func;
-            if (IsVariable) Func = " to function 'SelectVar'"; else Func = "to function 'SelectString'";
+            var Func = IsVariable ? " to function 'SelectVar'" : "to function 'SelectString'";
             if (line.Length < 2)
             {
                 Warn($"Missing arguments{Func}");
@@ -963,17 +947,16 @@ namespace OMODFramework.Scripting
                     Warn($"Invalid argument{Func}\nVariable '{line[1]}' does not exist");
                     return new string[0];
                 }
-                else return new string[] { "Case " + variables[line[1]] };
+
+                return new[] { "Case " + variables[line[1]] };
             }
-            else
-            {
-                return new string[] { "Case " + line[1] };
-            }
+
+            return new[] { "Case " + line[1] };
         }
 
         private static FlowControlStruct FunctionFor(string[] line, int LineNo)
         {
-            FlowControlStruct NullLoop = new FlowControlStruct(2);
+            var NullLoop = new FlowControlStruct(2);
             if (line.Length < 3)
             {
                 Warn("Missing arguments to function 'For'");
@@ -991,14 +974,14 @@ namespace OMODFramework.Scripting
                             return NullLoop;
                         }
                         if (line.Length > 6) Warn("Unexpected extra arguments to 'For Count'");
-                        int step = 1;
-                        if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end) || (line.Length >= 6 && !int.TryParse(line[5], out step)))
+                        var step = 1;
+                        if (!int.TryParse(line[3], out var start) || !int.TryParse(line[4], out var end) || (line.Length >= 6 && !int.TryParse(line[5], out step)))
                         {
                             Warn("Invalid argument to 'For Count'");
                             return NullLoop;
                         }
-                        List<string> steps = new List<string>();
-                        for (int i = start; i <= end; i += step)
+                        var steps = new List<string>();
+                        for (var i = start; i <= end; i += step)
                         {
                             steps.Add(i.ToString());
                         }
@@ -1022,7 +1005,7 @@ namespace OMODFramework.Scripting
                             Warn($"Invalid argument to 'For Each DataFolder'\nDirectory '{line[4]}' is not a part of this plugin");
                             return NullLoop;
                         }
-                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        var option = SearchOption.TopDirectoryOnly;
                         if (line.Length > 5)
                         {
                             switch (line[5])
@@ -1040,7 +1023,7 @@ namespace OMODFramework.Scripting
                         try
                         {
                             string[] paths = Directory.GetDirectories(Path.Combine(DataFiles, line[4]), line.Length > 6 ? line[6] : "*", option);
-                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
+                            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
                             return new FlowControlStruct(paths, line[3], LineNo);
                         }
                         catch
@@ -1067,7 +1050,7 @@ namespace OMODFramework.Scripting
                             Warn($"Invalid argument to 'For Each PluginFolder'\nDirectory '{line[4]}' is not a part of this plugin");
                             return NullLoop;
                         }
-                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        var option = SearchOption.TopDirectoryOnly;
                         if (line.Length > 5)
                         {
                             switch (line[5])
@@ -1085,7 +1068,7 @@ namespace OMODFramework.Scripting
                         try
                         {
                             string[] paths = Directory.GetDirectories(Path.Combine(Plugins, line[4]), line.Length > 6 ? line[6] : "*", option);
-                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
+                            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
                             return new FlowControlStruct(paths, line[3], LineNo);
                         }
                         catch
@@ -1112,7 +1095,7 @@ namespace OMODFramework.Scripting
                             Warn($"Invalid argument to 'For Each DataFile'\nDirectory '{line[4]}' is not a part of this plugin");
                             return NullLoop;
                         }
-                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        var option = SearchOption.TopDirectoryOnly;
                         if (line.Length > 5)
                         {
                             switch (line[5])
@@ -1130,7 +1113,7 @@ namespace OMODFramework.Scripting
                         try
                         {
                             string[] paths = Directory.GetFiles(Path.Combine(DataFiles, line[4]), line.Length > 6 ? line[6] : "*", option);
-                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
+                            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(DataFiles.Length);
                             return new FlowControlStruct(paths, line[3], LineNo);
                         }
                         catch
@@ -1157,7 +1140,7 @@ namespace OMODFramework.Scripting
                             Warn($"Invalid argument to 'For Each Plugin'\nDirectory '{line[4]}' is not a part of this plugin");
                             return NullLoop;
                         }
-                        SearchOption option = SearchOption.TopDirectoryOnly;
+                        var option = SearchOption.TopDirectoryOnly;
                         if (line.Length > 5)
                         {
                             switch (line[5])
@@ -1175,7 +1158,7 @@ namespace OMODFramework.Scripting
                         try
                         {
                             string[] paths = Directory.GetFiles(Path.Combine(Plugins, line[4]), line.Length > 6 ? line[6] : "*", option);
-                            for (int i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
+                            for (var i = 0; i < paths.Length; i++) if (Path.IsPathRooted(paths[i])) paths[i] = paths[i].Substring(Plugins.Length);
                             return new FlowControlStruct(paths, line[3], LineNo);
                         }
                         catch
@@ -1217,8 +1200,14 @@ namespace OMODFramework.Scripting
         private static void FunctionModifyInstall(string[] line, bool plugins, bool Install)
         {
             string WarnMess;
-            if (plugins) { if (Install) WarnMess = "function 'InstallPlugin'"; else WarnMess = "function 'DontInstallPlugin'"; }
-            else { if (Install) WarnMess = "function 'InstallDataFile'"; else WarnMess = "function 'DontInstallDataFile'"; }
+            if (plugins)
+            {
+                WarnMess = Install ? "function 'InstallPlugin'" : "function 'DontInstallPlugin'";
+            }
+            else
+            {
+                WarnMess = Install ? "function 'InstallDataFile'" : "function 'DontInstallDataFile'";
+            }
             if (line.Length == 1)
             {
                 Warn($"Missing arguments to {WarnMess}");
@@ -1232,7 +1221,7 @@ namespace OMODFramework.Scripting
                     Warn($"Invalid argument to {WarnMess}\nFile '{line[1]}' is not part of this plugin");
                     return;
                 }
-                if (line[1].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                if (line[1].IndexOfAny(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
                 {
                     Warn($"Invalid argument to {WarnMess}\nThis function cannot be used on plugins stored in subdirectories");
                     return;
@@ -1270,8 +1259,7 @@ namespace OMODFramework.Scripting
 
         private static void FunctionModifyInstallFolder(string[] line, bool Install)
         {
-            string WarnMess;
-            if (Install) WarnMess = "function 'InstallDataFolder'"; else WarnMess = "function 'DontInstallDataFolder'";
+            var WarnMess = Install ? "function 'InstallDataFolder'" : "function 'DontInstallDataFolder'";
             if (line.Length == 1)
             {
                 Warn($"Missing arguments to {WarnMess}");
@@ -1291,9 +1279,9 @@ namespace OMODFramework.Scripting
                 switch (line[2])
                 {
                     case "True":
-                        foreach (string folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
+                        foreach (var folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
                         {
-                            FunctionModifyInstallFolder(new string[] { "", folder.Substring(DataFiles.Length), "True" }, Install);
+                            FunctionModifyInstallFolder(new[] { "", folder.Substring(DataFiles.Length), "True" }, Install);
                         }
                         break;
                     case "False":
@@ -1304,9 +1292,9 @@ namespace OMODFramework.Scripting
                 }
             }
 
-            foreach (string path in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
+            foreach (var path in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
             {
-                string file = line[1] + Path.GetFileName(path);
+                var file = line[1] + Path.GetFileName(path);
                 if (Install)
                 {
                     Framework.strArrayRemove(srd.IgnoreData, file);
@@ -1328,16 +1316,15 @@ namespace OMODFramework.Scripting
 
         private static void FunctionCopyDataFile(string[] line, bool Plugin)
         {
-            string WarnMess;
-            if (Plugin) WarnMess = "function 'CopyPlugin'"; else WarnMess = "function 'CopyDataFile'";
+            var WarnMess = Plugin ? "function 'CopyPlugin'" : "function 'CopyDataFile'";
             if (line.Length < 3)
             {
                 Warn($"Missing arguments to {WarnMess}");
                 return;
             }
             if (line.Length > 3) Warn($"Unexpected arguments to {WarnMess}");
-            string upperfrom = line[1];
-            string upperto = line[2];
+            var upperfrom = line[1];
+            var upperto = line[2];
             line[1] = line[1].ToLower();
             line[2] = line[2].ToLower();
             if (!Framework.IsSafeFileName(line[1]) || !Framework.IsSafeFileName(line[2]))
@@ -1357,7 +1344,7 @@ namespace OMODFramework.Scripting
                     Warn($"Invalid argument to CopyPlugin\nFile '{upperfrom}' is not part of this plugin");
                     return;
                 }
-                if (line[2].IndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
+                if (line[2].IndexOfAny(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != -1)
                 {
                     Warn("Plugins cannot be copied to subdirectories of the data folder");
                     return;
@@ -1384,7 +1371,7 @@ namespace OMODFramework.Scripting
 
             if (Plugin)
             {
-                for (int i = 0; i < srd.CopyPlugins.Count; i++)
+                for (var i = 0; i < srd.CopyPlugins.Count; i++)
                 {
                     if (srd.CopyPlugins[i].CopyTo == line[2]) srd.CopyPlugins.RemoveAt(i--);
                 }
@@ -1392,7 +1379,7 @@ namespace OMODFramework.Scripting
             }
             else
             {
-                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                for (var i = 0; i < srd.CopyDataFiles.Count; i++)
                 {
                     if (srd.CopyDataFiles[i].CopyTo == line[2]) srd.CopyDataFiles.RemoveAt(i--);
                 }
@@ -1431,9 +1418,9 @@ namespace OMODFramework.Scripting
                 switch (line[3])
                 {
                     case "True":
-                        foreach (string folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
+                        foreach (var folder in Directory.GetDirectories(Path.Combine(DataFiles, line[1])))
                         {
-                            FunctionCopyDataFolder(new string[] { "", folder.Substring(DataFiles.Length), line[2] + folder.Substring(DataFiles.Length + line[1].Length), "True" });
+                            FunctionCopyDataFolder(new[] { "", folder.Substring(DataFiles.Length), line[2] + folder.Substring(DataFiles.Length + line[1].Length), "True" });
                         }
                         break;
                     case "False":
@@ -1444,12 +1431,12 @@ namespace OMODFramework.Scripting
                 }
             }
 
-            foreach (string s in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
+            foreach (var s in Directory.GetFiles(Path.Combine(DataFiles, line[1])))
             {
-                string from = line[1] + Path.GetFileName(s);
-                string to = line[2] + Path.GetFileName(s);
-                string lto = to.ToLower();
-                for (int i = 0; i < srd.CopyDataFiles.Count; i++)
+                var from = line[1] + Path.GetFileName(s);
+                var to = line[2] + Path.GetFileName(s);
+                var lto = to.ToLower();
+                for (var i = 0; i < srd.CopyDataFiles.Count; i++)
                 {
                     if (srd.CopyDataFiles[i].CopyTo == lto) srd.CopyDataFiles.RemoveAt(i--);
                 }
@@ -1488,7 +1475,7 @@ namespace OMODFramework.Scripting
                 Warn($"Invalid argument to 'EditShader'\nFile '{line[3]}' does not exist");
                 return;
             }
-            if (!byte.TryParse(line[1], out byte package))
+            if (!byte.TryParse(line[1], out var package))
             {
                 Warn($"Invalid argument to function 'EditShader'\n'{line[1]}' is not a valid shader package ID");
                 return;
@@ -1523,14 +1510,14 @@ namespace OMODFramework.Scripting
                 return;
             }
             byte[] data = null;
-            if (!long.TryParse(line[2], out long offset) || offset < 0)
+            if (!long.TryParse(line[2], out var offset) || offset < 0)
             {
                 Warn($"Invalid argument to {WarnMess}\nOffset '{line[1]}' is not valid");
                 return;
             }
             if (type == typeof(byte))
             {
-                if (!byte.TryParse(line[3], out byte value))
+                if (!byte.TryParse(line[3], out var value))
                 {
                     Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
                     return;
@@ -1539,7 +1526,7 @@ namespace OMODFramework.Scripting
             }
             if (type == typeof(short))
             {
-                if (!short.TryParse(line[3], out short value))
+                if (!short.TryParse(line[3], out var value))
                 {
                     Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
                     return;
@@ -1548,7 +1535,7 @@ namespace OMODFramework.Scripting
             }
             if (type == typeof(int))
             {
-                if (!int.TryParse(line[3], out int value))
+                if (!int.TryParse(line[3], out var value))
                 {
                     Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
                     return;
@@ -1557,7 +1544,7 @@ namespace OMODFramework.Scripting
             }
             if (type == typeof(long))
             {
-                if (!long.TryParse(line[3], out long value))
+                if (!long.TryParse(line[3], out var value))
                 {
                     Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
                     return;
@@ -1566,16 +1553,16 @@ namespace OMODFramework.Scripting
             }
             if (type == typeof(float))
             {
-                if (!float.TryParse(line[3], out float value))
+                if (!float.TryParse(line[3], out var value))
                 {
                     Warn($"Invalid argument to {WarnMess}\nValue '{line[3]}' is not valid");
                     return;
                 }
                 data = BitConverter.GetBytes(value);
             }
-            using (FileStream fs = File.OpenWrite(Path.Combine(Plugins, line[1])))
+            using (var fs = File.OpenWrite(Path.Combine(Plugins, line[1])))
             {
-                if (offset + data.Length >= fs.Length)
+                if (data != null && offset + data.Length >= fs.Length)
                 {
                     Warn($"Invalid argument to {WarnMess}\nOffset '{line[3]}' is out of range");
                     fs.Close();
@@ -1588,22 +1575,21 @@ namespace OMODFramework.Scripting
 
         private static void FunctionDisplayFile(string[] line, bool Image)
         {
-            string WarnMess;
-            if (Image) WarnMess = "function 'DisplayImage'"; else WarnMess = "function 'DisplayText'";
+            var WarnMess = Image ? "function 'DisplayImage'" : "function 'DisplayText'";
             if (line.Length < 2)
             {
-                Warn("Missing arguments to " + WarnMess);
+                Warn($"Missing arguments to {WarnMess}");
                 return;
             }
             if (line.Length > 3) Warn("Unexpected extra arguments to " + WarnMess);
             if (!Framework.IsSafeFileName(line[1]))
             {
-                Warn("Illegal path supplied to " + WarnMess);
+                Warn($"Illegal path supplied to {WarnMess}");
                 return;
             }
-            if (!File.Exists(DataFiles + line[1]))
+            if (!File.Exists(Path.Combine(DataFiles, line[1])))
             {
-                Warn($"Non-existant file '{line[1]}' supplied to " + WarnMess);
+                Warn($"Non-existant file '{line[1]}' supplied to {WarnMess}");
                 return;
             }
             if (Image)
@@ -1612,7 +1598,7 @@ namespace OMODFramework.Scripting
             }
             else
             {
-                string s = File.ReadAllText(Path.Combine(DataFiles + line[1]), System.Text.Encoding.Default);
+                var s = File.ReadAllText(Path.Combine(DataFiles, line[1]), Encoding.Default);
                 DisplayText((line.Length > 2) ? line[2] : line[1], s, true);
             }
         }
@@ -1710,7 +1696,7 @@ namespace OMODFramework.Scripting
             if (line.Length > 5) Warn("Unexpected extra arguments to Substring");
             if (line.Length == 4)
             {
-                if (!int.TryParse(line[3], out int start))
+                if (!int.TryParse(line[3], out var start))
                 {
                     Warn("Invalid argument to Substring");
                     return;
@@ -1719,7 +1705,7 @@ namespace OMODFramework.Scripting
             }
             else
             {
-                if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end))
+                if (!int.TryParse(line[3], out var start) || !int.TryParse(line[4], out var end))
                 {
                     Warn("Invalid argument to Substring");
                     return;
@@ -1738,7 +1724,7 @@ namespace OMODFramework.Scripting
             if (line.Length > 5) Warn("Unexpected extra arguments to RemoveString");
             if (line.Length == 4)
             {
-                if (!int.TryParse(line[3], out int start))
+                if (!int.TryParse(line[3], out var start))
                 {
                     Warn("Invalid argument to RemoveString");
                     return;
@@ -1747,7 +1733,7 @@ namespace OMODFramework.Scripting
             }
             else
             {
-                if (!int.TryParse(line[3], out int start) || !int.TryParse(line[4], out int end))
+                if (!int.TryParse(line[3], out var start) || !int.TryParse(line[4], out var end))
                 {
                     Warn("Invalid argument to RemoveString");
                     return;
@@ -1776,13 +1762,13 @@ namespace OMODFramework.Scripting
             }
             if (line.Length > 4) Warn("Unexpected arguments to InputString");
 
-            string title = "";
-            string initial = "";
+            var title = "";
+            var initial = "";
 
             if (line.Length > 2) title = line[2];
             if (line.Length > 3) initial = line[3];
 
-            string result = InputString(title, initial);
+            var result = InputString(title, initial);
             if (result == null) variables[line[1]] = "";
             else variables[line[1]] = result;
         }
@@ -1831,13 +1817,13 @@ namespace OMODFramework.Scripting
                 Warn("Invalid filename supplied to function 'EditXMLLine'");
                 return;
             }
-            string ext = Path.GetExtension(line[1]);
+            var ext = Path.GetExtension(line[1]);
             if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
             {
                 Warn("Invalid filename supplied to function 'EditXMLLine'");
                 return;
             }
-            if (!int.TryParse(line[2], out int index) || index < 1)
+            if (!int.TryParse(line[2], out var index) || index < 1)
             {
                 Warn("Invalid line number supplied to function 'EditXMLLine'");
                 return;
@@ -1867,13 +1853,13 @@ namespace OMODFramework.Scripting
                 Warn("Invalid filename supplied to function 'EditXMLReplace'");
                 return;
             }
-            string ext = Path.GetExtension(line[1]);
+            var ext = Path.GetExtension(line[1]);
             if (ext != ".xml" && ext != ".txt" && ext != ".ini" && ext != ".bat")
             {
                 Warn("Invalid filename supplied to function 'EditXMLLine'");
                 return;
             }
-            string text = File.ReadAllText(Path.Combine(DataFiles, line[1]));
+            var text = File.ReadAllText(Path.Combine(DataFiles, line[1]));
             text = text.Replace(line[2], line[3]);
             File.WriteAllText(Path.Combine(DataFiles, line[1]), text);
         }
@@ -1886,8 +1872,8 @@ namespace OMODFramework.Scripting
                 return;
             }
             if (line.Length > 2) Warn("Unexpected extra arguments to function 'ExecLines'");
-            string[] lines = line[1].Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string s in lines) queue.Enqueue(s);
+            string[] lines = line[1].Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var s in lines) queue.Enqueue(s);
         }
 
         private static int iSet(List<string> func)
@@ -1895,14 +1881,13 @@ namespace OMODFramework.Scripting
             if (func.Count == 0) throw new Exception("Empty iSet");
             if (func.Count == 1) return int.Parse(func[0]);
             //check for brackets
-            int index;
 
-            index = func.IndexOf("(");
+            var index = func.IndexOf("(");
             while (index != -1)
             {
-                int count = 1;
-                List<string> newfunc = new List<string>();
-                for (int i = index + 1; i < func.Count; i++)
+                var count = 1;
+                var newfunc = new List<string>();
+                for (var i = index + 1; i < func.Count; i++)
                 {
                     if (func[i] == "(") count++;
                     else if (func[i] == ")") count--;
@@ -1912,7 +1897,8 @@ namespace OMODFramework.Scripting
                         func.Insert(index, iSet(newfunc).ToString());
                         break;
                     }
-                    else newfunc.Add(func[i]);
+
+                    newfunc.Add(func[i]);
                 }
                 if (count != 0) throw new Exception("Mismatched brackets");
                 index = func.IndexOf("(");
@@ -1922,7 +1908,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("not");
             while (index != -1)
             {
-                int i = int.Parse(func[index + 1]);
+                var i = int.Parse(func[index + 1]);
                 i = ~i;
                 func[index + 1] = i.ToString();
                 func.RemoveAt(index);
@@ -1933,7 +1919,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("not");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) & int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) & int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("not");
@@ -1943,7 +1929,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("or");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) | int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) | int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("or");
@@ -1953,7 +1939,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("xor");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) ^ int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) ^ int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("xor");
@@ -1963,7 +1949,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("mod");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) % int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) % int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("mod");
@@ -1973,7 +1959,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("%");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) % int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) % int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("%");
@@ -1983,7 +1969,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("^");
             while (index != -1)
             {
-                int i = (int)Math.Pow(int.Parse(func[index - 1]), int.Parse(func[index + 1]));
+                var i = (int)Math.Pow(int.Parse(func[index - 1]), int.Parse(func[index + 1]));
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("^");
@@ -1993,7 +1979,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("/");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) / int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) / int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("/");
@@ -2003,7 +1989,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("*");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) * int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) * int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("*");
@@ -2013,7 +1999,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("+");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) + int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) + int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("+");
@@ -2023,7 +2009,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("-");
             while (index != -1)
             {
-                int i = int.Parse(func[index - 1]) - int.Parse(func[index + 1]);
+                var i = int.Parse(func[index - 1]) - int.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("-");
@@ -2038,14 +2024,13 @@ namespace OMODFramework.Scripting
             if (func.Count == 0) throw new Exception("Empty iSet");
             if (func.Count == 1) return int.Parse(func[0]);
             //check for brackets
-            int index;
 
-            index = func.IndexOf("(");
+            var index = func.IndexOf("(");
             while (index != -1)
             {
-                int count = 1;
-                List<string> newfunc = new List<string>();
-                for (int i = index; i < func.Count; i++)
+                var count = 1;
+                var newfunc = new List<string>();
+                for (var i = index; i < func.Count; i++)
                 {
                     if (func[i] == "(") count++;
                     else if (func[i] == ")") count--;
@@ -2055,7 +2040,8 @@ namespace OMODFramework.Scripting
                         func.Insert(index, fSet(newfunc).ToString());
                         break;
                     }
-                    else newfunc.Add(func[i]);
+
+                    newfunc.Add(func[i]);
                 }
                 if (count != 0) throw new Exception("Mismatched brackets");
                 index = func.IndexOf("(");
@@ -2146,7 +2132,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("mod");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) % double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) % double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("mod");
@@ -2156,7 +2142,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("%");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) % double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) % double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("%");
@@ -2166,7 +2152,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("^");
             while (index != -1)
             {
-                double i = Math.Pow(double.Parse(func[index - 1]), double.Parse(func[index + 1]));
+                var i = Math.Pow(double.Parse(func[index - 1]), double.Parse(func[index + 1]));
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("^");
@@ -2176,7 +2162,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("/");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) / double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) / double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("/");
@@ -2186,7 +2172,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("*");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) * double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) * double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("*");
@@ -2196,7 +2182,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("+");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) + double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) + double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("+");
@@ -2206,7 +2192,7 @@ namespace OMODFramework.Scripting
             index = func.IndexOf("-");
             while (index != -1)
             {
-                double i = double.Parse(func[index - 1]) - double.Parse(func[index + 1]);
+                var i = double.Parse(func[index - 1]) - double.Parse(func[index + 1]);
                 func[index + 1] = i.ToString();
                 func.RemoveRange(index - 1, 2);
                 index = func.IndexOf("-");
@@ -2223,19 +2209,19 @@ namespace OMODFramework.Scripting
                 Warn("Missing arguments to function " + (integer ? "iSet" : "fSet"));
                 return;
             }
-            List<string> func = new List<string>();
-            for (int i = 2; i < line.Length; i++) func.Add(line[i]);
-            string result;
+            var func = new List<string>();
+            for (var i = 2; i < line.Length; i++) func.Add(line[i]);
             try
             {
+                string result;
                 if (integer)
                 {
-                    int i = iSet(func);
+                    var i = iSet(func);
                     result = i.ToString();
                 }
                 else
                 {
-                    float f = (float)fSet(func);
+                    var f = (float)fSet(func);
                     result = f.ToString();
                 }
                 variables[line[1]] = result;
