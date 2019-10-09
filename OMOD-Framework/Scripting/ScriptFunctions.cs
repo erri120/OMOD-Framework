@@ -20,7 +20,7 @@ namespace OblivionModManager.Scripting
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
         private static Action<string, string> IMessage;
         private static Action<string> IDisplayImage;
-        private static Action<string, string> IDisplayText;
+        private static Action<string, string, bool> IDisplayText;
         private static Func<string, string, string> IInputString;
         private static Func<string[]> IGetActiveESPNames;
         private static Func<string[]> IGetExistingESPNames;
@@ -200,7 +200,7 @@ namespace OblivionModManager.Scripting
         {
             CheckDataSafety(path);
             string s = File.ReadAllText(Path.Combine(DataFiles, path), System.Text.Encoding.Default);
-            IDisplayText((title != null) ? title : path, s);
+            IDisplayText(title ?? path, s, true);
         }
         public void DontInstallAnyDataFiles() { srd.InstallAllData = false; }
         public void DontInstallAnyPlugins() { srd.InstallAllPlugins = false; }

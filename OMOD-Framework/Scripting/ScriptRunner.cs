@@ -62,7 +62,8 @@ namespace OMODFramework.Scripting
         /// </summary>
         /// <param name="text">Text to be displayed</param>
         /// <param name="title">Title of the Dialog</param>
-        void DisplayText(string text, string title);
+        /// <param name="rtf">If the text is RTF</param>
+        void DisplayText(string text, string title, bool rtf);
         /// <summary>
         /// Opens a Dialog for inputing text
         /// </summary>

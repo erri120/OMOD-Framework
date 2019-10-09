@@ -205,7 +205,7 @@ namespace OMODFramework.Scripting
         private static Func<string[], string, bool, string[], string[], int[]> DialogSelect;
         private static Action<string, string> Message;
         private static Action<string> DisplayImage;
-        private static Action<string, string> DisplayText;
+        private static Action<string, string, bool> DisplayText;
         private static Func<string, string, string> InputString;
 
 
@@ -1613,7 +1613,7 @@ namespace OMODFramework.Scripting
             else
             {
                 string s = File.ReadAllText(Path.Combine(DataFiles + line[1]), System.Text.Encoding.Default);
-                DisplayText((line.Length > 2) ? line[2] : line[1], s);
+                DisplayText((line.Length > 2) ? line[2] : line[1], s, true);
             }
         }
 
