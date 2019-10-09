@@ -47,7 +47,7 @@ public:
 	// displays an image, path to image is absolute and should be located inside the extracted dataFiles folder which is in the temp folder
 	virtual void DisplayImage(String imageFilePath) {}
 	// displays text, similar to message idk why you have two methods for that
-	virtual void DisplayText(String text, String title) {}
+	virtual void DisplayText(String text, String title, bool rtf) {}
 	// creates an input dialog, initialContent can be empty
 	virtual String InputString(String title, String initialContent) { return ""; }
 	// returns a String[] array with the NAMES of all active esps	NAMES WITHOUT EXTENSIONS (no .esp or .esm)

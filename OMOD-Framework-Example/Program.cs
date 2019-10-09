@@ -26,7 +26,7 @@ namespace OMOD_Framework_Example
                 Console.WriteLine(imageFilePath);
             }
 
-            public void DisplayText(string text, string title)
+            public void DisplayText(string text, string title, bool rtf)
             {
                 Console.WriteLine(text);
             }
