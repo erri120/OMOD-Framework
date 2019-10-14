@@ -237,10 +237,10 @@ namespace OblivionModManager.Scripting
             CheckDataSafety(file);
             var ext = Path.GetExtension(file)?.ToLower();
             if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
-            string[] lines = File.ReadAllLines(Path.Combine(DataFiles + file));
+            string[] lines = File.ReadAllLines(Path.Combine(DataFiles, file));
             if (line < 0 || line >= lines.Length) throw new Exception("Invalid line number");
             lines[line] = value;
-            File.WriteAllLines(Path.Combine(DataFiles + file), lines);
+            File.WriteAllLines(Path.Combine(DataFiles, file), lines);
 
         }
         public void EditXMLReplace(string file, string find, string replace)
@@ -248,9 +248,9 @@ namespace OblivionModManager.Scripting
             CheckDataSafety(file);
             var ext = Path.GetExtension(file)?.ToLower();
             if (ext != ".txt" && ext != ".xml" && ext != ".bat" && ext != ".ini") throw new Exception("Can only edit files with a .xml, .ini, .bat or .txt extension");
-            var text = File.ReadAllText(Path.Combine(DataFiles + file));
+            var text = File.ReadAllText(Path.Combine(DataFiles, file));
             text = text.Replace(find, replace);
-            File.WriteAllText(Path.Combine(DataFiles + file), text);
+            File.WriteAllText(Path.Combine(DataFiles, file), text);
         }
         public void FatalError() { srd.CancelInstall = true; }
         public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel) { }
