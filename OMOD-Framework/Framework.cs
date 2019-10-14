@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace OMODFramework
 {
@@ -13,7 +14,7 @@ namespace OMODFramework
         internal byte OBMMFakeBuildNumber = 12;
         internal byte OBMMFakeCurrentOmodVersion = 4;
 
-        internal static string DLLPath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "erri120.OMODFramework.dll");
+        internal static string DLLPath { get; set; } = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "erri120.OMODFramework.dll");
         internal static string TempDir { get; set; } = Path.Combine(Path.GetTempPath(), "obmm");
         #endregion
 
