@@ -267,6 +267,7 @@ namespace OMODFramework.Scripting
                 }
                 string[] line = SplitLine(s);
                 if (line.Length == 0) continue;
+                if (srd.CancelInstall) continue;
 
                 if (FlowControl.Count != 0 && !FlowControl.Peek().active)
                 {

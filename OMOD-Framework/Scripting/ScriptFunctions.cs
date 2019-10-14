@@ -252,7 +252,11 @@ namespace OblivionModManager.Scripting
             text = text.Replace(find, replace);
             File.WriteAllText(Path.Combine(DataFiles, file), text);
         }
-        public void FatalError() { srd.CancelInstall = true; }
+        public void FatalError() 
+        { 
+            srd.CancelInstall = true;
+            Application.Exit();
+        }
         public void GenerateBSA(string file, string path, string prefix, int cRatio, int cLevel) { }
         public void GenerateNewDataFile(string file, byte[] data)
         {
