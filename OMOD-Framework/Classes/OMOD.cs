@@ -111,6 +111,12 @@ namespace OMODFramework
         /// <returns></returns>
         public bool HasScript() { return ModFile.GetEntry("config") != null; }
         /// <summary>
+        /// Checks if the omod contains any file
+        /// </summary>
+        /// <param name="file">The file</param>
+        /// <returns></returns>
+        public bool HasFile(string file) { return ModFile.GetEntry(file) != null;}
+        /// <summary>
         /// Returns the OMOD version
         /// </summary>
         /// <returns>Possible returns: 1 | 2 | 3 | 4</returns>
@@ -167,8 +173,8 @@ namespace OMODFramework
         public string[] GetDataFileList() { return GetList("data.crc"); }
         private string[] GetList(string s)
         {
-            var TempStream = ExtractWholeFile(s);
-            if (TempStream == null) return new string[0];
+            if (!HasFile(s)) return new string[0];
+            using (var TempStream = ExtractWholeFile(s))
             using (var br = new BinaryReader(TempStream))
             {
                 var ar = new List<string>();
@@ -187,6 +193,7 @@ namespace OMODFramework
         internal Framework GetFramework() { return framework; }
         internal string GetScript()
         {
+            if (!HasFile("script")) return "";
             using (var Script = ExtractWholeFile("script"))
             using (var br = new BinaryReader(Script))
             {
@@ -204,22 +211,19 @@ namespace OMODFramework
         }
         private string[] GetDataList()
         {
+            if(!HasFile("data.crc")) return new string[0];
             using (var TempStream = ExtractWholeFile("data.crc"))
+            using (var br = new BinaryReader(TempStream))
             {
-                if (TempStream == null) return new string[0];
-                using (var br = new BinaryReader(TempStream))
+                var ar = new List<string>();
+                while (br.PeekChar() != -1)
                 {
-                    var ar = new List<string>();
-                    while (br.PeekChar() != -1)
-                    {
-                        var s = br.ReadString();
-                        br.ReadUInt32();
-                        br.ReadInt64();
-                        ar.Add(s);
-                    }
-                    return ar.ToArray();
+                    var s = br.ReadString();
+                    br.ReadUInt32();
+                    br.ReadInt64();
+                    ar.Add(s);
                 }
-
+                return ar.ToArray();
             }
         }
         private string ParseCompressedStream(string fileList, string compressedStream)
