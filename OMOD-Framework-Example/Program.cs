@@ -13,12 +13,45 @@ namespace OMOD_Framework_Example
             private string gameDir = @"S:\SteamLibrary\steamapps\common\Oblivion";
             public int[] DialogSelect(string[] items, string title, bool multiSelect, string[] previewImagePaths, string[] descriptions)
             {
-                return new int[1] { 0 };
+                Console.WriteLine(title);
+                for (var i = 0; i < items.Length; i++)
+                {
+                    var description = (descriptions != null && descriptions.Length > 0) ? $": {descriptions[i]}" : "";
+                    Console.Write($"[{i}]: {items[i]}{description}\n");
+                }
+
+                if (multiSelect)
+                {
+                    Console.WriteLine("Multi select enabled. Write one number, hit enter, write another one and when done write END");
+                    var end = false;
+                    var list = new List<int>();
+                    while (!end)
+                    {
+                        var i = Console.ReadLine();
+                        if (i != "END")
+                        {
+                            list.Add(Convert.ToInt32(i));
+                        }
+                        else
+                        {
+                            end = true;
+                        }
+                        
+                    }
+
+                    return list.ToArray();
+                }
+                var input = Console.ReadLine();
+                return new[] { Convert.ToInt32(input) };
             }
 
             public int DialogYesNo(string text, string title)
             {
-                return 1;
+                Console.WriteLine($"{title}\n");
+                Console.WriteLine(text);
+                Console.WriteLine("[0]: No\n[1]: Yes");
+                var input = Console.ReadLine();
+                return Convert.ToInt32(input);
             }
 
             public void DisplayImage(string imageFilePath)
@@ -58,7 +91,10 @@ namespace OMOD_Framework_Example
 
             public string InputString(string title, string initialContent)
             {
-                return "Hi!";
+                Console.WriteLine(title);
+                Console.WriteLine($"Initial content: {initialContent}");
+                var input = Console.ReadLine();
+                return input;
             }
 
             public void Message(string text, string title)
@@ -108,10 +144,10 @@ namespace OMOD_Framework_Example
             f.SetTempDirectory(temp);
             // setting the dll path is mostly used for debugging or if you execute the code from somewhere else
             // better safe than sorry just do this if
-            f.SetDLLPath(@"M:\Projects\OMOD-Framework\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
+            //f.SetDLLPath(@"M:\Projects\OMOD-Framework\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\Robert Male Body Replacer v52 OMOD-40532-1.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\EVE_HGEC_BodyStock and Clothing OMOD-24078.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
