@@ -143,7 +143,7 @@ namespace OMODFramework
 
             for (var i = 0; i < filesPlugins.Count; i++)
             {
-                if (InstallPlugins[i].StartsWith("\\")) filesPlugins[i] = filesPlugins[i].Substring(1);
+                if (filesPlugins[i].StartsWith("\\")) filesPlugins[i] = filesPlugins[i].Substring(1);
                 var currentFile = Path.Combine(pluginsPath, filesPlugins[i]);
                 if (!File.Exists(currentFile)) filesPlugins.RemoveAt(i--);
             }
