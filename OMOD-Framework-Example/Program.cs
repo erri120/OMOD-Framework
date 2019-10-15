@@ -17,7 +17,8 @@ namespace OMOD_Framework_Example
                 for (var i = 0; i < items.Length; i++)
                 {
                     var description = (descriptions != null && descriptions.Length > 0) ? $": {descriptions[i]}" : "";
-                    Console.Write($"[{i}]: {items[i]}{description}\n");
+                    var image = (previewImagePaths != null && previewImagePaths.Length > 0) ? $": {previewImagePaths[i]}" : "";
+                    Console.Write($"[{i}]: {items[i]}{description}{image}\n");
                 }
 
                 if (multiSelect)
@@ -147,7 +148,7 @@ namespace OMOD_Framework_Example
             //f.SetDLLPath(@"M:\Projects\OMOD-Framework\OMOD-Framework\bin\Release\erri120.OMODFramework.dll");
 
             // after everything is setup you can go ahead and grap the omod
-            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\EVE_HGEC_BodyStock and Clothing OMOD-24078.omod", ref f);
+            OMOD omod = new OMOD(@"M:\Projects\omod\testDLL\HGEC Body with BBB v1dot12-34442.omod", ref f);
 
             // before you run the install script, extract the data files and plugins from the omod
             // ExtractDataFiles will always return something but ExtractPlugins can return null if there is no
