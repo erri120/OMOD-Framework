@@ -205,17 +205,21 @@ namespace OMODFramework
         private string[] GetDataList()
         {
             using (var TempStream = ExtractWholeFile("data.crc"))
-            using (var br = new BinaryReader(TempStream))
             {
-                var ar = new List<string>();
-                while (br.PeekChar() != -1)
+                if (TempStream == null) return new string[0];
+                using (var br = new BinaryReader(TempStream))
                 {
-                    var s = br.ReadString();
-                    br.ReadUInt32();
-                    br.ReadInt64();
-                    ar.Add(s);
+                    var ar = new List<string>();
+                    while (br.PeekChar() != -1)
+                    {
+                        var s = br.ReadString();
+                        br.ReadUInt32();
+                        br.ReadInt64();
+                        ar.Add(s);
+                    }
+                    return ar.ToArray();
                 }
-                return ar.ToArray();
+
             }
         }
         private string ParseCompressedStream(string fileList, string compressedStream)
