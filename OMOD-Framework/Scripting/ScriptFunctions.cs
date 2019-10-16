@@ -437,7 +437,12 @@ namespace OblivionModManager.Scripting
         }
         public string ReadINI(string section, string value) { return IReadINI(section, value); }
         public string ReadRendererInfo(string value) { return IReadRendererInfo(value); }
-        public void RegisterBSA(string path) { IRegisterBSA(path); }
+        public void RegisterBSA(string path)
+        {
+            CheckDataSafety(path);
+            if(path.Contains(";")||path.Contains(",")||path.Contains("=")) throw new ScriptingException("BSA path cannot contain the characters ',', '=' or ';'");
+            IRegisterBSA(Path.Combine(DataFiles, path));
+        }
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)
         {
             if (previews != null)
@@ -513,7 +518,12 @@ namespace OblivionModManager.Scripting
             }
         }
         public void UncheckEsp(string plugin) { IUncheckESP(plugin); }
-        public void UnregisterBSA(string path) { IUnregisterBSA(path); }
+        public void UnregisterBSA(string path)
+        {
+            CheckDataSafety(path);
+            if(path.Contains(";")||path.Contains(",")||path.Contains("=")) throw new ScriptingException("BSA path cannot contain the characters ',', '=' or ';'");
+            IUnregisterBSA(Path.Combine(DataFiles, path));
+        }
 
         #endregion
     }
