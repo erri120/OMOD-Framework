@@ -393,35 +393,29 @@ namespace OblivionModManager.Scripting
         public void Message(string msg) { IMessage(msg, null); }
         public void Message(string msg, string title) { IMessage(msg, title); }
         public void PatchDataFile(string from, string to, bool create)
-        {/*
+        {
             CheckDataSafety(from);
             CheckPathSafety(to);
-            string toL = to.ToLower();
+            var toL = to.ToLower();
             if (toL.EndsWith(".esp") || toL.EndsWith(".esm")) throw new Exception("Cant be esp or esm files");
             to = IGetFile(to);
 
-            //if (File.Exists(to))
-            //{
-            //    File.Delete(to);
-            //}
             if (!File.Exists(to) && !create) return;
-            File.Copy(Path.Combine(DataFiles, from), Path.Combine(Framework.OutputDir, to));*/
+            File.Copy(Path.Combine(DataFiles, from), Path.Combine(DataFiles, to));
+            srd.InstallData.Add(to);
         }
         public void PatchPlugin(string from, string to, bool create)
-        {/*
+        {
             CheckDataSafety(from);
             CheckPathSafety(to);
-            string toL = to.ToLower();
+            var toL = to.ToLower();
             if (!toL.EndsWith(".esp") && !toL.EndsWith(".esm")) throw new Exception("Must be esp or esm files");
             to = IGetFile(to);
 
-            //if (File.Exists(to))
-            //{
-            //File.Delete(to);
-            //}
-            //else if (!create) return;
+            if (!create) return;
             if (!File.Exists(to) && !create) return;
-            File.Copy(Path.Combine(Plugins, from), Path.Combine(Framework.OutputDir, to));*/
+            File.Copy(Path.Combine(Plugins, from), Path.Combine(Plugins, to));
+            srd.InstallPlugins.Add(to);
         }
         public byte[] ReadDataFile(string file)
         {
