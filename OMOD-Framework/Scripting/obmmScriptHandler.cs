@@ -1445,7 +1445,57 @@ namespace OMODFramework.Scripting
             }
         }
 
-        private static void FunctionPatch(string[] line, bool Plugin) { }
+        private static void FunctionPatch(string[] line, bool Plugin)
+        {
+            string WarnMess;
+            WarnMess = Plugin ? "function 'PatchPlugin'" : "function 'PatchDataFile'";
+            if(line.Length<3) {
+                Warn($"Missing arguments to {WarnMess}");
+                return;
+            }
+            if(line.Length>4) Warn($"Unexpected arguments to {WarnMess}");
+            var lowerTo = line[2].ToLower();
+            if(!Framework.IsSafeFileName(line[1]) || !Framework.IsSafeFileName(line[2])) {
+                Warn("Invalid argument to "+WarnMess);
+                return;
+            }
+            string copyPath;
+            if(Plugin) {
+                copyPath = Path.Combine(Plugins, line[1]);
+                if(!File.Exists(copyPath)) {
+                    Warn($"Invalid argument to PatchPlugin\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if(line[2].IndexOfAny(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar })!=-1) {
+                    Warn("Plugins cannot be copied to subdirectories of the data folder");
+                    return;
+                }
+                if(!(lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm"))) {
+                    Warn("Plugins must have a .esp or .esm extension");
+                    return;
+                }
+
+            } else {
+                copyPath = Path.Combine(DataFiles, line[1]);
+                if(!File.Exists(copyPath)) {
+                    Warn($"Invalid argument to PatchDataFile\nFile '{line[1]}' is not part of this plugin");
+                    return;
+                }
+                if(lowerTo.EndsWith(".esp") || lowerTo.EndsWith(".esm")) {
+                    Warn("Data files cannot have a .esp or .esm extension");
+                    return;
+                }
+            }
+            if (ExistsFile(Path.Combine("data", line[2])))
+            {
+            }
+            else if (line.Length < 4 || line[3] != "True") return;
+
+            var copyTo = Plugin ? Path.Combine(Plugins, line[2]) : Path.Combine(DataFiles, line[2]);
+            File.Copy(copyPath, copyTo);
+            if(Plugin) srd.InstallPlugins.Add(line[2]);
+            else srd.InstallData.Add(line[2]);
+        }
 
         private static void FunctionEditINI(string[] line)
         {
