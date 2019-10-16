@@ -26,6 +26,11 @@ namespace OblivionModManager.Scripting
         private static Func<string[]> IGetActiveESPNames;
         private static Func<string[]> IGetExistingESPNames;
         private static Func<string, string> IGetFile;
+        private static Action<string> IUncheckESP;
+        private static Action<string> IRegisterBSA;
+        private static Action<string> IUnregisterBSA;
+        private static Func<string, string, string> IReadINI;
+        private static Func<string, string> IReadRendererInfo;
 
         internal ScriptFunctions(ScriptReturnData srd, string dataFilesPath, string pluginsPath,
             Framework _f,
@@ -44,6 +49,11 @@ namespace OblivionModManager.Scripting
             IGetActiveESPNames = scriptRunnerFunctions.GetActiveESPNames;
             IGetFile = scriptRunnerFunctions.GetFileFromPath;
             IGetExistingESPNames = scriptRunnerFunctions.GetExistingESPNames;
+            IUncheckESP = scriptRunnerFunctions.UncheckESP;
+            IRegisterBSA = scriptRunnerFunctions.RegisterBSA;
+            IUnregisterBSA = scriptRunnerFunctions.UnregisterBSA;
+            IReadINI = scriptRunnerFunctions.ReadINI;
+            IReadRendererInfo = scriptRunnerFunctions.ReadRendererInfo;
 
             this.srd = srd;
             DataFiles = dataFilesPath;
@@ -366,11 +376,9 @@ namespace OblivionModManager.Scripting
             var found = false;
             for (var i = 0; i < srd.CopyPlugins.Count; i++)
             {
-                if (srd.CopyPlugins[i].CopyTo == path1)
-                {
-                    found = true;
-                    break;
-                }
+                if (srd.CopyPlugins[i].CopyTo != path1) continue;
+                found = true;
+                break;
             }
             if (!found) CheckPluginSafety(plugin1);
             if (early)
@@ -427,9 +435,9 @@ namespace OblivionModManager.Scripting
             CheckPathSafety(file);
             return File.ReadAllBytes(IGetFile(file));
         }
-        public string ReadINI(string section, string value) { return ""; }
-        public string ReadRendererInfo(string value) { return ""; }
-        public void RegisterBSA(string path) { }
+        public string ReadINI(string section, string value) { return IReadINI(section, value); }
+        public string ReadRendererInfo(string value) { return IReadRendererInfo(value); }
+        public void RegisterBSA(string path) { IRegisterBSA(path); }
         public string[] Select(string[] items, string[] previews, string[] descs, string title, bool many)
         {
             if (previews != null)
@@ -504,8 +512,8 @@ namespace OblivionModManager.Scripting
                 fs.Write(data, 0, 4);
             }
         }
-        public void UncheckEsp(string plugin) { }
-        public void UnregisterBSA(string path) { }
+        public void UncheckEsp(string plugin) { IUncheckESP(plugin); }
+        public void UnregisterBSA(string path) { IUnregisterBSA(path); }
 
         #endregion
     }
