@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace OMODFramework
 {
@@ -113,9 +114,12 @@ namespace OMODFramework
 
             if (InstallAllData)
             {
-                foreach (var s in omod.GetDataFileList()) { filesData.Add(s); }
+                filesData.AddRange(omod.GetDataFileList());
             }
-            foreach (var s in InstallData) { if (!Framework.strArrayContains(filesData, s)) filesData.Add(s); }
+            foreach (var s in InstallData.Where(s => !Framework.strArrayContains(filesData, s)))
+            {
+                filesData.Add(s);
+            }
             foreach (var s in IgnoreData) { Framework.strArrayRemove(filesData, s); }
 
             if (copy)
@@ -157,11 +161,9 @@ namespace OMODFramework
             InstallPlugins = null;
             IgnoreData = null;
             IgnorePlugins = null;
-            if (copy)
-            {
-                CopyDataFiles = null;
-                CopyPlugins = null;
-            }
+            if (!copy) return this;
+            CopyDataFiles = null;
+            CopyPlugins = null;
 
 
             return this;
