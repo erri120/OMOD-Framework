@@ -927,7 +927,7 @@ namespace OMODFramework.Scripting
             var result = new string[dialogResult.Length];
             for (var i = 0; i < dialogResult.Length; i++)
             {
-                result[i] = $"Case {Items[dialogResult[i]].TrimStart(new[] { '|' })}";
+                result[i] = $"Case {Items[dialogResult[i]].TrimStart('|')}";
             }
             return result;
         }
